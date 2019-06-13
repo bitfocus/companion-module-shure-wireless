@@ -89,52 +89,50 @@ instance.prototype.init_module = function () {
 			self.updateVariable('last_command_send', cmd);
 			self.actions(); // export actions
 		});
+	
+		// separate buffered stream into lines with responses
+		self.socket.on('data', (chunk) => {
+			var i = 0, line = '', offset = 0;
+			receivebuffer += chunk;
 
-		self.socket.on('data', (data) => {
-			self.processShureData(data.toString());
+			while ( (i = receivebuffer.indexOf('>', offset)) !== -1) {
+				line = receivebuffer.substr(offset, i - offset);
+				offset = i + 1;
+				self.socket.emit('receiveline', line.toString());
+			}
+
+			receivebuffer = receivebuffer.substr(offset);
+		});
+
+		self.socket.on('receiveline', (line) => {
+			self.processShureCommand(line.replace('< ','').trim());
 		});
 	}
 };
 
-//processShureData: processes the command received from the Shure receiver and updates variables/feedbacks
-instance.prototype.processShureData = function(command) {
-	var self = this;
-	
-	//commands are surrounded by < and >
-	//REP = report and should be the only incoming type of response, if not, it was something weird/unexpected
-	//sometimes multiple commands will be received in one line, so we need to separate those out
-	
-	let commands = command.split('< ');
-	
-	for (let i = 0; i < commands.length; i++) {
-		self.updateVariable('last_command_received', commands[i].replace('>',''));
-		self.processShureCommand(commands[i].replace('>',''));
-	}
-}
-
 instance.prototype.processShureCommand = function (command) {
 	var self = this;
 	
-	let parsedCommand = command.replace('< ','').replace('>',''); //remove the markers, we don't need them
+	self.updateVariable('last_command_received', command);
 	
 	let commandArr = null;
 	let commandNum = null;
 	let commandVar = null;
 	let commandVal = null;
 	
-	if (parsedCommand.substr(0, 3) === 'REP') {
+	if (command.substr(0, 3) === 'REP') {
 		//this is a report command
-		let channelNumber = parseInt(parsedCommand.substr(4,1));
+		let channelNumber = parseInt(command.substr(4,1));
 		
 		if (isNaN(channelNumber)) {
 			//this command isn't about a specific channel
-			commandArr = parsedCommand.split(' ');
+			commandArr = command.split(' ');
 			commandVar = commandArr[1];
 			commandVal = commandArr[2];
 		}
 		else {
 			//this command IS about a specific channel
-			commandArr = parsedCommand.split(' ');
+			commandArr = command.split(' ');
 			commandNum = commandArr[1];
 			commandVar = commandArr[2];
 			commandVal = commandArr[3];
@@ -266,7 +264,8 @@ instance.prototype.config_fields = function () {
 			type: 'dropdown',
 			id: 'modeltype',
 			label: 'Model Type',
-			choices: self.SHURE_MODELS
+			choices: self.SHURE_MODELS,
+			width: 4
 		}
 	]
 };
