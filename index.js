@@ -592,7 +592,15 @@ instance.prototype.init_feedbacks = function() {
 				id: 'bg',
 				default: self.rgb(100,255,0)
 			}
-		]
+		],
+		callback: (feedback, bank) => {
+			if (parseInt(self.localVariables['battery_bars_' + feedback.options.channel]) <= parseInt(feedback.options.barlevel)) {
+				return {
+					color: feedback.options.fg,
+					bgcolor: feedback.options.bg
+				};
+			}
+		}
 	};
 	
 	feedbacks['channel_muted'] = {
@@ -618,7 +626,15 @@ instance.prototype.init_feedbacks = function() {
 				id: 'bg',
 				default: self.rgb(100,255,0)
 			}
-		]
+		],
+		callback: (feedback, bank) => {
+			if (self.localVariables['transmitter_mutestatus_' + feedback.options.channel] === 'ON') {
+				return {
+					color: feedback.options.fg,
+					bgcolor: feedback.options.bg
+				};
+			}
+		}
 	};
 	
 	feedbacks['interference_detection'] = {
@@ -644,7 +660,15 @@ instance.prototype.init_feedbacks = function() {
 				id: 'bg',
 				default: self.rgb(100,255,0)
 			}
-		]
+		],
+		callback: (feedback, bank) => {
+			if (self.localVariables['interference_detection_' + feedback.options.channel] === 'CRITICAL') {
+				return {
+					color: feedback.options.fg,
+					bgcolor: feedback.options.bg
+				};
+			}
+		}
 	};
 	
 	feedbacks['transmitter_turned_off'] = {
@@ -670,40 +694,18 @@ instance.prototype.init_feedbacks = function() {
 				id: 'bg',
 				default: self.rgb(100,255,0)
 			}
-		]
+		],
+		callback: (feedback, bank) => {
+			if ((self.localVariables['transmitter_type_' + feedback.options.channel] === 'UNKN') || (self.localVariables['battery_bars_' + feedback.options.channel] === '255')) {
+				return {
+					color: feedback.options.fg,
+					bgcolor: feedback.options.bg
+				};
+			}
+		}
 	};
 
 	self.setFeedbackDefinitions(feedbacks);
-};
-
-instance.prototype.feedback = function(feedback, bank) {
-	var self = this;
-	
-	if (feedback.type === 'battery_level') {
-		if (parseInt(self.localVariables['battery_bars_' + feedback.options.channel]) <= parseInt(feedback.options.barlevel)) {
-			return { color: feedback.options.fg, bgcolor: feedback.options.bg };
-		}
-	}
-	
-	if (feedback.type === 'channel_muted') {
-		if (self.localVariables['transmitter_mutestatus_' + feedback.options.channel] === 'ON') {
-			return { color: feedback.options.fg, bgcolor: feedback.options.bg };
-		}
-	}
-	
-	if (feedback.type === 'interference_dection') {
-		if (self.localVariables['interference_detection_' + feedback.options.channel] === 'CRITICAL') {
-			return { color: feedback.options.fg, bgcolor: feedback.options.bg };
-		}
-	}
-	
-	if (feedback.type === 'transmitter_turned_off') {
-		if ((self.localVariables['transmitter_type_' + feedback.options.channel] === 'UNKN') || (self.localVariables['battery_bars_' + feedback.options.channel] === '255')) {
-			return { color: feedback.options.fg, bgcolor: feedback.options.bg };
-		}
-	}
-	
-	return {};
 };
 
 instance_skel.extendedBy(instance);
