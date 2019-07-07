@@ -92,16 +92,16 @@ class instance_api {
 				interferenceStatus2:  'NONE',    // (AD) NONE - DETECTED
 
 				//sample
-				antennaA:             'OFF',     // (ULX|QLX) OFF - ON=BLUE | (AD) OFF - RED - BLUE
-				antennaB:             'OFF',     // (ULX|QLX) OFF - ON=BLUE | (AD) OFF - RED - BLUE
-				antennaC:             'OFF',     // (AD:QUADVERITY ON) OFF - RED - BLUE
-				antennaD:             'OFF',     // (AD:QUADVERITY ON) OFF - RED - BLUE
+				antenna:              'XX',      // (ULX|QLX|AD) raw sample
+				antennaA:             'X',       // (ULX|QLX) X - B | (AD) X - B - R
+				antennaB:             'X',       // (ULX|QLX) X - B | (AD) X - B - R
+				antennaC:             'X',       // (AD:QUADVERITY ON) X - B - R
+				antennaD:             'X',       // (AD:QUADVERITY ON) X - B - R
 				rfLevel:              -120,      // (ULX|QLX) 0-115,-120dBm | (MXW) 0-96?
 				audioLevel:           -50,       // (ULX|QLX) 0-50,-50dB | (AD) 0-120,-120dB | (MXW) 0-98,-98dB?
 				audioLevelPeak:       -120,      // (AD) 0-120,-120dB
 				audioLED:             0,         // (AD) 0-255 binary, 1-7=level, 8=OL
-				channelQuality:       255,       // (AD) 0-5,255=UNKN
-				adSample:             {},        // (AD) extended sample data
+				signallQuality:       255,       // (AD) 0-5,255=UNKN
 
 				//tx
 				txType:               'Unknown', // (ULX|QLX) QLXD1 - QLXD2 - ULXD1 - ULXD2 - ULXD6 - ULXD8 - UNKN
@@ -184,6 +184,109 @@ class instance_api {
 		}
 
 		return this.getChannel(channel).slots[id];
+	}
+
+	/**
+	 * Parse sample data for AD.
+	 *
+	 * @param {number} id - the channel id
+	 * @param {String} data - the sample data
+	 * @access public
+	 * @since 1.0.0
+	 */
+	parseADSample(id, data) {
+		let channel = this.getChannel(id);
+		let sample = data.split(' ');
+
+		channel.signalQuality  = parseInt(sample[2]);
+		channel.audioLED       = parseInt(sample[3]);
+		channel.audioLevelPeak = parseInt(sample[4]);
+		channel.audioLevel     = parseInt(sample[5]);
+
+		if (channel.fdMode == 'FD-C') {
+			// need to do something here
+		}
+		else {
+			channel.rfLevelA  = parseInt(sample[8]);
+			channel.rfBitmapA = parseInt(sample[7]);
+			channel.rfLevelB  = parseInt(sample[10]);
+			channel.rfBitmapB = parseInt(sample[9]);
+			channel.antenna   = sample[6];
+			channel.antennaA  = sample[6].substr(0,1);
+			channel.antennaB  = sample[6].substr(1,1);
+
+			this.instance.setVariable(prefix + 'antenna', channel.antenna);
+			this.instance.setVariable(prefix + 'rf_level_a', (channel.rfLevelA-120) + ' dBm');
+			this.instance.setVariable(prefix + 'rf_level_b', (channel.rfLevelB-120) + ' dBm');
+			this.instance.setVariable(prefix + 'audio_level', (channel.audioLevel-120) + ' dBFS');
+			this.instance.setVariable(prefix + 'audio_level_peak', (channel.audioLevelPeak-120) + ' dBFS');
+
+			if (this.receiver.quadversityMode == 'ON') {
+				channel.rfLevelC  = parseInt(sample[12]);
+				channel.rfBitmapC = parseInt(sample[11]);
+				channel.rfLevelC  = parseInt(sample[14]);
+				channel.rfBitmapC = parseInt(sample[13]);
+				channel.antennaC  = sample[6].substr(2,1);
+				channel.antennaD  = sample[6].substr(3,1);
+				this.instance.setVariable(prefix + 'rf_level_c', (channel.rfLevelC-120) + ' dBm');
+				this.instance.setVariable(prefix + 'rf_level_d', (channel.rfLevelD-120) + ' dBm');
+			}
+		}
+	}
+
+	/**
+	 * Parse sample data for MXW.
+	 *
+	 * @param {number} id - the channel id
+	 * @param {String} data - the sample data
+	 * @access public
+	 * @since 1.0.0
+	 */
+	parseMXWSample(id, data) {
+		let channel = this.getChannel(id);
+		let sample = data.split(' ');
+
+		channel.rfLevel    = parseInt(sample[1]);
+		channel.audioLevel = parseInt(sample[2]);
+
+		this.instance.setVariable(prefix + 'rf_level',    channel.rfLevel);
+		this.instance.setVariable(prefix + 'audio_level', channel.audioLevel);
+	}
+
+	/**
+	 * Parse sample data for ULX/QLX.
+	 *
+	 * @param {number} id - the channel id
+	 * @param {String} data - the sample data
+	 * @access public
+	 * @since 1.0.0
+	 */
+	parseULXSample(id, data) {
+		let channel = this.getChannel(id);
+		let sample = data.split(' ');
+
+		switch(sample[2]) {
+			case 'AX':
+				channel.antennaA = 'B';
+				channel.antennaB = 'X';
+				break;
+			case 'XB':
+				channel.antennaA = 'X';
+				channel.antennaB = 'B';
+				break;
+			default:
+				channel.antennaA = 'X';
+				channel.antennaB = 'X';
+				break;
+		}
+
+		channel.antenna    = sample[2];
+		channel.rfLevel    = parseInt(sample[3]);
+		channel.audioLevel = parseInt(sample[4]);
+
+		this.instance.setVariable(prefix + 'antenna', channel.antenna);
+		this.instance.setVariable(prefix + 'rf_level', (channel.rfLevel-120) + ' dBm');
+		this.instance.setVariable(prefix + 'audio_level', (channel.audioLevel-50) + ' dBFS');
 	}
 
 	/**
@@ -303,6 +406,17 @@ class instance_api {
 			this.instance.setVariable(prefix + 'fd_mode', value);
 		}
 		else if (key == 'TX_AVAILABLE') {
+			if (channel.txAvailable != value && value == 'YES') {
+				//poll for tx when becoming available (per Shure spec)
+				this.socket.send('< GET ' + id + ' TX_STATUS >');
+				this.socket.send('< GET ' + id + ' AUDIO_GAIN >');
+				this.socket.send('< GET ' + id + ' BATT_RUN_TIME >');
+				this.socket.send('< GET ' + id + ' BATT_CHARGE >');
+				this.socket.send('< GET ' + id + ' BATT_HEALTH >');
+				this.socket.send('< GET ' + id + ' BUTTON_STS >');
+				this.socket.send('< GET ' + id + ' LED_STATUS >');
+				this.socket.send('< GET ' + id + ' TX_TYPE >');
+			}
 			channel.txAvailable = value;
 			this.instance.setVariable(prefix + 'tx_available', value);
 		}
@@ -316,8 +430,8 @@ class instance_api {
 			this.instance.checkFeedbacks('transmitter_turned_off');
 		}
 		else if (key == 'TX_DEVICE_ID') {
-			channel.txDeviceId = value;
-			this.instance.setVariable(prefix + 'tx_device_id', value);
+			channel.txDeviceId = value.replace('{','').replace('}','');
+			this.instance.setVariable(prefix + 'tx_device_id', channel.txDeviceId);
 		}
 		else if (key == 'TX_LOCK') {
 			switch(value) {
@@ -596,12 +710,12 @@ class instance_api {
 		}
 
 		if (key == 'FW_VER') {
-			this.receiver.firmwareVersion = value;
-			this.instance.setVariable('firmware_version', value.replace('{',''));
+			this.receiver.firmwareVersion = value.replace('{','').replace('}','');
+			this.instance.setVariable('firmware_version', this.receiver.firmwareVersion);
 		}
 		else if (key == 'DEVICE_ID') {
-			this.receiver.deviceId = value;
-			this.instance.setVariable('device_id', value.replace('{',''));
+			this.receiver.deviceId = value.replace('{','').replace('}','');
+			this.instance.setVariable('device_id', this.receiver.deviceId);
 		}
 		else if (key == 'FREQUENCY_DIVERSITY_MODE') {
 			this.receiver.frequencyDiversity = value;
@@ -684,8 +798,8 @@ class instance_api {
 				this.instance.setVariable(prefix + 'tx_model', value);
 				break;
 			case 'SLOT_TX_DEVICE_ID':
-				slot.txDeviceId = value;
-				this.instance.setVariable(prefix + 'tx_device_id', value);
+				slot.txDeviceId = value.replace('{','').replace('}','');
+				this.instance.setVariable(prefix + 'tx_device_id', slot.txDeviceId);
 				this.instance.actions();
 				this.instance.initFeedbacks();
 				break;

@@ -103,12 +103,6 @@ class instance extends instance_skel {
 		var cmd;
 
 		switch (action.action) {
-			case 'get_all_status':
-				cmd = 'GET 0 ALL';
-				break;
-			case 'get_status':
-				cmd = 'GET ' + options.channel + ' ALL';
-				break;
 			case 'set_channel_name':
 				cmd = 'SET ' + options.channel + ' CHAN_NAME {' + options.name.substr(0,8) + '}';
 				break;
@@ -116,7 +110,14 @@ class instance extends instance_skel {
 				cmd = 'SET ' + options.channel + ' AUDIO_MUTE ' + options.choice;
 				break;
 			case 'channel_setaudiogain':
-				cmd = 'SET ' + options.channel + ' AUDIO_GAIN ' + options.gain.padStart(3, '0');
+				let value = options.gain;
+				if (this.model.family == 'mxw') {
+					value += 25;
+				}
+				else {
+					value += 18;
+				}
+				cmd = 'SET ' + options.channel + ' AUDIO_GAIN ' + value;
 				break;
 			case 'channel_increasegain':
 				cmd = 'SET ' + options.channel + ' AUDIO_GAIN INC ' + options.gain;
@@ -126,6 +127,13 @@ class instance extends instance_skel {
 				break;
 			case 'flash_lights':
 				cmd = 'SET FLASH ' + options.onoff;
+				break;
+			case 'flash_channel':
+				cmd = 'SET ' + options.channel + ' FLASH ON';
+				break;
+			case 'slot_rf_output':
+				let slot = options.slot.split(':');
+				cmd = 'SET ' + slot[0] + ' SLOT_RF_OUTPUT ' + slot[1] + ' ' + options.onoff;
 				break;
 		}
 
@@ -186,8 +194,7 @@ class instance extends instance_skel {
 				min: 1000,
 				max: 99999,
 				default: 5000,
-				required: true,
-				range: false
+				required: true
 			}
 		]
 	}
@@ -330,6 +337,20 @@ class instance extends instance_skel {
 		else if (command.startsWith('SAMPLE')) {
 			//this is a sample command
 			command.replace('SAMPLE ','');
+			commandNum = parseInt( commandArr[0].substr(0,1) );
+
+			switch(this.model.family) {
+				case 'ulx':
+				case 'qlx':
+					this.api.parseULXSample(commandNum, command);
+					break;
+				case 'ad':
+					this.api.parseADSample(commandNum, command);
+					break;
+				case 'mxw':
+					this.api.parseMXWSample(commandNum, command);
+					break;
+			}
 		}
 	}
 
@@ -355,8 +376,7 @@ class instance extends instance_skel {
 
 			if (this.model.slots > 0) {
 				for (var j = 1; j <= this.model.slots; j++) {
-					let k = j < 10 ? '0' + j : j;
-					let id = `${i}:${k}`;
+					let id = `${i}:${j}`;
 					data = id;
 
 					if ( this.api.getSlot(i,j).txDeviceId != '' ) {

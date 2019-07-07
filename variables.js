@@ -43,6 +43,24 @@ module.exports = {
 				variables.push({ name: prefix +'interference_status2',   label: 'Channel ' + i + ' Interference Status 2' });
 			}
 
+			if (this.model.family != 'mxw') {
+				variables.push({ name: prefix +'antenna',         label: 'Channel ' + i + ' Antenna Status' });
+			}
+
+			if (this.model.family == 'ad') {
+				variables.push({ name: prefix +'rf_level_a',       label: 'Channel ' + i + ' RF Level A' });
+				variables.push({ name: prefix +'rf_level_b',       label: 'Channel ' + i + ' RF Level B' });
+				variables.push({ name: prefix +'rf_level_c',       label: 'Channel ' + i + ' RF Level C' });
+				variables.push({ name: prefix +'rf_level_d',       label: 'Channel ' + i + ' RF Level D' });
+				variables.push({ name: prefix +'audio_level',      label: 'Channel ' + i + ' Audio Level RMS' });
+				variables.push({ name: prefix +'audio_level_peak', label: 'Channel ' + i + ' Audio Level Peak' });
+			}
+			else {
+				variables.push({ name: prefix +'rf_level',        label: 'Channel ' + i + ' RF Level' });
+				variables.push({ name: prefix +'audio_level',     label: 'Channel ' + i + ' Audio Level' });
+			}
+			
+
 			variables.push({ name: prefix +'tx_type',             label: 'Channel ' + i + ' Transmitter Type' });
 
 			if (this.model.family == 'mxw') {

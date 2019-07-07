@@ -10,25 +10,8 @@ module.exports = {
 	getActions() {
 		var actions = {};
 
-		actions['get_all_status'] = {
-			label: 'Get Updated Status of All Channels'
-		};
-
-		actions['get_status'] = {
-			label: 'Get Updated Status of Specific Channel',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Channel Number',
-					id: 'channel',
-					default: '1',
-					choices: this.CHOICES_CHANNELS
-				}
-			]
-		};
-
 		actions['set_channel_name'] = {
-			label: 'Set Channel Name',
+			label: 'Set channel name',
 			options: [
 				{
 					type: 'dropdown',
@@ -46,32 +29,34 @@ module.exports = {
 			]
 		};
 
-		actions['channel_mute'] = {
-			label: 'Mute or Unmute Channel',
-			options: [
-				{
-					type: 'dropdown',
-					label: 'Channel Number',
-					id: 'channel',
-					default: '1',
-					choices: this.CHOICES_CHANNELS
-				},
-				{
-					type: 'dropdown',
-					label: 'Mute/Unmute/Toggle',
-					id: 'choice',
-					default: 'ON',
-					choices: [
-						{id: 'ON', label: 'Mute'},
-						{id: 'OFF', label: 'Unmute'},
-						{id: 'TOGGLE', label: 'Toggle Mute/Unmute'}
-					]
-				}
-			]
-		};
+		if (this.model.family == 'ulx' || this.model.family == 'ad') {
+			actions['channel_mute'] = {
+				label: 'Mute or unmute channel',
+				options: [
+					{
+						type: 'dropdown',
+						label: 'Channel Number',
+						id: 'channel',
+						default: '1',
+						choices: this.CHOICES_CHANNELS
+					},
+					{
+						type: 'dropdown',
+						label: 'Mute/Unmute/Toggle',
+						id: 'choice',
+						default: 'ON',
+						choices: [
+							{id: 'ON', label: 'Mute'},
+							{id: 'OFF', label: 'Unmute'},
+							{id: 'TOGGLE', label: 'Toggle Mute/Unmute'}
+						]
+					}
+				]
+			};
+		}
 
 		actions['channel_setaudiogain'] = {
-			label: 'Set Audio Gain of Channel',
+			label: 'Set audio gain of channel',
 			options: [
 				{
 					type: 'dropdown',
@@ -81,17 +66,20 @@ module.exports = {
 					choices: this.CHOICES_CHANNELS
 				},
 				{
-					type: 'textinput',
-					label: 'Gain Value (0 - 60)',
+					type: 'number',
+					label: 'Gain Value (dB)',
 					id: 'gain',
-					default: '0',
-					regex: '([1-9]|[1-5][0-9]|60)'
+					min: (this.model.family == 'mxw' ? -25 : -18),
+					max: (this.model.family == 'mxw' ? 15 : 42),
+					default: 0,
+					required: true,
+					range: true
 				}
 			]
 		};
 
 		actions['channel_increasegain'] = {
-			label: 'Increase Audio Gain of Channel',
+			label: 'Increase audio gain of channel',
 			options: [
 				{
 					type: 'dropdown',
@@ -101,17 +89,20 @@ module.exports = {
 					choices: this.CHOICES_CHANNELS
 				},
 				{
-					type: 'textinput',
-					label: 'Gain Value (1 - 60)',
+					type: 'number',
+					label: 'Gain Value (dB)',
 					id: 'gain',
-					default: '0',
-					regex: '([1-9]|[1-5][0-9]|60)'
+					min: 1,
+					max: (this.model.family == 'mxw' ? 40 : 60),
+					default: 3,
+					required: true,
+					range: true
 				}
 			]
 		};
 
 		actions['channel_decreasegain'] = {
-			label: 'Decrease Audio Gain of Channel',
+			label: 'Decrease audio gain of channel',
 			options: [
 				{
 					type: 'dropdown',
@@ -121,18 +112,21 @@ module.exports = {
 					choices: this.CHOICES_CHANNELS
 				},
 				{
-					type: 'textinput',
-					label: 'Gain Value (1 - 60)',
+					type: 'number',
+					label: 'Gain Value (dB)',
 					id: 'gain',
-					default: '0',
-					regex: '([1-9]|[1-5][0-9]|60)'
+					min: 1,
+					max: (this.model.family == 'mxw' ? 40 : 60),
+					default: 3,
+					required: true,
+					range: true
 				}
 			]
 		};
 
 		if (this.model.family != 'qlx') {
 			actions['flash_lights'] = {
-				label: 'Flash Lights on Receiver',
+				label: 'Flash lights on receiver',
 				tooltip: 'It will automatically turn off after 30 seconds',
 				options: [
 					{
@@ -143,6 +137,47 @@ module.exports = {
 						choices: [
 							{id: 'OFF', label: 'Off'},
 							{id: 'ON', label: 'On'}
+						]
+					}
+				]
+			};
+		}
+
+		if (this.model.family == 'ad' || this.model.family == 'mxw') {
+			actions['flash_channel'] = {
+				label: 'Flash lights on receiver channel',
+				tooltip: 'It will automatically turn off after 60 seconds',
+				options: [
+					{
+						type: 'dropdown',
+						label: 'Channel Number',
+						id: 'channel',
+						default: '1',
+						choices: this.CHOICES_CHANNELS
+					}
+				]
+			};
+		}
+
+		if (this.model.family == 'ad') {
+			actions['slot_rf_output'] = {
+				label: 'Set slot RF output',
+				options: [
+					{
+						type: 'dropdown',
+						label: 'Slot Number',
+						id: 'slot',
+						default: '1:01',
+						choices: this.CHOICES_SLOTS
+					},
+					{
+						type: 'dropdown',
+						label: 'On/Off',
+						id: 'onoff',
+						default: 'RF_ON',
+						choices: [
+							{id: 'RF_ON',   label: 'RF On'},
+							{id: 'RF_MUTE', label: 'RF Mute'}
 						]
 					}
 				]

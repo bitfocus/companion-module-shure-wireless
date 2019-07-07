@@ -22,17 +22,14 @@ module.exports = {
 					 choices: this.CHOICES_CHANNELS
 				},
 				{
-					 type: 'dropdown',
-					 label: 'Battery Bar Level',
-					 id: 'barlevel',
-					 default: '2',
-					 choices: [
-						 {id: '5', label: '5'},
-						 {id: '4', label: '4'},
-						 {id: '3', label: '3'},
-						 {id: '2', label: '2'},
-						 {id: '1', label: '1'}
-					 ]
+					type: 'number',
+					label: 'Battery Bar Level',
+					id: 'barlevel',
+					min: 1,
+					max: 5,
+					default: 2,
+					required: true,
+					range: true
 				},
 				{
 					type: 'colorpicker',
@@ -48,7 +45,7 @@ module.exports = {
 				}
 			],
 			callback: (feedback, bank) => {
-				if (this.api.getChannel(parseInt(feedback.options.channel)).batteryBars <= parseInt(feedback.options.barlevel)) {
+				if (this.api.getChannel(parseInt(feedback.options.channel)).batteryBars <= feedback.options.barlevel) {
 					return {
 						color: feedback.options.fg,
 						bgcolor: feedback.options.bg
