@@ -1,2 +1,2 @@
-# companion-module-shure-ulxd
-See HELP.MD for more information about this module.
+# companion-module-shure-wireless
+See HELP.md and LICENSE for more information about this module.
