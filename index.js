@@ -323,54 +323,50 @@ class instance extends instance_skel {
 	 */
 	processShureCommand(command) {
 
-		let commandArr = null;
-		let commandNum = null;
+		if ( ( typeof command === 'string' || command instanceof String ) && command.length > 0 ) {
 
-		if (command.startsWith('REP')) {
-			//this is a report command
-			command = command.replace('REP ','');
+			let commandArr = command.split(' ');
+			let commandType = commandArr.shift();
+			let commandNum = parseInt( commandArr[0] );
 
-			commandArr = command.split(' ');
-			commandNum = parseInt( commandArr[0] );
+			if (commandType == 'REP') {
+				//this is a report command
 
-			if ( isNaN(commandNum) && commandArr[0] != 'PRI' && commandArr[0] != 'SEC' ) {
-				//this command isn't about a specific channel
-				this.api.updateReceiver(commandArr[0], commandArr[1]);
+				if ( isNaN(commandNum) && commandArr[0] != 'PRI' && commandArr[0] != 'SEC' ) {
+					//this command isn't about a specific channel
+					this.api.updateReceiver(commandArr[0], commandArr[1]);
+				}
+				else if (commandArr[1].startsWith('SLOT')) {
+					//this command is about a specific SLOT in AD
+					this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], commandArr[3]);
+				}
+				else if (commandArr[0] == 'PRI' || commandArr[0] == 'SEC') {
+					//ignore pri/sec commands in MXW
+				}
+				else if (commandArr[1] == 'LED_STATUS') {
+					//this command is led status for a MXW channel
+					this.api.updateChannel(commandNum, commandArr[1], commandArr[2]+','+commandArr[3]);
+				}
+				else {
+					//this command is about a specific channel
+					this.api.updateChannel(commandNum, commandArr[1], commandArr[2]);
+				}
 			}
-			else if (commandArr[1].startsWith('SLOT')) {
-				//this command is about a specific SLOT in AD
-				this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], commandArr[3]);
-			}
-			else if (commandArr[0] == 'PRI' || commandArr[0] == 'SEC') {
-				//ignore pri/sec commands in MXW
-			}
-			else if (commandArr[1] == 'LED_STATUS') {
-				//this command is led status for a MXW channel
-				this.api.updateChannel(commandNum, commandArr[1], commandArr[2]+','+commandArr[3]);
-			}
-			else {
-				//this command is about a specific channel
-				this.api.updateChannel(commandNum, commandArr[1], commandArr[2]);
-			}
-		}
-		else if (command.startsWith('SAMPLE')) {
-			//this is a sample command
-			command = command.replace('SAMPLE ','');
+			else if (commandType == 'SAMPLE') {
+				//this is a sample command
 
-			commandArr = command.split(' ');
-			commandNum = parseInt( commandArr[0] );
-
-			switch(this.model.family) {
-				case 'ulx':
-				case 'qlx':
-					this.api.parseULXSample(commandNum, command);
-					break;
-				case 'ad':
-					this.api.parseADSample(commandNum, command);
-					break;
-				case 'mxw':
-					this.api.parseMXWSample(commandNum, command);
-					break;
+				switch(this.model.family) {
+					case 'ulx':
+					case 'qlx':
+						this.api.parseULXSample(commandNum, command);
+						break;
+					case 'ad':
+						this.api.parseADSample(commandNum, command);
+						break;
+					case 'mxw':
+						this.api.parseMXWSample(commandNum, command);
+						break;
+				}
 			}
 		}
 	}
