@@ -13,7 +13,7 @@ var log;
 class instance_api {
 
 	/**
-	 * Create an instance of an ATEM module.
+	 * Create an instance of a Shure API module.
 	 *
 	 * @param {instance} instance - the parent instance
 	 * @since 1.0.0
@@ -116,6 +116,7 @@ class instance_api {
 				txPowerMode:          'Unknown', // (ULX+QLX:TX_RF_PWR) UNKNOWN - LOW - NORMAL - HIGH
 				txMuteStatus:         'Unknown', // (ULX|QLX) OFF - ON - UNKN | (AD:TX_MUTE_MODE_STATUS) OFF - MUTE=ON - UNKNOWN
 				txPolarity:           'Unknown', // (AD) POSITIVE - NEGATIVE - UNKNOWN
+				txLock:               'Unknown', // (ULX|QLX) [simulate] | (AD) ALL - POWER - MENU - OFF - UNKNOWN
 				txPowerLock:          'Unknown', // (ULX|QLX) OFF - ON - UNKN | (AD:TX_LOCK) POWER|ALL=ON - MENU|NONE=OFF - UNKNOWN
 				txMenuLock:           'Unknown', // (ULX|QLX) OFF - ON - UNKN | (AD:TX_LOCK) MENU|ALL=ON - POWER|NONE=OFF - UNKNOWN
 				txTalkSwitch:         'Unknown', // (ULX+QLX:TX_MUTE_BUTTON_STATUS) PRESSED - RELEASED - UNKN | (AD|MWX:BUTTON_STS) OFF=RELEASED - ON=PRESSED - UNKNOWN
@@ -196,6 +197,7 @@ class instance_api {
 	 */
 	parseADSample(id, data) {
 		let channel = this.getChannel(id);
+		let prefix = 'ch_' + id + '_';
 		let sample = data.split(' ');
 
 		channel.signalQuality  = parseInt(sample[2]);
@@ -244,6 +246,7 @@ class instance_api {
 	 */
 	parseMXWSample(id, data) {
 		let channel = this.getChannel(id);
+		let prefix = 'ch_' + id + '_';
 		let sample = data.split(' ');
 
 		channel.rfLevel    = parseInt(sample[1]);
@@ -263,6 +266,7 @@ class instance_api {
 	 */
 	parseULXSample(id, data) {
 		let channel = this.getChannel(id);
+		let prefix = 'ch_' + id + '_';
 		let sample = data.split(' ');
 
 		switch(sample[2]) {
@@ -300,8 +304,8 @@ class instance_api {
 	 */
 	updateChannel(id, key, value) {
 		var channel = this.getChannel(id);
-		var prefix = 'ch_' + channel + '_';
-		var mode = this.instance.model;
+		var prefix = 'ch_' + id + '_';
+		var model = this.instance.model;
 		var variable;
 
 		if (value == 'UNKN' || value == 'UNKNOWN') {
@@ -456,6 +460,8 @@ class instance_api {
 					channel.txPowerLock = 'Unknown';
 					break;
 			}
+			channel.txLock = value
+			this.instance.setVariable(prefix + 'tx_lock',       channel.txLock);
 			this.instance.setVariable(prefix + 'tx_power_lock', channel.txPowerLock);
 			this.instance.setVariable(prefix + 'tx_menu_lock',  channel.txMenuLock);
 		}

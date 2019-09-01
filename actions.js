@@ -3,7 +3,6 @@ module.exports = {
 	/**
 	 * INTERNAL: Get the available actions.  Utilized by bmd-multiview.
 	 *
-	 * @returns {Object[]} the available actions
 	 * @access public
 	 * @since 1.0.0
 	 */
@@ -22,9 +21,10 @@ module.exports = {
 				},
 				{
 					type: 'textinput',
-					label: 'Name',
+					label: 'Name (' + ((this.model.family == 'ulx' || this.model.family == 'qlx') ? '8' : '31') + ' characters max)',
 					id: 'name',
-					default: ''
+					default: '',
+					regex: ((this.model.family == 'ulx' || this.model.family == 'qlx') ? this.REGEX_CHAR_8 : this.REGEX_CHAR_31)
 				}
 			]
 		};
@@ -45,11 +45,7 @@ module.exports = {
 						label: 'Mute/Unmute/Toggle',
 						id: 'choice',
 						default: 'ON',
-						choices: [
-							{id: 'ON', label: 'Mute'},
-							{id: 'OFF', label: 'Unmute'},
-							{id: 'TOGGLE', label: 'Toggle Mute/Unmute'}
-						]
+						choices: this.CHOICES_MUTE
 					}
 				]
 			};
@@ -134,10 +130,7 @@ module.exports = {
 						label: 'On/Off',
 						id: 'onoff',
 						default: 'ON',
-						choices: [
-							{id: 'OFF', label: 'Off'},
-							{id: 'ON', label: 'On'}
-						]
+						choices: this.CHOICES_ONOFF
 					}
 				]
 			};
@@ -175,10 +168,7 @@ module.exports = {
 						label: 'On/Off',
 						id: 'onoff',
 						default: 'RF_ON',
-						choices: [
-							{id: 'RF_ON',   label: 'RF On'},
-							{id: 'RF_MUTE', label: 'RF Mute'}
-						]
+						choices: this.CHOICES_RFOUTPUT;
 					}
 				]
 			};

@@ -44,7 +44,7 @@ module.exports = {
 			}
 
 			if (this.model.family != 'mxw') {
-				variables.push({ name: prefix +'antenna',         label: 'Channel ' + i + ' Antenna Status' });
+				variables.push({ name: prefix +'antenna', label: 'Channel ' + i + ' Antenna Status' });
 			}
 
 			if (this.model.family == 'ad') {
@@ -59,7 +59,6 @@ module.exports = {
 				variables.push({ name: prefix +'rf_level',        label: 'Channel ' + i + ' RF Level' });
 				variables.push({ name: prefix +'audio_level',     label: 'Channel ' + i + ' Audio Level' });
 			}
-			
 
 			variables.push({ name: prefix +'tx_type',             label: 'Channel ' + i + ' Transmitter Type' });
 
@@ -82,6 +81,7 @@ module.exports = {
 				variables.push({ name: prefix +'tx_power_level',  label: 'Channel ' + i + ' Transmitter Power Level' });
 				variables.push({ name: prefix +'tx_power_mode',   label: 'Channel ' + i + ' Transmitter Power Mode' });
 				variables.push({ name: prefix +'tx_mute_status',  label: 'Channel ' + i + ' Transmitter Mute Status' });
+				variables.push({ name: prefix +'tx_lock',         label: 'Channel ' + i + ' Transmitter Lock' });
 				variables.push({ name: prefix +'tx_power_lock',   label: 'Channel ' + i + ' Transmitter Power Lock' });
 				variables.push({ name: prefix +'tx_menu_lock',    label: 'Channel ' + i + ' Transmitter Menu Lock' });
 			}

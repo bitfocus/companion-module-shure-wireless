@@ -67,6 +67,22 @@ class instance extends instance_skel {
 			return 0;
 		});
 
+		this.CHOICES_MUTE = [
+			{id: 'ON', label: 'Mute'},
+			{id: 'OFF', label: 'Unmute'},
+			{id: 'TOGGLE', label: 'Toggle Mute/Unmute'}
+		];
+
+		this.CHOICES_ONOFF = [
+			{id: 'OFF', label: 'Off'},
+			{id: 'ON', label: 'On'}
+		];
+
+		this.CHOICES_RFOUTPUT = [
+			{id: 'RF_ON',   label: 'RF On'},
+			{id: 'RF_MUTE', label: 'RF Mute'}
+		];
+
 		if (this.config.modelID !== undefined){
 			this.model = this.CONFIG_MODEL[this.config.modelID];
 		}
@@ -74,6 +90,9 @@ class instance extends instance_skel {
 			this.config.modelID = 'ulxd4';
 			this.model = this.CONFIG_MODEL['ulxd4'];
 		}
+
+		const this.REGEX_CHAR_8  = '/^[A-Za-z0-9,!"#\$%&\'\(\)\*\+,\-\./:;<=>\?@\[\\\]^_`~\s]{1,8}$/';
+		const this.REGEX_CHAR_31 = '/^[A-Za-z0-9,!"#\$%&\'\(\)\*\+,\-\./:;<=>\?@\[\\\]^_`~\s]{1,31}$/';
 
 		this.actions(); // export actions
 	}
@@ -309,10 +328,10 @@ class instance extends instance_skel {
 
 		if (command.startsWith('REP')) {
 			//this is a report command
-			command.replace('REP ','');
+			command = command.replace('REP ','');
 
 			commandArr = command.split(' ');
-			commandNum = parseInt( commandArr[0].substr(0,1) );
+			commandNum = parseInt( commandArr[0] );
 
 			if ( isNaN(commandNum) && commandArr[0] != 'PRI' && commandArr[0] != 'SEC' ) {
 				//this command isn't about a specific channel
@@ -336,8 +355,10 @@ class instance extends instance_skel {
 		}
 		else if (command.startsWith('SAMPLE')) {
 			//this is a sample command
-			command.replace('SAMPLE ','');
-			commandNum = parseInt( commandArr[0].substr(0,1) );
+			command = command.replace('SAMPLE ','');
+
+			commandArr = command.split(' ');
+			commandNum = parseInt( commandArr[0] );
 
 			switch(this.model.family) {
 				case 'ulx':
