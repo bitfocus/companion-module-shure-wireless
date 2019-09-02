@@ -141,14 +141,14 @@ class instance_icons {
 			var img = new this.Image();
 			img.backgroundColor(bg);
 
-			img.drawPixelBuffer(0, 0, 56, 72, this.AD_ANT[ant], 'base64');
-			img.drawPixelBuffer(0, 0, 56, 72, this.AD_AUDIO[audio], 'base64');
-			img.drawPixelBuffer(0, 0, 56, 72, this.AD_RF_A[rfA], 'base64');
-			img.drawPixelBuffer(0, 0, 56, 72, this.AD_RF_B[rfB], 'base64');
-			img.drawPixelBuffer(0, 0, 56, 72, this.BATTERY[battery], 'base64');
+			img.drawPixelBuffer(0, 0, 72, 58, this.AD_ANT[ant], 'base64');
+			img.drawPixelBuffer(0, 0, 72, 58, this.AD_AUDIO[audio], 'base64');
+			img.drawPixelBuffer(0, 0, 72, 58, this.AD_RF_A[rfA], 'base64');
+			img.drawPixelBuffer(0, 0, 72, 58, this.AD_RF_B[rfB], 'base64');
+			img.drawPixelBuffer(0, 0, 72, 58, this.BATTERY[battery], 'base64');
 
 			if ( lock == 'all' || lock == 'power' || lock == 'menu' ) {
-				img.drawPixelBuffer(0, 0, 56, 72, this.LOCK[lock], 'base64');
+				img.drawPixelBuffer(0, 0, 72, 58, this.LOCK[lock], 'base64');
 			}
 
 			out = img.toBase64();
@@ -181,13 +181,13 @@ class instance_icons {
 			var img = new this.Image();
 			img.backgroundColor(bg);
 
-			img.drawPixelBuffer(0, 0, 56, 72, this.ULX_ANT[ant], 'base64');
-			img.drawPixelBuffer(0, 0, 56, 72, this.ULX_AUDIO[audio], 'base64');
-			img.drawPixelBuffer(0, 0, 56, 72, this.ULX_RF[rf], 'base64');
-			img.drawPixelBuffer(0, 0, 56, 72, this.BATTERY[battery], 'base64');
+			img.drawPixelBuffer(0, 0, 72, 58, this.ULX_ANT[ant], 'base64');
+			img.drawPixelBuffer(0, 0, 72, 58, this.ULX_AUDIO[audio], 'base64');
+			img.drawPixelBuffer(0, 0, 72, 58, this.ULX_RF[rf], 'base64');
+			img.drawPixelBuffer(0, 0, 72, 58, this.BATTERY[battery], 'base64');
 
 			if ( lock == 'all' || lock == 'power' || lock == 'menu' ) {
-				img.drawPixelBuffer(0, 0, 56, 72, this.LOCK[lock], 'base64');
+				img.drawPixelBuffer(0, 0, 72, 58, this.LOCK[lock], 'base64');
 			}
 
 			out = img.toBase64();
