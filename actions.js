@@ -168,7 +168,7 @@ module.exports = {
 						label: 'On/Off',
 						id: 'onoff',
 						default: 'RF_ON',
-						choices: this.CHOICES_RFOUTPUT;
+						choices: this.CHOICES_RFOUTPUT
 					}
 				]
 			};

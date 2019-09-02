@@ -15,11 +15,11 @@ module.exports = {
 			description: 'If the battery bar drops to or below a certain value, change the color of the button.',
 			options: [
 				{
-					 type: 'dropdown',
-					 label: 'Channel',
-					 id: 'channel',
-					 default: '1',
-					 choices: this.CHOICES_CHANNELS
+					type: 'dropdown',
+					label: 'Channel',
+					id: 'channel',
+					default: '1',
+					choices: this.CHOICES_CHANNELS
 				},
 				{
 					type: 'number',
@@ -59,11 +59,11 @@ module.exports = {
 			description: 'If the selected channel is muted, change the color of the button.',
 			options: [
 				{
-					 type: 'dropdown',
-					 label: 'Channel',
-					 id: 'channel',
-					 default: '1',
-					 choices: this.CHOICES_CHANNELS
+					type: 'dropdown',
+					label: 'Channel',
+					id: 'channel',
+					default: '1',
+					choices: this.CHOICES_CHANNELS
 				},
 				{
 					type: 'colorpicker',
@@ -93,11 +93,11 @@ module.exports = {
 			description: 'If the selected channel gets interference, change the color of the button.',
 			options: [
 				{
-					 type: 'dropdown',
-					 label: 'Channel',
-					 id: 'channel',
-					 default: '1',
-					 choices: this.CHOICES_CHANNELS
+					type: 'dropdown',
+					label: 'Channel',
+					id: 'channel',
+					default: '1',
+					choices: this.CHOICES_CHANNELS
 				},
 				{
 					type: 'colorpicker',
@@ -127,11 +127,11 @@ module.exports = {
 			description: 'If the selected channel\'s transmitter is powered off, change the color of the button.',
 			options: [
 				{
-					 type: 'dropdown',
-					 label: 'Channel',
-					 id: 'channel',
-					 default: '1',
-					 choices: this.CHOICES_CHANNELS
+					type: 'dropdown',
+					label: 'Channel',
+					id: 'channel',
+					default: '1',
+					choices: this.CHOICES_CHANNELS
 				},
 				{
 					type: 'colorpicker',
@@ -155,6 +155,27 @@ module.exports = {
 				}
 			}
 		};
+
+		if (this.model.family != 'mxw') {
+			feedbacks['sample'] = {
+				label: 'Channel Status Display',
+				description: "Provide a visual display of the channel's status.",
+				options: [
+					{
+						type: 'dropdown',
+						label: 'Channel',
+						id: 'channel',
+						default: '1',
+						choices: this.CHOICES_CHANNELS
+					}
+				],
+				callback: (feedback, bank) => {
+					return {
+						img64: this.api.getIcon(parseInt(feedback.options.channel))
+					};
+				}
+			};
+		}
 
 		this.setFeedbackDefinitions(feedbacks);
 	}

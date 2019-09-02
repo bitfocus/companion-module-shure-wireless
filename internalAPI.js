@@ -20,6 +20,7 @@ class instance_api {
 	 */
 	constructor(instance) {
 		this.instance = instance;
+		this.rgb      = instance.rgb;
 
 		//qlx-d [FW_VER,DEVICE_ID,ENCRYPTION]
 		//ulx-d [FW_VER,DEVICE_ID,ENCRYPTION,AUDIO_SUMMING_MODE,FREQUENCY_DIVERSITY_MODE,HIGH_DENSITY,FLASH]
@@ -141,6 +142,31 @@ class instance_api {
 	}
 
 	/**
+	 * Returns the desired channel status icon.
+	 *
+	 * @param {number} id - the channel to fetch
+	 * @returns {String} the icon
+	 * @access public
+	 * @since 1.0.0
+	 */
+	getIcon(id) {
+		var ch = this.getChannel(id);
+		var icon;
+
+		switch(this.instance.model.family) {
+			case 'ulx':
+			case 'qlx':
+				icon = this.instance.icons.getULXStatus(this.rgb(0,0,0), ch.antenna, ch.audioLED, ch.rfBitmapA, ch.batteryBars, ch.txLock);
+				break;
+			case 'ad':
+				icon = this.instance.icons.getADStatus(this.rgb(0,0,0), ch.antenna, ch.audioLED, ch.rfBitmapA, ch.rfBitmapB, ch.batteryBars, ch.txLock);
+				break;
+		}
+
+		return icon;
+	}
+
+	/**
 	 * Returns the receiver state object.
 	 *
 	 * @returns {Object} the receiver state object
@@ -234,6 +260,8 @@ class instance_api {
 				this.instance.setVariable(prefix + 'rf_level_d', (channel.rfLevelD-120) + ' dBm');
 			}
 		}
+
+		this.instance.checkFeedbacks('sample');
 	}
 
 	/**
@@ -288,9 +316,55 @@ class instance_api {
 		channel.rfLevel    = parseInt(sample[3]);
 		channel.audioLevel = parseInt(sample[4]);
 
+		let audioLevel = channel.audioLevel - 50;
+
+		if (audioLevel > -6) {
+			channel.audioLED = 6;
+		}
+		else if (audioLevel > -12) {
+			channel.audioLED = 5;
+		}
+		else if (audioLevel > -20) {
+			channel.audioLED = 4;
+		}
+		else if (audioLevel > -30) {
+			channel.audioLED = 3;
+		}
+		else if (audioLevel > -40) {
+			channel.audioLED = 2;
+		}
+		else if (audioLevel > -50) {
+			channel.audioLED = 1;
+		}
+		else {
+			channel.audioLED = 0;
+		}
+
+		let rfLevel = channel.rfLevel - 120;
+
+		if (rfLevel > -25) {
+			channel.rfBitmapA = 5;
+		}
+		else if (rfLevel > -70) {
+			channel.rfBitmapA = 4;
+		}
+		else if (rfLevel > -77) {
+			channel.rfBitmapA = 3;
+		}
+		else if (rfLevel > -83) {
+			channel.rfBitmapA = 2;
+		}
+		else if (rfLevel > -90) {
+			channel.rfBitmapA = 1;
+		}
+		else {
+			channel.rfBitmapA = 0;
+		}
+
 		this.instance.setVariable(prefix + 'antenna', channel.antenna);
-		this.instance.setVariable(prefix + 'rf_level', (channel.rfLevel-120) + ' dBm');
-		this.instance.setVariable(prefix + 'audio_level', (channel.audioLevel-50) + ' dBFS');
+		this.instance.setVariable(prefix + 'rf_level', rfLevel + ' dBm');
+		this.instance.setVariable(prefix + 'audio_level', audioLevel + ' dBFS');
+		this.instance.checkFeedbacks('sample');
 	}
 
 	/**

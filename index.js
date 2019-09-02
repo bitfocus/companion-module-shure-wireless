@@ -1,10 +1,11 @@
 var tcp = require('../../tcp');
 var instance_skel = require('../../instance_skel');
 
-var instance_api  = require('./internalAPI');
-var actions       = require('./actions');
-var feedback      = require('./feedback');
-var variables     = require('./variables');
+var instance_api   = require('./internalAPI');
+var instance_icons = require('./icons');
+var actions        = require('./actions');
+var feedback       = require('./feedback');
+var variables      = require('./variables');
 
 var debug;
 var log;
@@ -41,7 +42,8 @@ class instance extends instance_skel {
 			...variables
 		});
 
-		this.api = new instance_api(this);
+		this.api   = new instance_api(this);
+		this.icons = new instance_icons(this);
 
 		this.CONFIG_MODEL = {
 			ulxd4:   {id: 'ulxd4',   family: 'ulx', label: 'ULXD4 Single Receiver', channels: 1, slots: 0},
@@ -91,8 +93,8 @@ class instance extends instance_skel {
 			this.model = this.CONFIG_MODEL['ulxd4'];
 		}
 
-		const this.REGEX_CHAR_8  = '/^[A-Za-z0-9,!"#\$%&\'\(\)\*\+,\-\./:;<=>\?@\[\\\]^_`~\s]{1,8}$/';
-		const this.REGEX_CHAR_31 = '/^[A-Za-z0-9,!"#\$%&\'\(\)\*\+,\-\./:;<=>\?@\[\\\]^_`~\s]{1,31}$/';
+		this.defineConst('REGEX_CHAR_8',  '/^\\d+{1,8}$/');
+		this.defineConst('REGEX_CHAR_31', '/^\\d+{1,31}$/');
 
 		this.actions(); // export actions
 	}
@@ -247,6 +249,7 @@ class instance extends instance_skel {
 
 		this.initVariables();
 		this.initFeedbacks();
+		this.checkFeedbacks('sample');
 
 		this.initTCP();
 	}
