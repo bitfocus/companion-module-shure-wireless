@@ -133,7 +133,7 @@ class instance_icons {
 	 * @access public
 	 * @since 1.0.0
 	 */
-	getADStatus(bg = 0, ant = 'XX', audio = 0, rfA = 0, rfB = 0, battery = 'off', lock = 'off') {
+	getADStatus(bg = 0, ant = 'XX', audio = 0, rfA = 0, rfB = 0, battery = 255, lock = 'OFF') {
 		var id = bg + '-' + ant + '-' + audio + '-' + rfA + '-' + rfB + '-' + battery + '-' + lock;
 		var out;
 
@@ -173,7 +173,7 @@ class instance_icons {
 	 * @access public
 	 * @since 1.0.0
 	 */
-	getULXStatus(bg, ant = 'XX', audio = 0, rf = 0, battery = 'off', lock = 'off') {
+	getULXStatus(bg, ant = 'XX', audio = 0, rf = 0, battery = 255, lock = 'OFF') {
 		var id = bg + '-' + ant + '-' + audio + '-' + rf + '-' + battery + '-' + lock;
 		var out;
 
