@@ -156,7 +156,7 @@ module.exports = {
 			}
 		};
 
-		if (this.model.family != 'mxw') {
+		/*if (this.model.family != 'mxw') {
 			feedbacks['sample'] = {
 				label: 'Channel Status Display',
 				description: "Provide a visual display of the channel's status.",
@@ -175,7 +175,7 @@ module.exports = {
 					};
 				}
 			};
-		}
+		}*/
 
 		this.setFeedbackDefinitions(feedbacks);
 	}

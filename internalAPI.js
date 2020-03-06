@@ -149,7 +149,7 @@ class instance_api {
 	 * @access public
 	 * @since 1.0.0
 	 */
-	getIcon(id) {
+	/*getIcon(id) {
 		var ch = this.getChannel(id);
 		var icon;
 
@@ -164,7 +164,7 @@ class instance_api {
 		}
 
 		return icon;
-	}
+	}*/
 
 	/**
 	 * Returns the receiver state object.
@@ -261,7 +261,7 @@ class instance_api {
 			}
 		}
 
-		this.instance.checkFeedbacks('sample');
+		//this.instance.checkFeedbacks('sample');
 	}
 
 	/**
@@ -364,7 +364,7 @@ class instance_api {
 		this.instance.setVariable(prefix + 'antenna', channel.antenna);
 		this.instance.setVariable(prefix + 'rf_level', rfLevel + ' dBm');
 		this.instance.setVariable(prefix + 'audio_level', audioLevel + ' dBFS');
-		this.instance.checkFeedbacks('sample');
+		//this.instance.checkFeedbacks('sample');
 	}
 
 	/**

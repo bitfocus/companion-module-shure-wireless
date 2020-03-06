@@ -1,0 +1,9 @@
+battery 3, 46, 25, 9
+locks 31, 46, 18, 8
+ulx-ant 47, 12, 13, 5
+ulx-rf 50, 19, 6, 37
+ulx-audio 63, 12, 5, 43
+ad-ant 51, 13, 11, 10
+ad-rf-a 51, 24, 4, 31
+ad-rf-b 57, 24, 4, 31
+ad-audio 64, 13, 4, 42
