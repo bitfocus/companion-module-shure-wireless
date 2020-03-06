@@ -805,7 +805,7 @@ class instance_api {
 			this.receiver.audioSumming = value;
 			this.instance.setVariable('audio_summing_mode', value);
 		}
-		else if (key =='HIGH_DENSITY' || id == 'TRANSMISSION_MODE') {
+		else if (key =='HIGH_DENSITY' || key == 'TRANSMISSION_MODE') { // changed from: (key =='HIGH_DENSITY' || id == 'TRANSMISSION_MODE') in order to try fix the "Reference error: id is not defined" error (ticket #5 and #6)
 
 			if (value == 'STANDARD') {
 				value = 'OFF';
