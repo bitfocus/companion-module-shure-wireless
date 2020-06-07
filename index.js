@@ -93,8 +93,7 @@ class instance extends instance_skel {
 			this.model = this.CONFIG_MODEL['ulxd4'];
 		}
 
-		this.defineConst('REGEX_CHAR_8',  '/^\\d+{1,8}$/');
-		this.defineConst('REGEX_CHAR_31', '/^\\d+{1,31}$/');
+		this.defineConst('REGEX_CHAR_8', '/^.{1,8}$/');
 
 		this.actions(); // export actions
 	}
@@ -332,16 +331,26 @@ class instance extends instance_skel {
 			let commandType = commandArr.shift();
 			let commandNum = parseInt( commandArr[0] );
 
+			let joinData = function(commands, start) {
+				let out = '';
+				if (commands.length > 0) {
+					for (let i = start; i < commands.length; i++) {
+						out += commands[i] + ' ';
+					}
+				}
+				return out.trim();
+			}
+
 			if (commandType == 'REP') {
 				//this is a report command
 
 				if ( isNaN(commandNum) && commandArr[0] != 'PRI' && commandArr[0] != 'SEC' ) {
 					//this command isn't about a specific channel
-					this.api.updateReceiver(commandArr[0], commandArr[1]);
+					this.api.updateReceiver(commandArr[0], joinData(commandArr, 1));
 				}
 				else if (commandArr[1].startsWith('SLOT')) {
 					//this command is about a specific SLOT in AD
-					this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], commandArr[3]);
+					this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], joinData(commandArr, 3));
 				}
 				else if (commandArr[0] == 'PRI' || commandArr[0] == 'SEC') {
 					//ignore pri/sec commands in MXW
@@ -352,7 +361,7 @@ class instance extends instance_skel {
 				}
 				else {
 					//this command is about a specific channel
-					this.api.updateChannel(commandNum, commandArr[1], commandArr[2]);
+					this.api.updateChannel(commandNum, commandArr[1], joinData(commandArr, 2));
 				}
 			}
 			else if (commandType == 'SAMPLE') {

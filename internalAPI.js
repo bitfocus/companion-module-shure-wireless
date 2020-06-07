@@ -115,7 +115,7 @@ class instance_api {
 				txInputPad:           255,       // (AD) 0=ON(-12), 12=OFF(0), 255=UNKN
 				txPowerLevel:         255,       // (AD) 0-50mW 255=UNKN | (ULX+QLX:TX_RF_PWR) LOW=1 NORMAL=10 HIGH=20 UNKN=255
 				txPowerMode:          'Unknown', // (ULX+QLX:TX_RF_PWR) UNKNOWN - LOW - NORMAL - HIGH
-				txMuteStatus:         'Unknown', // (ULX|QLX) OFF - ON - UNKN | (AD:TX_MUTE_MODE_STATUS) OFF - MUTE=ON - UNKNOWN
+				txMuteStatus:         'Unknown', // (ULX|QLX) OFF - ON - UNKN | (AD:TX_MUTE_MODE_STATUS) ON=OFF - MUTE=ON - UNKNOWN
 				txPolarity:           'Unknown', // (AD) POSITIVE - NEGATIVE - UNKNOWN
 				txLock:               'Unknown', // (ULX|QLX) [simulate] | (AD) ALL - POWER - MENU - OFF - UNKNOWN
 				txPowerLock:          'Unknown', // (ULX|QLX) OFF - ON - UNKN | (AD:TX_LOCK) POWER|ALL=ON - MENU|NONE=OFF - UNKNOWN
@@ -380,14 +380,14 @@ class instance_api {
 		var channel = this.getChannel(id);
 		var prefix = 'ch_' + id + '_';
 		var model = this.instance.model;
-		var variable;
+		var variable, point;
 
 		if (value == 'UNKN' || value == 'UNKNOWN') {
 			value = 'Unknown';
 		}
 
 		if (key == 'CHAN_NAME') {
-			channel.name = value.replace('{','').replace('}','');
+			channel.name = value.replace('{','').replace('}','').trim();
 			this.instance.setVariable(prefix + 'name', channel.name);
 			this.instance.actions();
 			this.instance.initFeedbacks();
@@ -405,10 +405,10 @@ class instance_api {
 		else if (key == 'AUDIO_GAIN') {
 			channel.audioGain = parseInt(value);
 			if (model.family == 'mxw') {
-				variable = (channel.txOffset - 25).toString() + ' dB';
+				variable = (channel.audioGain - 25).toString() + ' dB';
 			}
 			else {
-				variable = (channel.txOffset - 18).toString() + ' dB';
+				variable = (channel.audioGain - 18).toString() + ' dB';
 			}
 			this.instance.setVariable(prefix + 'audio_gain', variable);
 		}
@@ -418,25 +418,27 @@ class instance_api {
 			this.instance.checkFeedbacks('channel_muted');
 		}
 		else if (key == 'GROUP_CHANNEL2') {
-			this.instance.setVariable(prefix + 'group_chan2', value);
-			variable = value.split(',');
+			this.instance.setVariable(prefix + 'group_chan2', value.replace('{','').replace('}','').trim());
+			variable = value.replace('{','').replace('}','').trim().split(',');
 			channel.group2   = variable[0];
 			channel.channel2 = variable[1];
 		}
 		else if (key.match(/GROUP_CHAN/)) {
-			this.instance.setVariable(prefix + 'group_chan', value);
-			variable = value.split(',');
+			this.instance.setVariable(prefix + 'group_chan', value.replace('{','').replace('}','').trim());
+			variable = value.replace('{','').replace('}','').trim().split(',');
 			channel.group   = variable[0];
 			channel.channel = variable[1];
 		}
 		else if (key == 'FREQUENCY') {
 			channel.frequency = value;
-			variable = value.substr(0,3) + '.' + value.substr(3,3) + ' MHz';
+			point = value.indexOf('.');
+			variable = value.substring(point - 1, point) + '.' + value.substr(point + 1, point + 4) + ' MHz';
 			this.instance.setVariable(prefix + 'frequency', variable);
 		}
 		else if (key == 'FREQUENCY2') {
 			channel.frequency2 = value;
-			variable = value.substr(0,3) + '.' + value.substr(3,3) + ' MHz';
+			point = value.indexOf('.');
+			variable = value.substring(point - 1, point) + '.' + value.substr(point + 1, point + 4) + ' MHz';
 			this.instance.setVariable(prefix + 'frequency2', variable);
 		}
 		else if (key.match(/ENCRYPTION/)) {
@@ -473,7 +475,7 @@ class instance_api {
 		}
 		else if (key == 'FLASH') {
 			channel.flash = value;
-			this.instance.setVariable(prefix + 'flash', value);
+			this.instance.setVariable(prefix + 'flash_lights', value);
 		}
 		else if (key == 'UNREGISTERED_TX_STATUS') {
 			channel.unregisteredTxStatus = value;
@@ -502,7 +504,7 @@ class instance_api {
 			channel.txStatus = value;
 			this.instance.setVariable(prefix + 'tx_status', value);
 		}
-		else if (key == 'TX_TYPE' || value == 'TX_MODEL') {
+		else if (key == 'TX_TYPE' || key == 'TX_MODEL') {
 			channel.txType = value;
 			this.instance.setVariable(prefix + 'tx_model', value);
 			this.instance.checkFeedbacks('transmitter_turned_off');
@@ -551,8 +553,11 @@ class instance_api {
 			channel.txPowerSource = value;
 			this.instance.setVariable(prefix + 'tx_power_source', value);
 		}
-		else if (key.match(/(MUTE|MUTE_MODE)_STATUS/)) {
+		else if (key.match(/MUTE_MODE_STATUS/)) {
 			switch(value) {
+				case 'ON':
+					variable = 'OFF';
+					break;
 				case 'MUTE':
 					variable = 'ON';
 					break;
@@ -562,6 +567,10 @@ class instance_api {
 			}
 			channel.txMuteStatus = variable;
 			this.instance.setVariable(prefix + 'tx_mute_status', variable);
+		}
+		else if (key.match(/MUTE_STATUS/)) {
+			channel.txMuteStatus = value;
+			this.instance.setVariable(prefix + 'tx_mute_status', value);
 		}
 		else if (key == 'TX_MUTE_BUTTON_STATUS' || key == 'TX_TALK_SWITCH' || key == 'BUTTON_STS') {
 			switch(value) {
@@ -738,7 +747,7 @@ class instance_api {
 				variable = 'Unknown';
 			}
 			else {
-				variable = (channel.batteryTempC + 40) + '&#176;';
+				variable = (channel.batteryTempC + 40) + "°";
 			}
 			this.instance.setVariable(prefix + 'battery_temp_c', variable);
 		}
@@ -748,7 +757,7 @@ class instance_api {
 				variable = 'Unknown';
 			}
 			else {
-				variable = (channel.batteryTempF + 40) + '&#176;';
+				variable = (channel.batteryTempF + 40) + "°";
 			}
 			this.instance.setVariable(prefix + 'battery_temp_f', variable);
 		}
@@ -851,7 +860,8 @@ class instance_api {
 	 */
 	updateSlot(channel, id, key, value) {
 		var slot = this.getSlot(channel, id);
-		var prefix = 'ch_' + channel + '_slot_' + id + '_';
+		id = id < 10 ? '0' + id : id;
+		var prefix = `slot_${channel}:${id}_`;
 		var variable;
 
 		if (value == 'UNKN' || value == 'UNKNOWN') {
