@@ -73,31 +73,6 @@ class instance extends instance_skel {
 			return 0;
 		});
 
-		this.CHOICES_MUTE = [
-			{id: 'ON',     label: 'Mute'},
-			{id: 'OFF',    label: 'Unmute'},
-			{id: 'TOGGLE', label: 'Toggle Mute/Unmute'}
-		];
-
-		this.CHOICES_ONOFF = [
-			{id: 'OFF', label: 'Off'},
-			{id: 'ON',  label: 'On'}
-		];
-
-		this.CHOICES_RFOUTPUT = [
-			{id: 'RF_ON',   label: 'RF On'},
-			{id: 'RF_MUTE', label: 'RF Mute'}
-		];
-
-		this.CHOICES_RFPOWER = [
-			{id: '2',  label: '2 mW'},
-			{id: '10', label: '10 mW'},
-			{id: '20', label: '20 mW'},
-			{id: '35', label: '35 mW'},
-			{id: '40', label: '40 mW'},
-			{id: '50', label: '50 mW'}
-		];
-
 		if (this.config.modelID !== undefined){
 			this.model = this.CONFIG_MODEL[this.config.modelID];
 		}
@@ -132,8 +107,9 @@ class instance extends instance_skel {
 	 * @since 1.0.0
 	 */
 	action(action) {
-		var options = action.options;
-		var cmd;
+		let options = action.options;
+		let cmd;
+		let slot, value;
 
 		switch (action.action) {
 			case 'set_channel_name':
@@ -143,7 +119,7 @@ class instance extends instance_skel {
 				cmd = 'SET ' + options.channel + ' AUDIO_MUTE ' + options.choice;
 				break;
 			case 'channel_setaudiogain':
-				let value = options.gain;
+				value = options.gain;
 				if (this.model.family == 'mxw') {
 					value += 25;
 				}
@@ -168,11 +144,11 @@ class instance extends instance_skel {
 				cmd = 'SET ' + options.channel + ' FLASH ON';
 				break;
 			case 'slot_rf_output':
-				let slot = options.slot.split(':');
+				slot = options.slot.split(':');
 				cmd = 'SET ' + slot[0] + ' SLOT_RF_OUTPUT ' + slot[1] + ' ' + options.onoff;
 				break;
 			case 'slot_rf_power':
-				let slot = options.slot.split(':');
+				slot = options.slot.split(':');
 				cmd = 'SET ' + slot[0] + ' SLOT_RF_POWER ' + slot[1] + ' ' + options.power;
 				break;
 		}

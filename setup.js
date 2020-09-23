@@ -1,5 +1,27 @@
 module.exports = {
 
+	CHOICES_MUTE: [
+		{id: 'ON',     label: 'Mute'},
+		{id: 'OFF',    label: 'Unmute'},
+		{id: 'TOGGLE', label: 'Toggle Mute/Unmute'}
+	],
+	CHOICES_ONOFF: [
+		{id: 'OFF', label: 'Off'},
+		{id: 'ON',  label: 'On'}
+	],
+	CHOICES_RFOUTPUT: [
+		{id: 'RF_ON',   label: 'RF On'},
+		{id: 'RF_MUTE', label: 'RF Mute'}
+	],
+	CHOICES_RFPOWER: [
+		{id: '2',  label: '2 mW'},
+		{id: '10', label: '10 mW'},
+		{id: '20', label: '20 mW'},
+		{id: '35', label: '35 mW'},
+		{id: '40', label: '40 mW'},
+		{id: '50', label: '50 mW'}
+	],
+
 	BG_COLOR_FIELD: function(defaultColor) {
 		return {
 			type: 'colorpicker',
