@@ -5,6 +5,7 @@ var instance_api   = require('./internalAPI');
 //var instance_icons = require('./icons');
 var actions        = require('./actions');
 var feedback       = require('./feedback');
+var setup          = require('./setup');
 var variables      = require('./variables');
 
 var debug;
@@ -39,6 +40,7 @@ class instance extends instance_skel {
 		Object.assign(this, {
 			...actions,
 			...feedback,
+			...setup,
 			...variables
 		});
 
@@ -53,7 +55,9 @@ class instance extends instance_skel {
 			ad4d:    {id: 'ad4d',    family: 'ad',  label: 'AD4D Dual Receiver',    channels: 2, slots: 8},
 			ad4q:    {id: 'ad4q',    family: 'ad',  label: 'AD4Q Quad Receiver',    channels: 4, slots: 8},
 			mxwani4: {id: 'mxwani4', family: 'mxw', label: 'MXWANI4 Quad Receiver', channels: 4, slots: 0},
-			mxwani8: {id: 'mxwani8', family: 'mxw', label: 'MXWANI8 Octo Receiver', channels: 8, slots: 0}
+			mxwani8: {id: 'mxwani8', family: 'mxw', label: 'MXWANI8 Octo Receiver', channels: 8, slots: 0},
+			slxd4:   {id: 'slxd4',   family: 'slx', label: 'SLXD4 Single Receiver', channels: 1, slots: 0},
+			slxd4d:  {id: 'slxd4d',  family: 'slx', label: 'SLXD4D Dual Receiver',  channels: 2, slots: 0}  
 		};
 
 		this.CHOICES_CHANNELS = [];
@@ -70,19 +74,28 @@ class instance extends instance_skel {
 		});
 
 		this.CHOICES_MUTE = [
-			{id: 'ON', label: 'Mute'},
-			{id: 'OFF', label: 'Unmute'},
+			{id: 'ON',     label: 'Mute'},
+			{id: 'OFF',    label: 'Unmute'},
 			{id: 'TOGGLE', label: 'Toggle Mute/Unmute'}
 		];
 
 		this.CHOICES_ONOFF = [
 			{id: 'OFF', label: 'Off'},
-			{id: 'ON', label: 'On'}
+			{id: 'ON',  label: 'On'}
 		];
 
 		this.CHOICES_RFOUTPUT = [
 			{id: 'RF_ON',   label: 'RF On'},
 			{id: 'RF_MUTE', label: 'RF Mute'}
+		];
+
+		this.CHOICES_RFPOWER = [
+			{id: '2',  label: '2 mW'},
+			{id: '10', label: '10 mW'},
+			{id: '20', label: '20 mW'},
+			{id: '35', label: '35 mW'},
+			{id: '40', label: '40 mW'},
+			{id: '50', label: '50 mW'}
 		];
 
 		if (this.config.modelID !== undefined){
@@ -145,8 +158,11 @@ class instance extends instance_skel {
 			case 'channel_decreasegain':
 				cmd = 'SET ' + options.channel + ' AUDIO_GAIN DEC ' + options.gain;
 				break;
+			case 'channel_frequency':
+				cmd = 'SET ' + options.channel + ' FREQUENCY ' + options.value.replace('.','');
+				break;
 			case 'flash_lights':
-				cmd = 'SET FLASH ' + options.onoff;
+				cmd = 'SET FLASH ON';
 				break;
 			case 'flash_channel':
 				cmd = 'SET ' + options.channel + ' FLASH ON';
@@ -154,6 +170,10 @@ class instance extends instance_skel {
 			case 'slot_rf_output':
 				let slot = options.slot.split(':');
 				cmd = 'SET ' + slot[0] + ' SLOT_RF_OUTPUT ' + slot[1] + ' ' + options.onoff;
+				break;
+			case 'slot_rf_power':
+				let slot = options.slot.split(':');
+				cmd = 'SET ' + slot[0] + ' SLOT_RF_POWER ' + slot[1] + ' ' + options.power;
 				break;
 		}
 
@@ -244,7 +264,7 @@ class instance extends instance_skel {
 		debug = this.debug;
 		log = this.log;
 
-		this.status(this.STATUS_OK);
+		this.status(this.STATUS_WARNING, 'Connecting');
 
 		this.initVariables();
 		this.initFeedbacks();
@@ -378,6 +398,9 @@ class instance extends instance_skel {
 					case 'mxw':
 						this.api.parseMXWSample(commandNum, command);
 						break;
+					case 'slx':
+						this.api.parseSLXSample(commandNum, command);
+						break;
 				}
 			}
 		}
@@ -416,6 +439,9 @@ class instance extends instance_skel {
 				}
 			}
 		}
+
+		this.CHANNELS_FIELD.choices = this.CHOICES_CHANNELS;
+		this.SLOTS_FIELD.choices    = this.CHOICES_SLOTS;
 	}
 
 	/**

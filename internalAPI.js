@@ -26,17 +26,19 @@ class instance_api {
 		//ulx-d [FW_VER,DEVICE_ID,ENCRYPTION,AUDIO_SUMMING_MODE,FREQUENCY_DIVERSITY_MODE,HIGH_DENSITY,FLASH]
 		//ad    [FW_VER,DEVICE_ID,ENCRYPTION_MODE,MODEL,QUADVERSITY_MODE,RF_BAND,TRANSMISSION_MODE,FLASH]
 		//mxw   [DEVICE_ID,FLASH]
+		//slx-d [FW_VER,DEVICE_ID,RF_BAND,MODEL,LOCK_STATUS,FLASH]
 		this.receiver  = {
-			firmwareVersion:    '',    // (ULX|QLX) 18 | (AD) 24
-			deviceId:           '',    // (ULX|QLX) 8 | (AD|MXW) 31
+			firmwareVersion:    '',    // (ULX|QLX) 18 | (AD|SLX) 24
+			deviceId:           '',    // (ULX|QLX|SLX) 8 | (AD|MXW) 31
 			encryption:         'OFF', // (QLX|AD:ENCRYPTION_MODE) OFF - ON | (ULX) OFF - MANUAL - AUTO
 			audioSumming:       'OFF', // (ULXD4D|ULXD4Q only) OFF - 1+2 - 3+4 - 1+2/3+4 - 1+2+3+4
 			frequencyDiversity: 'OFF', // (ULXD4D|ULXD4Q only) OFF - 1+2 - 3+4 - 1+2/3+4
 			highDensity:        'OFF', // (ULX) OFF - ON | (AD:TRANSMISSION_MODE) STANDARD = OFF - HIGH_DENSITY = ON
-			flash:              'OFF', // (ULX|AD|MXW) OFF - ON
+			flash:              'OFF', // (ULX|AD|MXW|SLX) OFF - ON
 			quadversityMode:    'OFF', // (AD) OFF - ON
-			model:              '',    // (AD) 32
-			rfBand:             ''     // (AD) 8
+			model:              '',    // (AD|SLX) 32
+			rfBand:             '',    // (AD|SLX) 8
+			lockStatus:         'OFF'  // (SLX) OFF - MENU - ALL
 		};
 		this.channels  = [];
 
@@ -65,6 +67,7 @@ class instance_api {
 			//ad    rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,AUDIO_MUTE,GROUP_CHANNEL,FREQUENCY,FLASH,ENCRYPTION_STATUS,INTERFERENCE_STATUS,UNREGISTERED_TX_STATUS]
 			//         [FD_MODE,GROUP_CHANNEL2,FREQUENCY2,INTERFERENCE_STATUS2]
 			//mxw   rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,FLASH]
+			//slx-d rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,GROUP_CHAN,FREQUENCY,AUDIO_OUT_LVL_SWITCH]
 			//qlx-d tx [TX_TYPE,TX_DEVICE_ID,TX_OFFSET,TX_RF_PWR,TX_MUTE_STATUS,TX_PWR_LOCK,TX_MENU_LOCK,TX_MUTE_BUTTON_STATUS,TX_POWER_SOURCE]
 			//         [BATT_BARS,BATT_CHARGE,BATT_CYCLE,BATT_RUN_TIME,BATT_TEMP_F,BATT_TEMP_C,BATT_TYPE]
 			//ulx-d tx [TX_TYPE,TX_DEVICE_ID,TX_OFFSET,TX_RF_PWR,TX_MUTE_STATUS,TX_PWR_LOCK,TX_MENU_LOCK,TX_MUTE_BUTTON_STATUS,TX_POWER_SOURCE]
@@ -72,16 +75,17 @@ class instance_api {
 			//ad    tx [TX_MODEL,TX_DEVICE_ID,TX_OFFSET,TX_INPUT_PAD,TX_POWER_LEVEL,TX_MUTE_MODE_STATUS,TX_POLARITY,TX_LOCK,TX_TALK_SWITCH]
 			//         [TX_BATT_BARS,TX_BATT_CHARGE_PERCENT,TX_BATT_CYCLE_COUNT,TX_BATT_HEALTH_PERCENT,TX_BATT_MINS,TX_BATT_TEMP_F,TX_BATT_TEMP_C,TX_BATT_TYPE]
 			//mxw   tx [TX_TYPE,TX_AVAILABLE,TX_STATUS,BUTTON_STS,LED_STATUS,BATT_CHARGE,BATT_HEALTH,BATT_RUN_TIME,BATT_TIME_TO_FULL]
+			//slx-d tx [TX_TYPE,TX_BATT_BARS,TX_BATT_MINS]
 			this.channels[id] = {
 				slots:                [],        // AD TX Slots
 				//rx
-				name:                 '',        // (ULX|QLX) 8 | (AD|MXW) 31
+				name:                 '',        // (ULX|QLX) 8 | (AD|MXW|SLX) 31
 				meterRate:            0,         // 0=disabled, 100-99999 [in ms]
-				audioGain:            0,         // (ULX|QLX|AD) 0-60,-18dB | (MXW) 0-40,-25dB
+				audioGain:            0,         // (ULX|QLX|AD|SLX) 0-60,-18dB | (MXW) 0-40,-25dB
 				audioMute:            'OFF',     // (ULX|AD) OFF - ON - TOGGLE[set]
-				group:                0,         // (ULX|QLX|AD:GROUP_CHANNEL) xx,yy (xx)
-				channel:              0,         // (ULX|QLX|AD:GROUP_CHANNEL) xx,yy (yy)
-				frequency:            '000.000', // (ULX|QLX|AD) 6, xxx[.]yyy
+				group:                0,         // (ULX|QLX|(AD|SLX):GROUP_CHANNEL) xx,yy (xx)
+				channel:              0,         // (ULX|QLX|(AD|SLX):GROUP_CHANNEL) xx,yy (yy)
+				frequency:            '000.000', // (ULX|QLX|AD|SLX) 6, xxx[.]yyy
 				flash:                'OFF',     // (AD|MXW) OFF - ON
 				encryptionStatus:     'OK',      // (AD) OK - ERROR | (ULX+QLD:ENCRYPTION_WARNING) OFF=OK - ON=ERROR
 				interferenceStatus:   'NONE',    // (AD) NONE - DETECTED | (ULX:RF_INT_DET) NONE - CRITICAL=DETECTED
@@ -91,6 +95,7 @@ class instance_api {
 				channel2:             0,         // (AD) xx,yy (yy)
 				frequency2:           '000.000', // (AD) 6, xxx[.]yyy
 				interferenceStatus2:  'NONE',    // (AD) NONE - DETECTED
+				audioOutLevelSwitch:  'MIC',     // (SLX) MIC - LINE
 
 				//sample
 				antenna:              'XX',      // (ULX|QLX|AD) raw sample
@@ -98,15 +103,15 @@ class instance_api {
 				antennaB:             'X',       // (ULX|QLX) X - B | (AD) X - B - R
 				antennaC:             'X',       // (AD:QUADVERITY ON) X - B - R
 				antennaD:             'X',       // (AD:QUADVERITY ON) X - B - R
-				rfLevel:              -120,      // (ULX|QLX) 0-115,-120dBm | (MXW) 0-96?
-				audioLevel:           -50,       // (ULX|QLX) 0-50,-50dB | (AD) 0-120,-120dB | (MXW) 0-98,-98dB?
-				audioLevelPeak:       -120,      // (AD) 0-120,-120dB
+				rfLevel:              -120,      // (ULX|QLX) 0-115,-120dBm | (SLX) 0-120,-120dBm | (MXW) 0-96?
+				audioLevel:           -50,       // (ULX|QLX) 0-50,-50dB | (AD|SLX) 0-120,-120dB | (MXW) 0-98,-98dB?
+				audioLevelPeak:       -120,      // (AD|SLX) 0-120,-120dB
 				audioLED:             0,         // (AD) 0-255 binary, 1-7=level, 8=OL
 				signallQuality:       255,       // (AD) 0-5,255=UNKN
 
 				//tx
 				txType:               'Unknown', // (ULX|QLX) QLXD1 - QLXD2 - ULXD1 - ULXD2 - ULXD6 - ULXD8 - UNKN
-				                                 // (AD:TX_MODEL) AD1 - AD2 - ADX1 - ADX1M - ADX2 - ADX2FD - UNKNOWN
+				                                 // ((AD|SLX):TX_MODEL) AD1 - AD2 - ADX1 - ADX1M - ADX2 - ADX2FD - SLXD1 - SLXD2 - UNKNOWN
 				                                 // (MXW) MXW1 - MXW2 - MXW6 - MXW8 - UNKNOWN
 				txAvailable:          'NO',      // (MXW) YES - NO
 				txStatus:             'Unknown', // (MXW) ACTIVE[set] - MUTE[set] - STANDBY[set] - ON_CHARGER - UNKNOWN - OFF[set-only]
@@ -124,12 +129,12 @@ class instance_api {
 				txPowerSource:        'Unknown', // (ULX|QLX) BATTERY - EXTERNAL - UNKN | (MXW) SEE batteryRuntime
 				ledStatusRed:         'Off',     // (MXW) rr gg (rr) ON=On,OF=Off,ST=Strobe,FL=Flash,PU=Pulse,NC=No Change
 				ledStatusGreen:       'Off',     // (MXW) rr gg (gg) ON=On,OF=Off,ST=Strobe,FL=Flash,PU=Pulse,NC=No Change
-				batteryBars:          255,       // (ULX|QLX|AD:TX_BATT_BARS) 0-5, 255=UNKN
+				batteryBars:          255,       // (ULX|QLX|(AD|SLX):TX_BATT_BARS) 0-5, 255=UNKN
 				batteryCharge:        255,       // (ULX|QLX|MXW|AD:TX_BATT_CHARGE_PERCENT) 0-100, 255=UNKN
 				batteryCycle:         65535,     // (ULX|QLX|AD:TX_BATT_CYCLE_COUNT) 0+, 65535=UNKN
 				batteryHealth:        255,       // (MXW|AD:TX_BATT_HEALTH_PERCENT) 0-100, 255=UNKN
 				batteryRuntime:       65535,     // (ULX|QLX) 0+, 65535=UNKN
-				                                 // (AD:TX_BATT_MINS) 0+, 65535=UNKN 65534=calcuating 65533=comm warning
+				                                 // ((AD|SLX):TX_BATT_MINS) 0+, 65535=UNKN 65534=calcuating 65533=comm warning
 				                                 // (MXW) 0+, 65535=UNKN 65534=calcuating 65533=charging 65532=wall power
 				batteryTempF:         255,       // (ULX|QLX|AD:TX_BATT_TEMP_F) +40 255=UNKN
 				batteryTempC:         255,       // (ULX|QLX|AD:TX_BATT_TEMP_C)  +40 255=UNKN
@@ -226,38 +231,39 @@ class instance_api {
 		let prefix = 'ch_' + id + '_';
 		let sample = data.split(' ');
 
-		channel.signalQuality  = parseInt(sample[2]);
-		channel.audioLED       = parseInt(sample[3]);
-		channel.audioLevelPeak = parseInt(sample[4]);
-		channel.audioLevel     = parseInt(sample[5]);
+		channel.signalQuality  = parseInt(sample[3]);
+		channel.audioLED       = parseInt(sample[4]);
+		channel.audioLevelPeak = parseInt(sample[5]) - 120;
+		channel.audioLevel     = parseInt(sample[6]) - 120;
 
 		if (channel.fdMode == 'FD-C') {
 			// need to do something here
 		}
 		else {
-			channel.rfLevelA  = parseInt(sample[8]);
-			channel.rfBitmapA = parseInt(sample[7]);
-			channel.rfLevelB  = parseInt(sample[10]);
-			channel.rfBitmapB = parseInt(sample[9]);
-			channel.antenna   = sample[6];
-			channel.antennaA  = sample[6].substr(0,1);
-			channel.antennaB  = sample[6].substr(1,1);
+			channel.rfLevelA  = parseInt(sample[9]) - 120;
+			channel.rfBitmapA = parseInt(sample[8]);
+			channel.rfLevelB  = parseInt(sample[11]) - 120;
+			channel.rfBitmapB = parseInt(sample[10]);
+			channel.antenna   = sample[7];
+			channel.antennaA  = sample[7].substr(0,1);
+			channel.antennaB  = sample[7].substr(1,1);
 
 			this.instance.setVariable(prefix + 'antenna', channel.antenna);
-			this.instance.setVariable(prefix + 'rf_level_a', (channel.rfLevelA-120) + ' dBm');
-			this.instance.setVariable(prefix + 'rf_level_b', (channel.rfLevelB-120) + ' dBm');
-			this.instance.setVariable(prefix + 'audio_level', (channel.audioLevel-120) + ' dBFS');
-			this.instance.setVariable(prefix + 'audio_level_peak', (channel.audioLevelPeak-120) + ' dBFS');
+			this.instance.setVariable(prefix + 'signal_quality', channel.signalQuality);
+			this.instance.setVariable(prefix + 'rf_level_a', channel.rfLevelA + ' dBm');
+			this.instance.setVariable(prefix + 'rf_level_b', channel.rfLevelB + ' dBm');
+			this.instance.setVariable(prefix + 'audio_level', channel.audioLevel + ' dBFS');
+			this.instance.setVariable(prefix + 'audio_level_peak', channel.audioLevelPeak + ' dBFS');
 
 			if (this.receiver.quadversityMode == 'ON') {
-				channel.rfLevelC  = parseInt(sample[12]);
-				channel.rfBitmapC = parseInt(sample[11]);
-				channel.rfLevelC  = parseInt(sample[14]);
-				channel.rfBitmapC = parseInt(sample[13]);
-				channel.antennaC  = sample[6].substr(2,1);
-				channel.antennaD  = sample[6].substr(3,1);
-				this.instance.setVariable(prefix + 'rf_level_c', (channel.rfLevelC-120) + ' dBm');
-				this.instance.setVariable(prefix + 'rf_level_d', (channel.rfLevelD-120) + ' dBm');
+				channel.rfLevelC  = parseInt(sample[13]) - 120;
+				channel.rfBitmapC = parseInt(sample[12]);
+				channel.rfLevelC  = parseInt(sample[15]) - 120;
+				channel.rfBitmapC = parseInt(sample[14]);
+				channel.antennaC  = sample[7].substr(2,1);
+				channel.antennaD  = sample[7].substr(3,1);
+				this.instance.setVariable(prefix + 'rf_level_c', channel.rfLevelC + ' dBm');
+				this.instance.setVariable(prefix + 'rf_level_d', channel.rfLevelD + ' dBm');
 			}
 		}
 
@@ -285,6 +291,75 @@ class instance_api {
 	}
 
 	/**
+	 * Parse sample data for SLX.
+	 *
+	 * @param {number} id - the channel id
+	 * @param {String} data - the sample data
+	 * @access public
+	 * @since 1.0.0
+	 */
+	parseSLXSample(id, data) {
+		let channel = this.getChannel(id);
+		let prefix = 'ch_' + id + '_';
+		let sample = data.split(' ');
+
+		channel.audioLevelPeak = parseInt(sample[3]) - 120;
+		channel.audioLevel     = parseInt(sample[4]) - 120;
+		channel.rfLevel        = parseInt(sample[5]) - 120;
+
+		let audioLevel = channel.audioLevel;
+
+		if (audioLevel >= -6) {
+			channel.audioLED = 6;
+		}
+		else if (audioLevel >= -12) {
+			channel.audioLED = 5;
+		}
+		else if (audioLevel >= -20) {
+			channel.audioLED = 4;
+		}
+		else if (audioLevel >= -30) {
+			channel.audioLED = 3;
+		}
+		else if (audioLevel >= -40) {
+			channel.audioLED = 2;
+		}
+		else if (audioLevel > -50) {
+			channel.audioLED = 1;
+		}
+		else {
+			channel.audioLED = 0;
+		}
+
+		let rfLevel = channel.rfLevel;
+
+		if (rfLevel >= -25) {
+			channel.rfBitmapA = 5;
+		}
+		else if (rfLevel >= -70) {
+			channel.rfBitmapA = 4;
+		}
+		else if (rfLevel >= -77) {
+			channel.rfBitmapA = 3;
+		}
+		else if (rfLevel >= -83) {
+			channel.rfBitmapA = 2;
+		}
+		else if (rfLevel >= -90) {
+			channel.rfBitmapA = 1;
+		}
+		else {
+			channel.rfBitmapA = 0;
+		}
+
+		this.instance.setVariable(prefix + 'rf_level', channel.rfLevel + ' dBm');
+		this.instance.setVariable(prefix + 'audio_level', channel.audioLevel + ' dBFS');
+		this.instance.setVariable(prefix + 'audio_level_peak', channel.audioLevelPeak + ' dBFS');
+
+		//this.instance.checkFeedbacks('sample');
+	}
+
+	/**
 	 * Parse sample data for ULX/QLX.
 	 *
 	 * @param {number} id - the channel id
@@ -297,7 +372,7 @@ class instance_api {
 		let prefix = 'ch_' + id + '_';
 		let sample = data.split(' ');
 
-		switch(sample[2]) {
+		switch(sample[3]) {
 			case 'AX':
 				channel.antennaA = 'B';
 				channel.antennaB = 'X';
@@ -312,25 +387,25 @@ class instance_api {
 				break;
 		}
 
-		channel.antenna    = sample[2];
-		channel.rfLevel    = parseInt(sample[3]);
-		channel.audioLevel = parseInt(sample[4]);
+		channel.antenna    = sample[3];
+		channel.rfLevel    = parseInt(sample[4]) - 128;
+		channel.audioLevel = parseInt(sample[5]) - 50;
 
-		let audioLevel = channel.audioLevel - 50;
+		let audioLevel = channel.audioLevel;
 
-		if (audioLevel > -6) {
+		if (audioLevel >= -6) {
 			channel.audioLED = 6;
 		}
-		else if (audioLevel > -12) {
+		else if (audioLevel >= -12) {
 			channel.audioLED = 5;
 		}
-		else if (audioLevel > -20) {
+		else if (audioLevel >= -20) {
 			channel.audioLED = 4;
 		}
-		else if (audioLevel > -30) {
+		else if (audioLevel >= -30) {
 			channel.audioLED = 3;
 		}
-		else if (audioLevel > -40) {
+		else if (audioLevel >= -40) {
 			channel.audioLED = 2;
 		}
 		else if (audioLevel > -50) {
@@ -340,21 +415,21 @@ class instance_api {
 			channel.audioLED = 0;
 		}
 
-		let rfLevel = channel.rfLevel - 120;
+		let rfLevel = channel.rfLevel;
 
-		if (rfLevel > -25) {
+		if (rfLevel >= -25) {
 			channel.rfBitmapA = 5;
 		}
-		else if (rfLevel > -70) {
+		else if (rfLevel >= -70) {
 			channel.rfBitmapA = 4;
 		}
-		else if (rfLevel > -77) {
+		else if (rfLevel >= -77) {
 			channel.rfBitmapA = 3;
 		}
-		else if (rfLevel > -83) {
+		else if (rfLevel >= -83) {
 			channel.rfBitmapA = 2;
 		}
-		else if (rfLevel > -90) {
+		else if (rfLevel >= -90) {
 			channel.rfBitmapA = 1;
 		}
 		else {
@@ -362,8 +437,8 @@ class instance_api {
 		}
 
 		this.instance.setVariable(prefix + 'antenna', channel.antenna);
-		this.instance.setVariable(prefix + 'rf_level', rfLevel + ' dBm');
-		this.instance.setVariable(prefix + 'audio_level', audioLevel + ' dBFS');
+		this.instance.setVariable(prefix + 'rf_level', channel.rfLevel + ' dBm');
+		this.instance.setVariable(prefix + 'audio_level', channel.audioLevel + ' dBFS');
 		//this.instance.checkFeedbacks('sample');
 	}
 
@@ -398,9 +473,9 @@ class instance_api {
 				variable = 'Disabled';
 			}
 			else {
-				variable = value + ' ms';
+				variable = channel.meterRate + ' ms';
 			}
-			this.instance.setVariable(prefix + 'meter', variable);
+			this.instance.setVariable(prefix + 'meter_rate', variable);
 		}
 		else if (key == 'AUDIO_GAIN') {
 			channel.audioGain = parseInt(value);
@@ -418,27 +493,27 @@ class instance_api {
 			this.instance.checkFeedbacks('channel_muted');
 		}
 		else if (key == 'GROUP_CHANNEL2') {
-			this.instance.setVariable(prefix + 'group_chan2', value.replace('{','').replace('}','').trim());
 			variable = value.replace('{','').replace('}','').trim().split(',');
-			channel.group2   = variable[0];
-			channel.channel2 = variable[1];
+			channel.group2   = (variable[0] == '--' ? variable[0] : parseInt(variable[0]));
+			channel.channel2 = (variable[1] == '--' ? variable[1] : parseInt(variable[1]));
+			this.instance.setVariable(prefix + 'group_chan2', channel.group2 + ',' + channel.channel2);
 		}
 		else if (key.match(/GROUP_CHAN/)) {
-			this.instance.setVariable(prefix + 'group_chan', value.replace('{','').replace('}','').trim());
 			variable = value.replace('{','').replace('}','').trim().split(',');
-			channel.group   = variable[0];
-			channel.channel = variable[1];
+			channel.group   = (variable[0] == '--' ? variable[0] : parseInt(variable[0]));
+			channel.channel = (variable[1] == '--' ? variable[1] : parseInt(variable[1]));
+			this.instance.setVariable(prefix + 'group_chan', channel.group + ',' + channel.channel);
 		}
 		else if (key == 'FREQUENCY') {
-			channel.frequency = value;
-			point = value.indexOf('.');
-			variable = value.substring(point - 1, point) + '.' + value.substr(point + 1, point + 4) + ' MHz';
+			value = '' + parseInt(value);
+			channel.frequency = value.substring(0, 3) + '.' + value.substring(3, 6);
+			variable = channel.frequency + ' MHz';
 			this.instance.setVariable(prefix + 'frequency', variable);
 		}
 		else if (key == 'FREQUENCY2') {
-			channel.frequency2 = value;
-			point = value.indexOf('.');
-			variable = value.substring(point - 1, point) + '.' + value.substr(point + 1, point + 4) + ' MHz';
+			value = '' + parseInt(value);
+			channel.frequency2 = value.substring(0, 3) + '.' + value.substring(3, 6);
+			variable = channel.frequency2 + ' MHz';
 			this.instance.setVariable(prefix + 'frequency2', variable);
 		}
 		else if (key.match(/ENCRYPTION/)) {
@@ -475,7 +550,11 @@ class instance_api {
 		}
 		else if (key == 'FLASH') {
 			channel.flash = value;
-			this.instance.setVariable(prefix + 'flash_lights', value);
+			//this.instance.setVariable(prefix + 'flash', value);
+		}
+		else if (key == 'AUDIO_OUT_LVL_SWITCH') {
+			channel.audioOutLevelSwitch = value;
+			this.instance.setVariable(prefix + 'audio_out_lvl_switch', value);
 		}
 		else if (key == 'UNREGISTERED_TX_STATUS') {
 			channel.unregisteredTxStatus = value;
@@ -515,6 +594,7 @@ class instance_api {
 		}
 		else if (key == 'TX_LOCK') {
 			switch(value) {
+				case 'LOCKED':
 				case 'ALL':
 					channel.txMenuLock  = 'ON';
 					channel.txPowerLock = 'ON';
@@ -544,10 +624,44 @@ class instance_api {
 		else if (key == 'TX_MENU_LOCK') {
 			channel.txMenuLock = value;
 			this.instance.setVariable(prefix + 'tx_menu_lock', value);
+
+			if (channel.txMenuLock == 'OFF' && channel.txPowerLock == 'OFF') {
+				channel.txLock = 'NONE';
+			}
+			else if (channel.txMenuLock == 'ON' && channel.txPowerLock == 'OFF') {
+				channel.txLock = 'MENU';
+			}
+			else if (channel.txMenuLock == 'OFF' && channel.txPowerLock =='ON') {
+				channel.txLock = 'POWER';
+			}
+			else if (channel.txMenuLock == 'ON' && channel.txPowerLock == 'ON') {
+				channel.txLock = 'BOTH';
+			}
+			else {
+				channel.txLock = 'Unknown'
+			}
+			this.instance.setVariable(prefix + 'tx_lock',       channel.txLock);
 		}
 		else if (key == 'TX_PWR_LOCK') {
 			channel.txPowerLock = value;
 			this.instance.setVariable(prefix + 'tx_power_lock', value);
+
+			if (channel.txMenuLock == 'OFF' && channel.txPowerLock == 'OFF') {
+				channel.txLock = 'NONE';
+			}
+			else if (channel.txMenuLock == 'ON' && channel.txPowerLock == 'OFF') {
+				channel.txLock = 'MENU';
+			}
+			else if (channel.txMenuLock == 'OFF' && channel.txPowerLock =='ON') {
+				channel.txLock = 'POWER';
+			}
+			else if (channel.txMenuLock == 'ON' && channel.txPowerLock == 'ON') {
+				channel.txLock = 'BOTH';
+			}
+			else {
+				channel.txLock = 'Unknown'
+			}
+			this.instance.setVariable(prefix + 'tx_lock',       channel.txLock);
 		}
 		else if (key == 'TX_POWER_SOURCE') {
 			channel.txPowerSource = value;
@@ -567,10 +681,12 @@ class instance_api {
 			}
 			channel.txMuteStatus = variable;
 			this.instance.setVariable(prefix + 'tx_mute_status', variable);
+			this.instance.checkFeedbacks('transmitter_muted');
 		}
 		else if (key.match(/MUTE_STATUS/)) {
 			channel.txMuteStatus = value;
 			this.instance.setVariable(prefix + 'tx_mute_status', value);
+			this.instance.checkFeedbacks('transmitter_muted');
 		}
 		else if (key == 'TX_MUTE_BUTTON_STATUS' || key == 'TX_TALK_SWITCH' || key == 'BUTTON_STS') {
 			switch(value) {
@@ -597,7 +713,7 @@ class instance_api {
 					variable = (channel.txOffset - 12).toString() + ' dB';
 				}
 				else {
-					variable = value + ' dB';
+					variable = channel.txOffset + ' dB';
 				}
 			}
 			this.instance.setVariable(prefix + 'tx_offset', variable);
@@ -618,7 +734,7 @@ class instance_api {
 				variable = 'Unknown';
 			}
 			else {
-				variable = value + ' mW';
+				variable = channel.txPowerLevel + ' mW';
 			}
 			this.instance.setVariable(prefix + 'tx_power_level', variable);
 		}
@@ -668,7 +784,7 @@ class instance_api {
 				variable = 'Unknown';
 			}
 			else {
-				variable = value;
+				variable = channel.batteryBars;
 			}
 			this.instance.setVariable(prefix + 'battery_bars', variable);
 			this.instance.checkFeedbacks('battery_level');
@@ -718,7 +834,7 @@ class instance_api {
 					channel.txPowerSource = 'BATTERY';
 				}
 			}
-			else if (channel.batteryRuntime == 65533 && model.family == 'ad') {
+			else if (channel.batteryRuntime == 65533 && (model.family == 'ad' || model.family == 'slx')) {
 				variable = 'Error';
 			}
 			else if (channel.batteryRuntime == 65533 && model.family == 'mxw') {
@@ -832,7 +948,7 @@ class instance_api {
 		}
 		else if (key == 'FLASH') {
 			this.receiver.flash = value;
-			this.instance.setVariable('flash', value);
+			//this.instance.setVariable('flash', value);
 		}
 		else if (key == 'QUADVERSITY_MODE') {
 			this.receiver.quadversityMode = value;
@@ -845,6 +961,10 @@ class instance_api {
 		else if (key == 'RF_BAND') {
 			this.receiver.rfBand = value;
 			this.instance.setVariable('rf_band', value);
+		}
+		else if (key == 'LOCK_STATUS') {
+			this.receiver.lockStatus = value;
+			this.instance.setVariable('lock_status', value);
 		}
 	}
 
@@ -922,6 +1042,7 @@ class instance_api {
 					variable = value + ' mW';
 				}
 				this.instance.setVariable(prefix + 'tx_power_level', variable);
+				this.instance.checkFeedbacks('slot_rf_power');
 				break;
 			case 'SLOT_RF_POWER_MODE':
 				slot.txPowerMode = value;
@@ -943,6 +1064,7 @@ class instance_api {
 					variable = value;
 				}
 				this.instance.setVariable(prefix + 'rf_output', variable);
+				this.instance.checkFeedbacks('slot_rf_output');
 				break;
 			case 'SLOT_BATT_BARS':
 				slot.batteryBars = parseInt(value);

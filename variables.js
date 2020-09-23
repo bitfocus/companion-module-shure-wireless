@@ -19,20 +19,27 @@ module.exports = {
 
 			if (this.model.family == 'ad' || this.model.family == 'ulx') {
 				variables.push({ name: prefix +'audio_mute', label: 'Channel ' + i + ' Audio Mute' });
+			}
+
+			if (this.model.family != 'mxw') {
 				variables.push({ name: prefix +'group_chan', label: 'Channel ' + i + ' Group & Channel' });
 				variables.push({ name: prefix +'frequency',  label: 'Channel ' + i + ' Frequency' });
 			}
 
-			if (this.model.family != 'mxw') {
+			if (this.model.family != 'mxw' && this.model.family != 'slx') {
 				variables.push({ name: prefix +'encryption_status', label: 'Channel ' + i + ' Encryption Status' });
 			}
 
-			if (this.model.family == 'ad' || this.model.family == 'mxw') {
+			/*if (this.model.family == 'ad' || this.model.family == 'mxw' || this.model.family == 'slx') {
 				variables.push({ name: prefix +'flash', label: 'Channel ' + i + ' Flash' });
-			}
+			}*/
 
 			if (this.model.family == 'ad' || this.model.family == 'ulx') {
 				variables.push({ name: prefix +'interference_status', label: 'Channel ' + i + ' Interference Status' });
+			}
+
+			if (this.model.family == 'slx') {
+				variables.push({ name: prefix +'audio_out_lvl_switch', label: 'Channel ' + i + ' Audio Out Level Switch' });
 			}
 
 			if (this.model.family == 'ad') {
@@ -43,15 +50,21 @@ module.exports = {
 				variables.push({ name: prefix +'interference_status2',   label: 'Channel ' + i + ' Interference Status 2' });
 			}
 
-			if (this.model.family != 'mxw') {
+			if (this.model.family != 'mxw' && this.model.family != 'slx') {
 				variables.push({ name: prefix +'antenna', label: 'Channel ' + i + ' Antenna Status' });
 			}
 
 			if (this.model.family == 'ad') {
+				variables.push({ name: prefix +'signal_quality',   label: 'Channel ' + i + ' Signal Quality' });
 				variables.push({ name: prefix +'rf_level_a',       label: 'Channel ' + i + ' RF Level A' });
 				variables.push({ name: prefix +'rf_level_b',       label: 'Channel ' + i + ' RF Level B' });
 				variables.push({ name: prefix +'rf_level_c',       label: 'Channel ' + i + ' RF Level C' });
 				variables.push({ name: prefix +'rf_level_d',       label: 'Channel ' + i + ' RF Level D' });
+				variables.push({ name: prefix +'audio_level',      label: 'Channel ' + i + ' Audio Level RMS' });
+				variables.push({ name: prefix +'audio_level_peak', label: 'Channel ' + i + ' Audio Level Peak' });
+			}
+			else if (this.model.family == 'slx') {
+				variables.push({ name: prefix +'rf_level',         label: 'Channel ' + i + ' RF Level' });
 				variables.push({ name: prefix +'audio_level',      label: 'Channel ' + i + ' Audio Level RMS' });
 				variables.push({ name: prefix +'audio_level_peak', label: 'Channel ' + i + ' Audio Level Peak' });
 			}
@@ -60,45 +73,52 @@ module.exports = {
 				variables.push({ name: prefix +'audio_level',     label: 'Channel ' + i + ' Audio Level' });
 			}
 
-			variables.push({ name: prefix +'tx_type',             label: 'Channel ' + i + ' Transmitter Type' });
+			variables.push({ name: prefix +'tx_model',             label: 'Channel ' + i + ' Transmitter Model' });
 
 			if (this.model.family == 'mxw') {
 				variables.push({ name: prefix +'tx_available',    label: 'Channel ' + i + ' Transmitter Available' });
 				variables.push({ name: prefix +'tx_status',       label: 'Channel ' + i + ' Transmitter Status' });
 			}
 
-			if (this.model.family != 'mxw') {
+			if (this.model.family != 'mxw' && this.model.family != 'slx') {
 				variables.push({ name: prefix +'tx_device_id',    label: 'Channel ' + i + ' Transmitter Device ID' });
 				variables.push({ name: prefix +'tx_offset',       label: 'Channel ' + i + ' Transmitter Offset' });
 			}
 
-			if (this.model.famiy == 'ad') {
+			if (this.model.family == 'ad') {
 				variables.push({ name: prefix +'tx_input_pad',    label: 'Channel ' + i + ' Transmitter Input Pad' });
 				variables.push({ name: prefix +'tx_polarity',     label: 'Channel ' + i + ' Transmitter Polarity' });
 			}
 
-			if (this.model.family != 'mxw') {
+			if (this.model.family != 'mxw' && this.model.family != 'slx') {
 				variables.push({ name: prefix +'tx_power_level',  label: 'Channel ' + i + ' Transmitter Power Level' });
-				variables.push({ name: prefix +'tx_power_mode',   label: 'Channel ' + i + ' Transmitter Power Mode' });
 				variables.push({ name: prefix +'tx_mute_status',  label: 'Channel ' + i + ' Transmitter Mute Status' });
 				variables.push({ name: prefix +'tx_lock',         label: 'Channel ' + i + ' Transmitter Lock' });
 				variables.push({ name: prefix +'tx_power_lock',   label: 'Channel ' + i + ' Transmitter Power Lock' });
 				variables.push({ name: prefix +'tx_menu_lock',    label: 'Channel ' + i + ' Transmitter Menu Lock' });
 			}
 
-			if (this.model.famiy != 'ad') {
+			if (this.model.family == 'ulx' || this.model.family == 'qlx') {
+				variables.push({ name: prefix +'tx_power_mode',   label: 'Channel ' + i + ' Transmitter Power Mode' });
+			}
+
+			if (this.model.family != 'ad' && this.model.family != 'slx') {
 				variables.push({ name: prefix +'tx_power_source', label: 'Channel ' + i + ' Transmitter Power Source' });
 			}
 
-			variables.push({ name: prefix +'tx_talk_switch',      label: 'Channel ' + i + ' Transmitter Mute Button Status' });
+			if (this.model.family != 'slx') {
+				variables.push({ name: prefix +'tx_talk_switch',      label: 'Channel ' + i + ' Transmitter Mute Button Status' });
+			}
 
 			if (this.model.family != 'mxw') {
 				variables.push({ name: prefix +'battery_bars',    label: 'Channel ' + i + ' Battery Bars' });
 			}
 
-			variables.push({ name: prefix +'battery_charge',      label: 'Channel ' + i + ' Battery Charge Status' });
+			if (this.model.family != 'slx') {
+				variables.push({ name: prefix +'battery_charge',      label: 'Channel ' + i + ' Battery Charge Status' });
+			}
 
-			if (this.model.family != 'mxw') {
+			if (this.model.family != 'mxw' && this.model.family != 'slx') {
 				variables.push({ name: prefix +'battery_cycle',   label: 'Channel ' + i + ' Battery Cycle' });
 			}
 
@@ -108,7 +128,7 @@ module.exports = {
 
 			variables.push({ name: prefix +'battery_runtime',     label: 'Channel ' + i + ' Battery Run Time' });
 
-			if (this.model.family != 'mxw') {
+			if (this.model.family != 'mxw' && this.model.family != 'slx') {
 				variables.push({ name: prefix +'battery_temp_f',  label: 'Channel ' + i + ' Battery Temperature (F)' });
 				variables.push({ name: prefix +'battery_temp_c',  label: 'Channel ' + i + ' Battery Temperature (C)' });
 				variables.push({ name: prefix +'battery_type',    label: 'Channel ' + i + ' Battery Type' });
@@ -156,19 +176,29 @@ module.exports = {
 			variables.push({ name: 'high_density_mode', label: 'High Density Mode' });
 		}
 
-		if (this.model.family == 'ad') {
+		if (this.model.family == 'ad' || this.model.family == 'slx') {
 			variables.push({ name: 'model',            label: 'Receiver Model' });
-			variables.push({ name: 'quadversity_mode', label: 'Quadversity Mode' });
 			variables.push({ name: 'rf_band',          label: 'RF Band' });
 		}
 
-		if ( this.model.family != 'mxw') {
+		if (this.model.family == 'ad') {
+			variables.push({ name: 'quadversity_mode', label: 'Quadversity Mode' });
+		}
+
+		if ( this.model.family != 'mxw' && this.model.family != 'slx') {
 			variables.push({ name: 'encryption',       label: 'Encryption' });
+		}
+
+		if ( this.model.family != 'mxw') {
 			variables.push({ name: 'firmware_version', label: 'Firmware Version' });
 		}
 
-		if (this.model.family != 'qlx') {
-			variables.push({ name: 'flash_lights', label: 'Flash Lights On/Off' });
+		/*if (this.model.family != 'qlx') {
+			variables.push({ name: 'flash', label: 'Flash Lights On/Off' });
+		}*/
+
+		if (this.model.family == 'slx') {
+			variables.push({ name: 'lock_status', label: 'Lock Status' });
 		}
 
 		this.setVariableDefinitions(variables);
