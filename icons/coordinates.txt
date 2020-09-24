@@ -1,5 +1,6 @@
 battery 3, 46, 25, 9
 locks 31, 46, 18, 8
+encryption 52, 2, 16, 6
 ulx-ant 47, 12, 13, 5
 ulx-rf 50, 19, 6, 37
 ulx-audio 63, 12, 5, 43
