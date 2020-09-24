@@ -81,8 +81,6 @@ class instance extends instance_skel {
 			this.model = this.CONFIG_MODEL['ulxd4'];
 		}
 
-		this.defineConst('REGEX_CHAR_8', '/^.{1,8}$/');
-
 		this.actions(); // export actions
 	}
 
