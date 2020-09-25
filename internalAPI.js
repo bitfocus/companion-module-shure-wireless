@@ -1,5 +1,6 @@
 var debug;
 var log;
+//var instance_icons = require('./icons');
 
 /**
  * Companion instance API class for Shure Wireless.
@@ -20,7 +21,7 @@ class instance_api {
 	 */
 	constructor(instance) {
 		this.instance = instance;
-		this.rgb      = instance.rgb;
+		//this.icons    = new instance_icons(instance);
 
 		//qlx-d [FW_VER,DEVICE_ID,ENCRYPTION]
 		//ulx-d [FW_VER,DEVICE_ID,ENCRYPTION,AUDIO_SUMMING_MODE,FREQUENCY_DIVERSITY_MODE,HIGH_DENSITY,FLASH]
@@ -149,22 +150,22 @@ class instance_api {
 	/**
 	 * Returns the desired channel status icon.
 	 *
-	 * @param {number} id - the channel to fetch
+	 * @param {Object} options - the feedback configuration
 	 * @returns {String} the icon
 	 * @access public
 	 * @since 1.0.0
 	 */
-	/*getIcon(id) {
-		var ch = this.getChannel(id);
+	/*getIcon(options) {
+		var ch = this.getChannel(parseInt(options.channel));
 		var icon;
 
 		switch(this.instance.model.family) {
 			case 'ulx':
 			case 'qlx':
-				icon = this.instance.icons.getULXStatus(this.rgb(0,0,0), ch.antenna, ch.audioLED, ch.rfBitmapA, ch.batteryBars, ch.txLock);
+				icon = this.icons.getULXStatus(0, ch.antenna, ch.audioLED, ch.rfBitmapA, ch.batteryBars, ch.txLock);
 				break;
 			case 'ad':
-				icon = this.instance.icons.getADStatus(this.rgb(0,0,0), ch.antenna, ch.audioLED, ch.rfBitmapA, ch.rfBitmapB, ch.batteryBars, ch.txLock);
+				icon = this.icons.getADStatus(0, ch.antenna, ch.audioLED, ch.rfBitmapA, ch.rfBitmapB, ch.batteryBars, ch.txLock);
 				break;
 		}
 
@@ -589,7 +590,7 @@ class instance_api {
 			this.instance.checkFeedbacks('transmitter_turned_off');
 		}
 		else if (key == 'TX_DEVICE_ID') {
-			channel.txDeviceId = value.replace('{','').replace('}','');
+			channel.txDeviceId = value.replace('{','').replace('}','').trim();
 			this.instance.setVariable(prefix + 'tx_device_id', channel.txDeviceId);
 		}
 		else if (key == 'TX_LOCK') {
@@ -915,11 +916,11 @@ class instance_api {
 		}
 
 		if (key == 'FW_VER') {
-			this.receiver.firmwareVersion = value.replace('{','').replace('}','');
+			this.receiver.firmwareVersion = value.replace('{','').replace('}','').trim();
 			this.instance.setVariable('firmware_version', this.receiver.firmwareVersion);
 		}
 		else if (key == 'DEVICE_ID') {
-			this.receiver.deviceId = value.replace('{','').replace('}','');
+			this.receiver.deviceId = value.replace('{','').replace('}','').trim();
 			this.instance.setVariable('device_id', this.receiver.deviceId);
 		}
 		else if (key == 'FREQUENCY_DIVERSITY_MODE') {
@@ -1008,7 +1009,7 @@ class instance_api {
 				this.instance.setVariable(prefix + 'tx_model', value);
 				break;
 			case 'SLOT_TX_DEVICE_ID':
-				slot.txDeviceId = value.replace('{','').replace('}','');
+				slot.txDeviceId = value.replace('{','').replace('}','').trim();
 				this.instance.setVariable(prefix + 'tx_device_id', slot.txDeviceId);
 				this.instance.actions();
 				this.instance.initFeedbacks();

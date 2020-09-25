@@ -2,7 +2,6 @@ var tcp = require('../../tcp');
 var instance_skel = require('../../instance_skel');
 
 var instance_api   = require('./internalAPI');
-//var instance_icons = require('./icons');
 var actions        = require('./actions');
 var feedback       = require('./feedback');
 var setup          = require('./setup');
@@ -45,7 +44,6 @@ class instance extends instance_skel {
 		});
 
 		this.api   = new instance_api(this);
-		//this.icons = new instance_icons(this);
 
 		this.CONFIG_MODEL = {
 			ulxd4:   {id: 'ulxd4',   family: 'ulx', label: 'ULXD4 Single Receiver', channels: 1, slots: 0},
@@ -205,7 +203,7 @@ class instance extends instance_skel {
 				id: 'meteringInterval',
 				label: 'Metering Interval (in ms)',
 				width: 4,
-				min: 1000,
+				min: 500,
 				max: 99999,
 				default: 5000,
 				required: true

@@ -110,7 +110,7 @@ module.exports = {
 		type: 'dropdown',
 		label: 'Slot Number',
 		id: 'slot',
-		default: '1:01',
+		default: '1:1',
 		choices: this.CHOICES_SLOTS
 	}
 }
