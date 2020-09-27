@@ -46,15 +46,19 @@ Axient | ULX-D | QLX-D | SLX-D
 
 #### Setup
 To utilize the feedback, you will utilize the "Instance Feedback" section of a button, selecting the "+ Add feedback" option.
+
 ![Instance feedback section](icons/doc-fb-block.png)
 
 In the dropdown you'll locate the "Channel Status Display" option for your Shure wireless instance.
+
 ![Instance feedback add](icons/doc-add-fb.png)
 
 Once added, the feedback will have option to select a channel to display, a field to select text labels to display, a field to select which visual icons should display, and a battery level alert option for the battery icon.  A default selection of these options is loaded.  Please reference the below tables for further information about them.
+
 ![Instance feedback options](icons/doc-options.png)
 
 Most of the data that presents is automatically populated from the receiver as information changes, however, a data flow called "metering" is used for the audio and RF data.  By default the instance will ask for updates to that data every 5 seconds (5000 ms).  In the instance's configuration, metering can be disabled or the interval changed to between 500 and 60000 ms.  Because of the graphical nature of this display, additional CPU resources are needed to update the displays timely.  For this reason it is recommended to test faster metering intervals with your configuration if you would like the audio and RF displays to update faster.
+
 ![Instance metering](icons/doc-metering.PNG)
 
 #### Labels
