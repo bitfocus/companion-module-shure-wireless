@@ -41,7 +41,7 @@ Slot Status | If the selected slot\'s status is set, change the color of the but
 The "Channel Status Display" is a customizable feedback to provide a graphic status readout for a channel, similar to information available on the front panel or in Wireless Workbench.
 
 Axient | ULX-D | QLX-D | SLX-D
---- | --- | ---
+--- | --- | --- | ---
 ![AD example](icons/example-ad.png) | ![ULX example](icons/example-ulx.png) | ![QLX example](icons/example-qlx.png) | ![SLX example](icons/example-slx.png)
 
 #### Setup
