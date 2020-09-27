@@ -55,7 +55,7 @@ Once added, the feedback will have option to select a channel to display, a fiel
 ![Instance feedback options](icons/doc-options.png)
 
 Most of the data that presents is automatically populated from the receiver as information changes, however, a data flow called "metering" is used for the audio and RF data.  By default the instance will ask for updates to that data every 5 seconds (5000 ms).  In the instance's configuration, metering can be disabled or the interval changed to between 500 and 60000 ms.  Because of the graphical nature of this display, additional CPU resources are needed to update the displays timely.  For this reason it is recommended to test faster metering intervals with your configuration if you would like the audio and RF displays to update faster.
-![Instance metering](icons/doc-metering.png)
+![Instance metering](icons/doc-metering.PNG)
 
 #### Labels
 Title | Description | Model Support
