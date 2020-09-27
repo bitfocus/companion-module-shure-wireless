@@ -56,7 +56,7 @@ class instance extends instance_skel {
 			mxwani4: {id: 'mxwani4', family: 'mxw', label: 'MXWANI4 Quad Receiver', channels: 4, slots: 0},
 			mxwani8: {id: 'mxwani8', family: 'mxw', label: 'MXWANI8 Octo Receiver', channels: 8, slots: 0},
 			slxd4:   {id: 'slxd4',   family: 'slx', label: 'SLXD4 Single Receiver', channels: 1, slots: 0},
-			slxd4d:  {id: 'slxd4d',  family: 'slx', label: 'SLXD4D Dual Receiver',  channels: 2, slots: 0}  
+			slxd4d:  {id: 'slxd4d',  family: 'slx', label: 'SLXD4D Dual Receiver',  channels: 2, slots: 0}
 		};
 
 		this.CHOICES_CHANNELS   = [];
@@ -150,7 +150,7 @@ class instance extends instance_skel {
 				break;
 			case 'slot_rf_power':
 				slot = options.slot.split(':');
-				cmd = 'SET ' + slot[0] + ' SLOT_RF_POWER ' + slot[1] + ' ' + options.power;
+				cmd = 'SET ' + slot[0] + ' SLOT_RF_POWER_MODE ' + slot[1] + ' ' + options.power;
 				break;
 		}
 
@@ -575,12 +575,9 @@ class instance extends instance_skel {
 			id: 'power',
 			default: '10',
 			choices: [
-				{id: '2',  label: '2 mW'},
-				{id: '10', label: '10 mW'},
-				{id: '20', label: '20 mW'},
-				{id: '35', label: '35 mW'},
-				{id: '40', label: '40 mW'},
-				{id: '50', label: '50 mW'}
+				{id: 'LOW',    label: 'Low'},
+				{id: 'MEDIUM', label: 'Medium'},
+				{id: 'HIGH',   label: 'High'}
 			]
 		};
 		this.SLOTS_FIELD = {

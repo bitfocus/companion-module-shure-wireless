@@ -367,7 +367,7 @@ module.exports = {
 				],
 				callback: (feedback, bank) => {
 					let slot = feedback.options.slot.split(':');
-					if (this.api.getSlot(parseInt(slot[0]), parseInt(slot[1])).txPowerLevel == parseInt(feedback.options.power)) {
+					if (this.api.getSlot(parseInt(slot[0]), parseInt(slot[1])).txPowerMode == parseInt(feedback.options.power)) {
 						return {
 							color: feedback.options.fg,
 							bgcolor: feedback.options.bg
