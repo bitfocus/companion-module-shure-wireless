@@ -108,8 +108,10 @@ module.exports = {
 					var opt = feedback.options;
 					var channel = this.api.getChannel(parseInt(opt.channel));
 					var out = {
-						img64: this.api.getIcon(feedback.options),
-						text:  ''
+						alignment: 'left:top',
+						img64:     this.api.getIcon(feedback.options),
+						size:      '7',
+						text:      ''
 					};
 
 					let addLabelData = function (item, channel, out) {
@@ -176,23 +178,25 @@ module.exports = {
 		};
 
 		if (this.model.family != 'slx') {
-			feedbacks['channel_muted'] = {
-				label: 'Channel Muted',
-				description: 'If the selected channel is muted, change the color of the button.',
-				options: [
-					this.CHANNELS_FIELD,
-					this.FG_COLOR_FIELD(this.rgb(255,255,255)),
-					this.BG_COLOR_FIELD(this.rgb(128,0,0))
-				],
-				callback: (feedback, bank) => {
-					if (this.api.getChannel(parseInt(feedback.options.channel)).audioMute == 'ON') {
-						return {
-							color: feedback.options.fg,
-							bgcolor: feedback.options.bg
-						};
+			if (this.model.family != 'qlx') {
+				feedbacks['channel_muted'] = {
+					label: 'Channel Muted',
+					description: 'If the selected channel is muted, change the color of the button.',
+					options: [
+						this.CHANNELS_FIELD,
+						this.FG_COLOR_FIELD(this.rgb(255,255,255)),
+						this.BG_COLOR_FIELD(this.rgb(128,0,0))
+					],
+					callback: (feedback, bank) => {
+						if (this.api.getChannel(parseInt(feedback.options.channel)).audioMute == 'ON') {
+							return {
+								color: feedback.options.fg,
+								bgcolor: feedback.options.bg
+							};
+						}
 					}
-				}
-			};
+				};
+			}
 
 			if (this.model.family != 'mxw') {
 				feedbacks['transmitter_muted'] = {

@@ -40,9 +40,9 @@ Slot Status | If the selected slot\'s status is set, change the color of the but
 ### Channel Status Display
 The "Channel Status Display" is a customizable feedback to provide a graphic status readout for a channel, similar to information available on the front panel or in Wireless Workbench.
 
-Axient | ULX-D | QLX-D
+Axient | ULX-D | QLX-D | SLX-D
 --- | --- | ---
-![AD example](icons/example-ad.png) | ![ULX example](icons/example-ulx.png) | ![QLX example](icons/example-qlx.png)
+![AD example](icons/example-ad.png) | ![ULX example](icons/example-ulx.png) | ![QLX example](icons/example-qlx.png) | ![SLX example](icons/example-slx.png)
 
 #### Setup
 *Coming soon*
@@ -54,7 +54,7 @@ Channel Name | This is the channel's name.  8 characters are supported. | All
 TX Device ID | This is the device ID programmed in the transmitter.<br />Note that for ULX-D and QLX-D, only ULXD6 and ULXD8 models support this field. | ULX, QLX, & AD
 Frequency | Displayed as "XXX.XXX" | All
 Group/Channel | Displayed as "XX,YY" | All
-Audio Gain | Display as "+/- X dB" | All
+Audio Gain | Displayed as "+/- X dB" | All
 TX Model | Displays the model of the current transmitter or "Unknown" when off. | All
 TX Power Level | Displayed as "XX mW" or "Unknown" when off. | ULX, QLX, & AD
 Battery Type | Displayed as "LION", "ALKA", "NIMH", "LITH", or "Unknown" when off. | ULX, QLX, & AD

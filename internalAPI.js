@@ -82,6 +82,7 @@ class instance_api {
 				meterRate:            0,         // 0=disabled, 100-99999 [in ms]
 				audioGain:            0,         // (ULX|QLX|AD|SLX) 0-60,-18dB | (MXW) 0-40,-25dB
 				audioMute:            'OFF',     // (ULX|AD) OFF - ON - TOGGLE[set]
+				groupChan:            '--,--',    // xx,yy
 				group:                0,         // (ULX|QLX|(AD|SLX):GROUP_CHANNEL) xx,yy (xx)
 				channel:              0,         // (ULX|QLX|(AD|SLX):GROUP_CHANNEL) xx,yy (yy)
 				frequency:            '000.000', // (ULX|QLX|AD|SLX) 6, xxx[.]yyy
@@ -90,6 +91,7 @@ class instance_api {
 				interferenceStatus:   'NONE',    // (AD) NONE - DETECTED | (ULX:RF_INT_DET) NONE - CRITICAL=DETECTED
 				unregisteredTxStatus: 'OK',      // (AD) OK - ERROR
 				fdMode:               'OFF',     // (AD) OFF - FD-C - FD-S
+				groupChan2:           '--,--',    // xx,yy
 				group2:               0,         // (AD) xx,yy (xx)
 				channel2:             0,         // (AD) xx,yy (yy)
 				frequency2:           '000.000', // (AD) 6, xxx[.]yyy
@@ -545,13 +547,15 @@ class instance_api {
 			variable = value.replace('{','').replace('}','').trim().split(',');
 			channel.group2   = (variable[0] == '--' ? variable[0] : parseInt(variable[0]));
 			channel.channel2 = (variable[1] == '--' ? variable[1] : parseInt(variable[1]));
-			this.instance.setVariable(prefix + 'group_chan2', channel.group2 + ',' + channel.channel2);
+			channel.groupChan2 = channel.group2 + ',' + channel.channel2;
+			this.instance.setVariable(prefix + 'group_chan2', channel.groupChan2);
 		}
 		else if (key.match(/GROUP_CHAN/)) {
 			variable = value.replace('{','').replace('}','').trim().split(',');
 			channel.group   = (variable[0] == '--' ? variable[0] : parseInt(variable[0]));
 			channel.channel = (variable[1] == '--' ? variable[1] : parseInt(variable[1]));
-			this.instance.setVariable(prefix + 'group_chan', channel.group + ',' + channel.channel);
+			channel.groupChan = channel.group + ',' + channel.channel;
+			this.instance.setVariable(prefix + 'group_chan', channel.groupChan);
 		}
 		else if (key == 'FREQUENCY') {
 			value = '' + parseInt(value);
