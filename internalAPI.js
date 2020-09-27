@@ -1,7 +1,3 @@
-var debug;
-var log;
-//var instance_icons = require('./icons');
-
 /**
  * Companion instance API class for Shure Wireless.
  * Utilized to track the state of the receiver and channels.
@@ -21,7 +17,9 @@ class instance_api {
 	 */
 	constructor(instance) {
 		this.instance = instance;
-		//this.icons    = new instance_icons(instance);
+
+		let instance_icons = require('./icons');
+		this.icons    = new instance_icons(instance);
 
 		//qlx-d [FW_VER,DEVICE_ID,ENCRYPTION]
 		//ulx-d [FW_VER,DEVICE_ID,ENCRYPTION,AUDIO_SUMMING_MODE,FREQUENCY_DIVERSITY_MODE,HIGH_DENSITY,FLASH]
@@ -105,10 +103,18 @@ class instance_api {
 				antennaC:             'X',       // (AD:QUADVERITY ON) X - B - R
 				antennaD:             'X',       // (AD:QUADVERITY ON) X - B - R
 				rfLevel:              -120,      // (ULX|QLX) 0-115,-120dBm | (SLX) 0-120,-120dBm | (MXW) 0-96?
+				rfLevelA:             -120,      // (AD) 0-120, -120dBm
+				rfLevelB:             -120,      // (AD) 0-120, -120dBm
+				rfLevelC:             -120,      // (AD) 0-120, -120dBm
+				rfLevelD:             -120,      // (AD) 0-120, -120dBm
+				rfBitmapA:            0,         // (AD) 0-255, 8 bit color segment | (ULX|QLX|SLX) 0-5
+				rfBitmapB:            0,         // (AD) 0-255, 8 bit color segment
+				rfBitmapC:            0,         // (AD) 0-255, 8 bit color segment
+				rfBitmapD:            0,         // (AD) 0-255, 8 bit color segment
 				audioLevel:           -50,       // (ULX|QLX) 0-50,-50dB | (AD|SLX) 0-120,-120dB | (MXW) 0-98,-98dB?
 				audioLevelPeak:       -120,      // (AD|SLX) 0-120,-120dB
-				audioLED:             0,         // (AD) 0-255 binary, 1-7=level, 8=OL
-				signallQuality:       255,       // (AD) 0-5,255=UNKN
+				audioLED:             0,         // (AD) 0-255 binary, 1-7=level, 8=OL | (ULX|QLX|SLX) 0-6
+				signalQuality:        255,       // (AD) 0-5,255=UNKN
 
 				//tx
 				txType:               'Unknown', // (ULX|QLX) QLXD1 - QLXD2 - ULXD1 - ULXD2 - ULXD6 - ULXD8 - UNKN
@@ -137,6 +143,7 @@ class instance_api {
 				batteryRuntime:       65535,     // (ULX|QLX) 0+, 65535=UNKN
 				                                 // ((AD|SLX):TX_BATT_MINS) 0+, 65535=UNKN 65534=calcuating 65533=comm warning
 				                                 // (MXW) 0+, 65535=UNKN 65534=calcuating 65533=charging 65532=wall power
+				batteryRuntime2:      'Unknown', // Text representation of batteryRuntime
 				batteryTempF:         255,       // (ULX|QLX|AD:TX_BATT_TEMP_F) +40 255=UNKN
 				batteryTempC:         255,       // (ULX|QLX|AD:TX_BATT_TEMP_C)  +40 255=UNKN
 				batteryType:          'Unknown', // (ULX|QLX|AD:TX_BATT_TYPE) ALKA - LION - LITH - NIMH - UNKN
@@ -150,27 +157,73 @@ class instance_api {
 	/**
 	 * Returns the desired channel status icon.
 	 *
-	 * @param {Object} options - the feedback configuration
+	 * @param {Object} opt - the feedback configuration
 	 * @returns {String} the icon
 	 * @access public
-	 * @since 1.0.0
+	 * @since 1.1.0
 	 */
-	/*getIcon(options) {
-		var ch = this.getChannel(parseInt(options.channel));
-		var icon;
+	getIcon(opt) {
+		let ch = this.getChannel(parseInt(opt.channel));
+		let icon;
+		let antenna, audioLED, rfBitmapA, rfBitmapB, batteryBars, txLock, encryption, quality
+
+		let setIconData = (item) => {
+			switch (item) {
+				case 'battery':
+					batteryBars = ch.batteryBars;
+					break;
+				case 'locks':
+					txLock = ch.txLock;
+					break;
+				case 'rf':
+					antenna   = ch.antenna;
+					if (ch.interferenceStatus == 'DETECTED' && (this.instance.model.family == 'ulx' || this.instance.model.family == 'qlx') ) {
+						switch(antenna) {
+							case 'AX':
+								antenna = 'RX';
+								break;
+							case 'XB':
+								antenna = 'XR';
+								break;
+						}
+					}
+					rfBitmapA = ch.rfBitmapA;
+					rfBitmapB = ch.rfBitmapB;
+					break;
+				case 'audio':
+					audioLED = ch.audioLED;
+					break;
+				case 'encryption':
+					encryption = (ch.encryptionStatus == 'ERROR' ? 'ERROR' : this.receiver.encryption);
+					break;
+				case 'quality':
+					quality = ch.signalQuality;
+					break;
+			}
+		}
+
+		if (typeof opt.icons === 'string') {
+			setIconData(opt.icons);
+		}
+		else if (Array.isArray(opt.icons)) {
+			opt.icons.forEach( item => setIconData(item) );
+		}
 
 		switch(this.instance.model.family) {
 			case 'ulx':
 			case 'qlx':
-				icon = this.icons.getULXStatus(0, ch.antenna, ch.audioLED, ch.rfBitmapA, ch.batteryBars, ch.txLock);
+				icon = this.icons.getULXStatus(antenna, audioLED, rfBitmapA, batteryBars, opt.barlevel, txLock, encryption);
+				break;
+			case 'slx':
+				icon = this.icons.getSLXStatus(audioLED, rfBitmapA, batteryBars, opt.barlevel);
 				break;
 			case 'ad':
-				icon = this.icons.getADStatus(0, ch.antenna, ch.audioLED, ch.rfBitmapA, ch.rfBitmapB, ch.batteryBars, ch.txLock);
+				icon = this.icons.getADStatus(antenna, audioLED, rfBitmapA, rfBitmapB, batteryBars, opt.barlevel, txLock, encryption, quality);
 				break;
 		}
 
 		return icon;
-	}*/
+	}
 
 	/**
 	 * Returns the receiver state object.
@@ -479,13 +532,8 @@ class instance_api {
 			this.instance.setVariable(prefix + 'meter_rate', variable);
 		}
 		else if (key == 'AUDIO_GAIN') {
-			channel.audioGain = parseInt(value);
-			if (model.family == 'mxw') {
-				variable = (channel.audioGain - 25).toString() + ' dB';
-			}
-			else {
-				variable = (channel.audioGain - 18).toString() + ' dB';
-			}
+			channel.audioGain = ( model.family == 'mxw' ? parseInt(value) - 25 : parseInt(value) - 18 );
+			variable = (channel.audioGain > 0 ? '+' : '') + channel.audioGain.toString() + ' dB';
 			this.instance.setVariable(prefix + 'audio_gain', variable);
 		}
 		else if (key == 'AUDIO_MUTE') {
@@ -510,6 +558,7 @@ class instance_api {
 			channel.frequency = value.substring(0, 3) + '.' + value.substring(3, 6);
 			variable = channel.frequency + ' MHz';
 			this.instance.setVariable(prefix + 'frequency', variable);
+			this.instance.checkFeedbacks('channel_frequency');
 		}
 		else if (key == 'FREQUENCY2') {
 			value = '' + parseInt(value);
@@ -592,10 +641,12 @@ class instance_api {
 		else if (key == 'TX_DEVICE_ID') {
 			channel.txDeviceId = value.replace('{','').replace('}','').trim();
 			this.instance.setVariable(prefix + 'tx_device_id', channel.txDeviceId);
+			this.instance.checkFeedbacks('slot_is_active');
 		}
 		else if (key == 'TX_LOCK') {
 			switch(value) {
 				case 'LOCKED':
+					value = 'ALL';
 				case 'ALL':
 					channel.txMenuLock  = 'ON';
 					channel.txPowerLock = 'ON';
@@ -636,7 +687,7 @@ class instance_api {
 				channel.txLock = 'POWER';
 			}
 			else if (channel.txMenuLock == 'ON' && channel.txPowerLock == 'ON') {
-				channel.txLock = 'BOTH';
+				channel.txLock = 'ALL';
 			}
 			else {
 				channel.txLock = 'Unknown'
@@ -657,7 +708,7 @@ class instance_api {
 				channel.txLock = 'POWER';
 			}
 			else if (channel.txMenuLock == 'ON' && channel.txPowerLock == 'ON') {
-				channel.txLock = 'BOTH';
+				channel.txLock = 'ALL';
 			}
 			else {
 				channel.txLock = 'Unknown'
@@ -856,6 +907,7 @@ class instance_api {
 			if (model.family == 'mxw') {
 				this.instance.setVariable(prefix + 'tx_power_source', channel.txPowerSource);
 			}
+			channel.batteryRuntime2 = variable;
 			this.instance.setVariable(prefix + 'battery_runtime', variable);
 		}
 		else if (key.match(/BATT_TEMP_C/)) {
@@ -944,6 +996,12 @@ class instance_api {
 			this.instance.setVariable('high_density_mode', value);
 		}
 		else if (key.match(/ENCRYPTION/)) {
+			if (value == 'INACTIVE') {
+				value = 'OFF';
+			}
+			else if (value == 'MANUAL' || value == 'AUTO') {
+				value = 'ON';
+			}
 			this.receiver.encryption = value;
 			this.instance.setVariable('encryption', value);
 		}
@@ -993,6 +1051,8 @@ class instance_api {
 			case 'SLOT_STATUS':
 				slot.status = value;
 				this.instance.setVariable(prefix + 'status', value);
+				this.instance.checkFeedbacks('slot_status');
+				this.instance.checkFeedbacks('slot_is_active');
 				break;
 			case 'SLOT_SHOWLINK_STATUS':
 				slot.showLinkStatus = parseInt(value);
@@ -1013,6 +1073,7 @@ class instance_api {
 				this.instance.setVariable(prefix + 'tx_device_id', slot.txDeviceId);
 				this.instance.actions();
 				this.instance.initFeedbacks();
+				this.instance.checkFeedbacks('slot_is_active');
 				break;
 			case 'SLOT_OFFSET':
 				slot.txOffset = parseInt(value);
@@ -1044,6 +1105,7 @@ class instance_api {
 				}
 				this.instance.setVariable(prefix + 'tx_power_level', variable);
 				this.instance.checkFeedbacks('slot_rf_power');
+				this.instance.checkFeedbacks('slot_is_active');
 				break;
 			case 'SLOT_RF_POWER_MODE':
 				slot.txPowerMode = value;

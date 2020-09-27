@@ -21,7 +21,7 @@ module.exports = {
 			actions['channel_mute'] = {
 				label: 'Mute or unmute channel',
 				options: [
-					this.CHANNELS_FIELD,
+					this.CHANNELS_A_FIELD,
 					this.MUTE_FIELD
 				]
 			};
@@ -30,24 +30,24 @@ module.exports = {
 		actions['channel_setaudiogain'] = {
 			label: 'Set audio gain of channel',
 			options: [
-				this.CHANNELS_FIELD,
-				this.GAIN_SET_FIELD
+				this.CHANNELS_A_FIELD,
+				this.GAIN_SET_FIELD(this.model.family)
 			]
 		};
 
 		actions['channel_increasegain'] = {
 			label: 'Increase audio gain of channel',
 			options: [
-				this.CHANNELS_FIELD,
-				this.GAIN_INC_FIELD
+				this.CHANNELS_A_FIELD,
+				this.GAIN_INC_FIELD(this.model.family)
 			]
 		};
 
 		actions['channel_decreasegain'] = {
 			label: 'Decrease audio gain of channel',
 			options: [
-				this.CHANNELS_FIELD,
-				this.GAIN_INC_FIELD
+				this.CHANNELS_A_FIELD,
+				this.GAIN_INC_FIELD(this.model.family)
 			]
 		};
 
@@ -82,14 +82,14 @@ module.exports = {
 			actions['slot_rf_output'] = {
 				label: 'Set slot RF output (ADX)',
 				options: [
-					this.SLOTS_FIELD,
+					this.SLOTS_A_FIELD,
 					this.RFOUTPUT_FIELD
 				]
 			};
 			actions['slot_rf_power'] = {
 				label: 'Set slot RF power level (ADX)',
 				options: [
-					this.SLOTS_FIELD,
+					this.SLOTS_A_FIELD,
 					this.RFPOWER_FIELD
 				]
 			};
