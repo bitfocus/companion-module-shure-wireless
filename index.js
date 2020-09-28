@@ -576,7 +576,7 @@ class instance extends instance_skel {
 			default: '10',
 			choices: [
 				{id: 'LOW',    label: 'Low'},
-				{id: 'MEDIUM', label: 'Medium'},
+				{id: 'NORMAL', label: 'Normal'},
 				{id: 'HIGH',   label: 'High'}
 			]
 		};
