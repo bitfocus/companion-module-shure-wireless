@@ -258,7 +258,7 @@ module.exports = {
 			};
 		}
 
-		feedbacks['channel_Gain'] = {
+		feedbacks['channel_gain'] = {
 			label: 'Channel Gain',
 			description: 'If the selected channel\'s gain is set, change the color of the button.',
 			options: [

@@ -537,6 +537,7 @@ class instance_api {
 			channel.audioGain = ( model.family == 'mxw' ? parseInt(value) - 25 : parseInt(value) - 18 );
 			variable = (channel.audioGain > 0 ? '+' : '') + channel.audioGain.toString() + ' dB';
 			this.instance.setVariable(prefix + 'audio_gain', variable);
+			this.instance.checkFeedbacks('channel_gain');
 		}
 		else if (key == 'AUDIO_MUTE') {
 			channel.audioMute = value;
