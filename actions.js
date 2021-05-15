@@ -1,12 +1,14 @@
 module.exports = {
 	/**
-	 * INTERNAL: Get the available actions.  Utilized by bmd-multiview.
+	 * INTERNAL: Set the available actions.
 	 *
-	 * @access public
+	 * @access protected
 	 * @since 1.0.0
 	 */
-	getActions() {
-		var actions = {}
+	 initActions() {
+		this.setupChannelChoices()
+
+		let actions = {}
 
 		actions['set_channel_name'] = {
 			label: 'Set channel name',
@@ -106,6 +108,6 @@ module.exports = {
 			}
 		}
 
-		return actions
+		this.setActions(actions)
 	},
 }

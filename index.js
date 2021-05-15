@@ -8,7 +8,6 @@ var log
  * Companion instance class for the Shure Wireless Microphones.
  *
  * @extends instance_skel
- * @version 1.0.0
  * @since 1.0.0
  * @author Joseph Adams <josephdadams@gmail.com>
  * @author Keith Rocheck <keith.rocheck@gmail.com>
@@ -185,17 +184,6 @@ class instance extends instance_skel {
 		this.checkFeedbacks('sample')
 
 		this.initTCP()
-	}
-
-	/**
-	 * Setup the actions.
-	 *
-	 * @access public
-	 * @since 1.0.0
-	 */
-	initActions() {
-		this.setupChannelChoices()
-		this.setActions(this.getActions())
 	}
 
 	/**
