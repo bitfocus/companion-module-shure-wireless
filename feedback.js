@@ -157,6 +157,7 @@ module.exports = {
 		}
 
 		feedbacks['battery_level'] = {
+			type: 'boolean',
 			label: 'Battery Level',
 			description: 'If the battery bar drops to or below a certain value, change the color of the button.',
 			style: {
@@ -176,6 +177,7 @@ module.exports = {
 		if (this.model.family != 'slx') {
 			if (this.model.family != 'qlx') {
 				feedbacks['channel_muted'] = {
+					type: 'boolean',
 					label: 'Channel Muted',
 					description: 'If the selected channel is muted, change the color of the button.',
 					style: {
@@ -195,6 +197,7 @@ module.exports = {
 
 			if (this.model.family != 'mxw') {
 				feedbacks['transmitter_muted'] = {
+					type: 'boolean',
 					label: 'Transmitter Muted',
 					description: "If the selected channel's transmitter is muted, change the color of the button.",
 					style: {
@@ -213,6 +216,7 @@ module.exports = {
 			}
 
 			feedbacks['interference_status'] = {
+				type: 'boolean',
 				label: 'Interference Status',
 				description: 'If the selected channel gets interference, change the color of the button.',
 				style: {
@@ -232,6 +236,7 @@ module.exports = {
 
 		if (this.model.family != 'mxw') {
 			feedbacks['channel_frequency'] = {
+				type: 'boolean',
 				label: 'Channel Frequency',
 				description: "If the selected channel's frequency is set, change the color of the button.",
 				style: {
@@ -250,6 +255,7 @@ module.exports = {
 		}
 
 		feedbacks['channel_gain'] = {
+			type: 'boolean',
 			label: 'Channel Gain',
 			description: "If the selected channel's gain is set, change the color of the button.",
 			style: {
@@ -267,6 +273,7 @@ module.exports = {
 		}
 
 		feedbacks['transmitter_turned_off'] = {
+			type: 'boolean',
 			label: 'Transmitter Turned Off',
 			description: "If the selected channel's transmitter is powered off, change the color of the button.",
 			style: {
@@ -288,6 +295,7 @@ module.exports = {
 
 		if (this.model.family == 'ad') {
 			feedbacks['slot_is_active'] = {
+				type: 'boolean',
 				label: 'Slot is Active',
 				description: "If the selected slot's transmitter is active to the channel, change the color of the button",
 				style: {
@@ -310,6 +318,7 @@ module.exports = {
 				},
 			}
 			feedbacks['slot_status'] = {
+				type: 'boolean',
 				label: 'Slot Status',
 				description: "If the selected slot's status is set, change the color of the button",
 				style: {
@@ -328,6 +337,7 @@ module.exports = {
 			}
 
 			feedbacks['slot_rf_output'] = {
+				type: 'boolean',
 				label: 'Slot RF Output',
 				description: "If the selected slot's transmitter RF is set, change the color of the button.",
 				style: {
@@ -346,6 +356,7 @@ module.exports = {
 			}
 
 			feedbacks['slot_rf_power'] = {
+				type: 'boolean',
 				label: 'Slot RF Power',
 				description: "If the selected slot's transmitter power level is set, change the color of the button.",
 				style: {
