@@ -1,8 +1,6 @@
 var tcp = require('../../tcp')
 var instance_skel = require('../../instance_skel')
-
-var debug
-var log
+var upgrades = require('./upgrades')
 
 /**
  * Companion instance class for the Shure Wireless Microphones.
@@ -35,16 +33,12 @@ class instance extends instance_skel {
 		let actions = require('./actions')
 		let feedback = require('./feedback')
 		let variables = require('./variables')
-		let upgrades = require('./upgrades')
 
 		Object.assign(this, {
 			...actions,
 			...feedback,
 			...variables,
-			...upgrades,
 		})
-
-		this.addUpgradeScripts()
 
 		this.api = new instance_api(this)
 
@@ -90,6 +84,16 @@ class instance extends instance_skel {
 		this.setupFields()
 
 		this.initActions() // export actions
+	}
+
+	/**
+	 * Provide the upgrade scripts for the module
+	 * @returns {function[]} the scripts
+	 * @static
+	 * @since 1.2.0
+	 */
+	static GetUpgradeScripts() {
+		return [instance_skel.CreateConvertToBooleanFeedbackUpgradeScript(upgrades.BooleanFeedbackUpgradeMap)]
 	}
 
 	/**
@@ -174,9 +178,6 @@ class instance extends instance_skel {
 	 * @since 1.0.0
 	 */
 	init() {
-		debug = this.debug
-		log = this.log
-
 		this.status(this.STATUS_WARNING, 'Connecting')
 
 		this.initVariables()
@@ -345,7 +346,7 @@ class instance extends instance_skel {
 			if (this.socket !== undefined && this.socket.connected) {
 				this.socket.send(`< ${cmd} >`)
 			} else {
-				debug('Socket not connected :(')
+				this.debug('Socket not connected :(')
 			}
 		}
 	}
