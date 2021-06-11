@@ -686,9 +686,9 @@ class instance_icons {
 	 */
 	getBaseImage() {
 		if (this.removeTopbar) {
-			return new this.Image(72, 71)
+			return new this.Image(72, 72)
 		} else {
-			return new this.Image(72, 57)
+			return new this.Image(72, 58)
 		}
 	}
 
