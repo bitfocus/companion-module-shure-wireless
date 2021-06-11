@@ -5,7 +5,7 @@ module.exports = {
 	 * @access protected
 	 * @since 1.0.0
 	 */
-	 initActions() {
+	initActions() {
 		this.setupChannelChoices()
 
 		let actions = {}

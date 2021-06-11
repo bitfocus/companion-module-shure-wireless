@@ -29,7 +29,6 @@ class instance extends instance_skel {
 		this.heartbeatInterval = null
 		this.heartbeatTimeout = null
 
-		let instance_api = require('./internalAPI')
 		let actions = require('./actions')
 		let feedback = require('./feedback')
 		let variables = require('./variables')
@@ -39,8 +38,6 @@ class instance extends instance_skel {
 			...feedback,
 			...variables,
 		})
-
-		this.api = new instance_api(this)
 
 		this.CONFIG_MODEL = {
 			ulxd4: { id: 'ulxd4', family: 'ulx', label: 'ULXD4 Single Receiver', channels: 1, slots: 0 },
@@ -80,10 +77,6 @@ class instance extends instance_skel {
 			this.config.modelID = 'ulxd4'
 			this.model = this.CONFIG_MODEL['ulxd4']
 		}
-
-		this.setupFields()
-
-		this.initActions() // export actions
 	}
 
 	/**
@@ -180,6 +173,12 @@ class instance extends instance_skel {
 	init() {
 		this.status(this.STATUS_WARNING, 'Connecting')
 
+		let instance_api = require('./internalAPI')
+		this.api = new instance_api(this)
+
+		this.setupFields()
+
+		this.initActions() // export actions
 		this.initVariables()
 		this.initFeedbacks()
 		this.checkFeedbacks('sample')

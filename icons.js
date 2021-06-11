@@ -16,6 +16,18 @@ class instance_icons {
 		this.instance = instance
 		this.Image = instance.Image
 		this.rgb = instance.rgb
+		this.removeTopbar = false
+
+		this.instance.getUserSetting('remove_topbar', (_remove_topbar) => {
+			this.removeTopbar = _remove_topbar
+		})
+
+		this.instance.subscribeUserSetting('remove_topbar', (_remove_topbar) => {
+			if (this.removeTopbar !== _remove_topbar) {
+				this.removeTopbar = _remove_topbar
+				this.savedIcons = {}
+			}
+		})
 
 		this.savedIcons = {}
 
@@ -587,7 +599,7 @@ class instance_icons {
 	drawFromPNGdata(img, icon, xStart, yStart, width, height, halign, valign) {
 		if (icon !== undefined) {
 			try {
-				img.drawFromPNGdata(icon, xStart, yStart, width, height, halign, valign)
+				img.drawFromPNGdata(icon, xStart, this.removeTopbar ? yStart + 14 : yStart, width, height, halign, valign)
 			} catch (e) {
 				return
 			}
@@ -623,7 +635,7 @@ class instance_icons {
 		var out
 
 		if (this.savedIcons[id] === undefined) {
-			var img = new this.Image()
+			var img = this.getBaseImage()
 
 			if (audio === undefined) {
 				this.drawFromPNGdata(img, this.AD_ANT[ant], 58, 13, 11, 10, 'left', 'top')
@@ -666,6 +678,21 @@ class instance_icons {
 	}
 
 	/**
+	 * Returns a new image with a proper raster
+	 *
+	 * @returns {Image} the new image
+	 * @access protected
+	 * @since 1.2.1
+	 */
+	getBaseImage() {
+		if (this.removeTopbar) {
+			return new this.Image(72, 71)
+		} else {
+			return new this.Image(72, 57)
+		}
+	}
+
+	/**
 	 * Returns the desired channel state object.
 	 *
 	 * @param {number} audio - the audio status
@@ -684,7 +711,7 @@ class instance_icons {
 		var out
 
 		if (this.savedIcons[id] === undefined) {
-			var img = new this.Image()
+			var img = this.getBaseImage()
 
 			if (audio === undefined) {
 				this.drawFromPNGdata(img, this.SLX_RF[rf], 63, 11, 6, 44, 'left', 'top')
@@ -733,7 +760,7 @@ class instance_icons {
 		var out
 
 		if (this.savedIcons[id] === undefined) {
-			var img = new this.Image()
+			var img = this.getBaseImage()
 
 			if (audio === undefined) {
 				this.drawFromPNGdata(img, this.ULX_ANT[ant], 56, 12, 13, 5, 'left', 'top')
