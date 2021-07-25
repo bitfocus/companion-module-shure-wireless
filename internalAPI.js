@@ -508,7 +508,7 @@ class instance_api {
 		if (key == 'CHAN_NAME') {
 			channel.name = value.replace('{', '').replace('}', '').trim()
 			this.instance.setVariable(prefix + 'name', channel.name)
-			this.instance.actions()
+			this.instance.initActions()
 			this.instance.initFeedbacks()
 		} else if (key == 'METER_RATE') {
 			channel.meterRate = parseInt(value)
@@ -985,7 +985,7 @@ class instance_api {
 			case 'SLOT_TX_DEVICE_ID':
 				slot.txDeviceId = value.replace('{', '').replace('}', '').trim()
 				this.instance.setVariable(prefix + 'tx_device_id', slot.txDeviceId)
-				this.instance.actions()
+				this.instance.initActions()
 				this.instance.initFeedbacks()
 				this.instance.checkFeedbacks('slot_is_active')
 				break
