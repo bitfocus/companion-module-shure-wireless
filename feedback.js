@@ -108,7 +108,7 @@ module.exports = {
 					var channel = this.api.getChannel(parseInt(opt.channel))
 					var out = {
 						alignment: 'left:top',
-						img64: this.api.getIcon(feedback.options),
+						img64: this.api.getIcon(feedback.options, bank),
 						size: '7',
 						text: '',
 					}

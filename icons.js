@@ -16,18 +16,8 @@ class instance_icons {
 		this.instance = instance
 		this.Image = instance.Image
 		this.rgb = instance.rgb
-		this.removeTopbar = false
-
-		this.instance.getUserSetting('remove_topbar', (_remove_topbar) => {
-			this.removeTopbar = _remove_topbar
-		})
-
-		this.instance.subscribeUserSetting('remove_topbar', (_remove_topbar) => {
-			if (this.removeTopbar !== _remove_topbar) {
-				this.removeTopbar = _remove_topbar
-				this.savedIcons = {}
-			}
-		})
+		this.width = 72
+		this.height = 58
 
 		this.savedIcons = {}
 
@@ -599,7 +589,7 @@ class instance_icons {
 	drawFromPNGdata(img, icon, xStart, yStart, width, height, halign, valign) {
 		if (icon !== undefined) {
 			try {
-				img.drawFromPNGdata(icon, xStart, this.removeTopbar ? yStart + 14 : yStart, width, height, halign, valign)
+				img.drawFromPNGdata(icon, xStart, this.height == 72 ? yStart + 14 : yStart, width, height, halign, valign)
 			} catch (e) {
 				return
 			}
@@ -685,11 +675,7 @@ class instance_icons {
 	 * @since 1.2.1
 	 */
 	getBaseImage() {
-		if (this.removeTopbar) {
-			return new this.Image(72, 72)
-		} else {
-			return new this.Image(72, 58)
-		}
+		return new this.Image(this.width, this.height)
 	}
 
 	/**
@@ -790,6 +776,21 @@ class instance_icons {
 		}
 
 		return out
+	}
+
+	/**
+	 * Set the raster to the current setting
+	 * 
+	 * @param {Object} bank - the bank configuration
+	 * @access public
+	 * @since 1.2.2
+	 */
+	setRaster(bank) {
+		if (bank.height !== this.height || bank.width !== this.width) {
+			this.height = bank.height
+			this.width = bank.width
+			this.savedIcons = {}
+		}
 	}
 }
 

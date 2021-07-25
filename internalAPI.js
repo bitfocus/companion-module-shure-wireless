@@ -158,11 +158,12 @@ class instance_api {
 	 * Returns the desired channel status icon.
 	 *
 	 * @param {Object} opt - the feedback configuration
+	 * @param {Object} bank - the bank information
 	 * @returns {String} the icon
 	 * @access public
 	 * @since 1.1.0
 	 */
-	getIcon(opt) {
+	getIcon(opt, bank) {
 		let ch = this.getChannel(parseInt(opt.channel))
 		let icon
 		let antenna, audioLED, rfBitmapA, rfBitmapB, batteryBars, txLock, encryption, quality
@@ -210,6 +211,8 @@ class instance_api {
 		} else if (Array.isArray(opt.icons)) {
 			opt.icons.forEach((item) => setIconData(item))
 		}
+
+		this.icons.setRaster(bank)
 
 		switch (this.instance.model.family) {
 			case 'ulx':
