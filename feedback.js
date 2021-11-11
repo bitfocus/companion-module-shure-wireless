@@ -103,12 +103,12 @@ module.exports = {
 					},
 					this.BATTERY_LEVEL_FIELD,
 				],
-				callback: (feedback, bank) => {
+				callback: (feedback, bank, info) => {
 					var opt = feedback.options
 					var channel = this.api.getChannel(parseInt(opt.channel))
 					var out = {
 						alignment: 'left:top',
-						img64: this.api.getIcon(feedback.options, bank),
+						img64: this.api.getIcon(feedback.options, info),
 						size: '7',
 						text: '',
 					}

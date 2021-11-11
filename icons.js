@@ -780,15 +780,15 @@ class instance_icons {
 
 	/**
 	 * Set the raster to the current setting
-	 * 
-	 * @param {Object} bank - the bank configuration
+	 *
+	 * @param {Object} info - the bank configuration
 	 * @access public
 	 * @since 1.2.2
 	 */
-	setRaster(bank) {
-		if (bank.height !== this.height || bank.width !== this.width) {
-			this.height = bank.height
-			this.width = bank.width
+	setRaster(info) {
+		if (info.height !== this.height || info.width !== this.width) {
+			this.height = info.height
+			this.width = info.width
 			this.savedIcons = {}
 		}
 	}
