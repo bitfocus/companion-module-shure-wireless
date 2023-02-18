@@ -1,3 +1,5 @@
+import Icons from './icons.js'
+
 /**
  * Companion instance API class for Shure Wireless.
  * Utilized to track the state of the receiver and channels.
@@ -7,7 +9,7 @@
  * @author Joseph Adams <josephdadams@gmail.com>
  * @author Keith Rocheck <keith.rocheck@gmail.com>
  */
-class instance_api {
+export default class API {
 	/**
 	 * Create an instance of a Shure API module.
 	 *
@@ -17,8 +19,7 @@ class instance_api {
 	constructor(instance) {
 		this.instance = instance
 
-		let instance_icons = require('./icons')
-		this.icons = new instance_icons(instance)
+		this.icons = new Icons(instance)
 
 		//qlx-d [FW_VER,DEVICE_ID,ENCRYPTION]
 		//ulx-d [FW_VER,DEVICE_ID,ENCRYPTION,AUDIO_SUMMING_MODE,FREQUENCY_DIVERSITY_MODE,HIGH_DENSITY,FLASH]
@@ -158,12 +159,12 @@ class instance_api {
 	 * Returns the desired channel status icon.
 	 *
 	 * @param {Object} opt - the feedback configuration
-	 * @param {Object} info - the bank information
+	 * @param {Object} image - the image raster information
 	 * @returns {String} the icon
 	 * @access public
 	 * @since 1.1.0
 	 */
-	getIcon(opt, info) {
+	getIcon(opt, image) {
 		let ch = this.getChannel(parseInt(opt.channel))
 		let icon
 		let antenna, audioLED, rfBitmapA, rfBitmapB, batteryBars, txLock, encryption, quality
@@ -212,18 +213,26 @@ class instance_api {
 			opt.icons.forEach((item) => setIconData(item))
 		}
 
-		this.icons.setRaster(info)
-
 		switch (this.instance.model.family) {
 			case 'ulx':
 			case 'qlx':
-				icon = this.icons.getULXStatus(antenna, audioLED, rfBitmapA, batteryBars, opt.barlevel, txLock, encryption)
+				icon = this.icons.getULXStatus(
+					image,
+					antenna,
+					audioLED,
+					rfBitmapA,
+					batteryBars,
+					opt.barlevel,
+					txLock,
+					encryption
+				)
 				break
 			case 'slx':
-				icon = this.icons.getSLXStatus(audioLED, rfBitmapA, batteryBars, opt.barlevel)
+				icon = this.icons.getSLXStatus(image, audioLED, rfBitmapA, batteryBars, opt.barlevel)
 				break
 			case 'ad':
 				icon = this.icons.getADStatus(
+					image,
 					antenna,
 					audioLED,
 					rfBitmapA,
@@ -314,12 +323,14 @@ class instance_api {
 			channel.antennaA = sample[7].substr(0, 1)
 			channel.antennaB = sample[7].substr(1, 1)
 
-			this.instance.setVariable(prefix + 'antenna', channel.antenna)
-			this.instance.setVariable(prefix + 'signal_quality', channel.signalQuality)
-			this.instance.setVariable(prefix + 'rf_level_a', channel.rfLevelA + ' dBm')
-			this.instance.setVariable(prefix + 'rf_level_b', channel.rfLevelB + ' dBm')
-			this.instance.setVariable(prefix + 'audio_level', channel.audioLevel + ' dBFS')
-			this.instance.setVariable(prefix + 'audio_level_peak', channel.audioLevelPeak + ' dBFS')
+			this.instance.setVariableValues({
+				[`${prefix}antenna`]: channel.antenna,
+				[`${prefix}signal_quality`]: channel.signalQuality,
+				[`${prefix}rf_level_a`]: channel.rfLevelA + ' dBm',
+				[`${prefix}rf_level_b`]: channel.rfLevelB + ' dBm',
+				[`${prefix}audio_level`]: channel.audioLevel + ' dBFS',
+				[`${prefix}audio_level_peak`]: channel.audioLevelPeak + ' dBFS',
+			})
 
 			if (this.receiver.quadversityMode == 'ON') {
 				channel.rfLevelC = parseInt(sample[13]) - 120
@@ -328,12 +339,12 @@ class instance_api {
 				channel.rfBitmapC = parseInt(sample[14])
 				channel.antennaC = sample[7].substr(2, 1)
 				channel.antennaD = sample[7].substr(3, 1)
-				this.instance.setVariable(prefix + 'rf_level_c', channel.rfLevelC + ' dBm')
-				this.instance.setVariable(prefix + 'rf_level_d', channel.rfLevelD + ' dBm')
+				this.instance.setVariableValues({
+					[`${prefix}rf_level_c`]: channel.rfLevelC + ' dBm',
+					[`${prefix}rf_level_d`]: channel.rfLevelD + ' dBm',
+				})
 			}
 		}
-
-		//this.instance.checkFeedbacks('sample');
 	}
 
 	/**
@@ -352,8 +363,10 @@ class instance_api {
 		channel.rfLevel = parseInt(sample[1])
 		channel.audioLevel = parseInt(sample[2])
 
-		this.instance.setVariable(prefix + 'rf_level', channel.rfLevel)
-		this.instance.setVariable(prefix + 'audio_level', channel.audioLevel)
+		this.instance.setVariableValues({
+			[`${prefix}rf_level`]: channel.rfLevel,
+			[`${prefix}audio_level`]: channel.audioLevel,
+		})
 	}
 
 	/**
@@ -407,11 +420,11 @@ class instance_api {
 			channel.rfBitmapA = 0
 		}
 
-		this.instance.setVariable(prefix + 'rf_level', channel.rfLevel + ' dBm')
-		this.instance.setVariable(prefix + 'audio_level', channel.audioLevel + ' dBFS')
-		this.instance.setVariable(prefix + 'audio_level_peak', channel.audioLevelPeak + ' dBFS')
-
-		//this.instance.checkFeedbacks('sample');
+		this.instance.setVariableValues({
+			[`${prefix}rf_level`]: channel.rfLevel + ' dBm',
+			[`${prefix}audio_level`]: channel.audioLevel + ' dBFS',
+			[`${prefix}audio_level_peak`]: channel.audioLevelPeak + ' dBFS',
+		})
 	}
 
 	/**
@@ -480,10 +493,11 @@ class instance_api {
 			channel.rfBitmapA = 0
 		}
 
-		this.instance.setVariable(prefix + 'antenna', channel.antenna)
-		this.instance.setVariable(prefix + 'rf_level', channel.rfLevel + ' dBm')
-		this.instance.setVariable(prefix + 'audio_level', channel.audioLevel + ' dBFS')
-		//this.instance.checkFeedbacks('sample');
+		this.instance.setVariableValues({
+			[`${prefix}antenna`]: channel.antenna,
+			[`${prefix}rf_level`]: channel.rfLevel + ' dBm',
+			[`${prefix}audio_level`]: channel.audioLevel + ' dBFS',
+		})
 	}
 
 	/**
@@ -496,10 +510,10 @@ class instance_api {
 	 * @since 1.0.0
 	 */
 	updateChannel(id, key, value) {
-		var channel = this.getChannel(id)
-		var prefix = 'ch_' + id + '_'
-		var model = this.instance.model
-		var variable, point
+		let channel = this.getChannel(id)
+		let prefix = 'ch_' + id + '_'
+		let model = this.instance.model
+		let variable, point
 
 		if (value == 'UNKN' || value == 'UNKNOWN') {
 			value = 'Unknown'
@@ -507,9 +521,9 @@ class instance_api {
 
 		if (key == 'CHAN_NAME') {
 			channel.name = value.replace('{', '').replace('}', '').trim()
-			this.instance.setVariable(prefix + 'name', channel.name)
-			this.instance.initActions()
-			this.instance.initFeedbacks()
+			this.instance.setVariableValues({ [`${prefix}name`]: channel.name })
+			this.instance.updateActions()
+			this.instance.updateFeedbacks()
 		} else if (key == 'METER_RATE') {
 			channel.meterRate = parseInt(value)
 			if (channel.meterRate == 0) {
@@ -517,39 +531,39 @@ class instance_api {
 			} else {
 				variable = channel.meterRate + ' ms'
 			}
-			this.instance.setVariable(prefix + 'meter_rate', variable)
+			this.instance.setVariableValues({ [`${prefix}meter_rate`]: variable })
 		} else if (key == 'AUDIO_GAIN') {
 			channel.audioGain = model.family == 'mxw' ? parseInt(value) - 25 : parseInt(value) - 18
 			variable = (channel.audioGain > 0 ? '+' : '') + channel.audioGain.toString() + ' dB'
-			this.instance.setVariable(prefix + 'audio_gain', variable)
+			this.instance.setVariableValues({ [`${prefix}audio_gain`]: variable })
 			this.instance.checkFeedbacks('channel_gain')
 		} else if (key == 'AUDIO_MUTE') {
 			channel.audioMute = value
-			this.instance.setVariable(prefix + 'audio_mute', value)
+			this.instance.setVariableValues({ [`${prefix}audio_mute`]: value })
 			this.instance.checkFeedbacks('channel_muted')
 		} else if (key == 'GROUP_CHANNEL2') {
 			variable = value.replace('{', '').replace('}', '').trim().split(',')
 			channel.group2 = variable[0] == '--' ? variable[0] : parseInt(variable[0])
 			channel.channel2 = variable[1] == '--' ? variable[1] : parseInt(variable[1])
 			channel.groupChan2 = channel.group2 + ',' + channel.channel2
-			this.instance.setVariable(prefix + 'group_chan2', channel.groupChan2)
+			this.instance.setVariableValues({ [`${prefix}group_chan2`]: channel.groupChan2 })
 		} else if (key.match(/GROUP_CHAN/)) {
 			variable = value.replace('{', '').replace('}', '').trim().split(',')
 			channel.group = variable[0] == '--' ? variable[0] : parseInt(variable[0])
 			channel.channel = variable[1] == '--' ? variable[1] : parseInt(variable[1])
 			channel.groupChan = channel.group + ',' + channel.channel
-			this.instance.setVariable(prefix + 'group_chan', channel.groupChan)
+			this.instance.setVariableValues({ [`${prefix}group_chan`]: channel.groupChan })
 		} else if (key == 'FREQUENCY') {
 			value = '' + parseInt(value)
 			channel.frequency = value.substring(0, 3) + '.' + value.substring(3, 6)
 			variable = channel.frequency + ' MHz'
-			this.instance.setVariable(prefix + 'frequency', variable)
+			this.instance.setVariableValues({ [`${prefix}frequency`]: variable })
 			this.instance.checkFeedbacks('channel_frequency')
 		} else if (key == 'FREQUENCY2') {
 			value = '' + parseInt(value)
 			channel.frequency2 = value.substring(0, 3) + '.' + value.substring(3, 6)
 			variable = channel.frequency2 + ' MHz'
-			this.instance.setVariable(prefix + 'frequency2', variable)
+			this.instance.setVariableValues({ [`${prefix}frequency2`]: variable })
 		} else if (key.match(/ENCRYPTION/)) {
 			switch (value) {
 				case 'ON':
@@ -563,7 +577,7 @@ class instance_api {
 					break
 			}
 			channel.encryptionStatus = variable
-			this.instance.setVariable(prefix + 'encryption_status', variable)
+			this.instance.setVariableValues({ [`${prefix}encryption_status`]: variable })
 		} else if (key == 'RF_INT_DET' || key == 'INTERFERENCE_STATUS') {
 			switch (value) {
 				case 'CRITICAL':
@@ -574,23 +588,23 @@ class instance_api {
 					break
 			}
 			channel.interferenceStatus = variable
-			this.instance.setVariable(prefix + 'interference_status', variable)
+			this.instance.setVariableValues({ [`${prefix}interference_status`]: variable })
 			this.instance.checkFeedbacks('interference_status')
 		} else if (key == 'INTERFERENCE_STATUS2') {
 			channel.interferenceStatus = value
-			this.instance.setVariable(prefix + 'interference_status', value)
+			this.instance.setVariableValues({ [`${prefix}interference_status`]: value })
 		} else if (key == 'FLASH') {
 			channel.flash = value
-			//this.instance.setVariable(prefix + 'flash', value);
+			//this.instance.setVariableValues({[`${prefix}flash`]: value});
 		} else if (key == 'AUDIO_OUT_LVL_SWITCH') {
 			channel.audioOutLevelSwitch = value
-			this.instance.setVariable(prefix + 'audio_out_lvl_switch', value)
+			this.instance.setVariableValues({ [`${prefix}audio_out_lvl_switch`]: value })
 		} else if (key == 'UNREGISTERED_TX_STATUS') {
 			channel.unregisteredTxStatus = value
-			this.instance.setVariable(prefix + 'unregistered_tx_status', value)
+			this.instance.setVariableValues({ [`${prefix}unregistered_tx_status`]: value })
 		} else if (key == 'FD_MODE') {
 			channel.fdMode = value
-			this.instance.setVariable(prefix + 'fd_mode', value)
+			this.instance.setVariableValues({ [`${prefix}fd_mode`]: value })
 		} else if (key == 'TX_AVAILABLE') {
 			if (channel.txAvailable != value && value == 'YES') {
 				//poll for tx when becoming available (per Shure spec)
@@ -604,17 +618,17 @@ class instance_api {
 				this.socket.send('< GET ' + id + ' TX_TYPE >')
 			}
 			channel.txAvailable = value
-			this.instance.setVariable(prefix + 'tx_available', value)
+			this.instance.setVariableValues({ [`${prefix}tx_available`]: value })
 		} else if (key == 'TX_STATUS') {
 			channel.txStatus = value
-			this.instance.setVariable(prefix + 'tx_status', value)
+			this.instance.setVariableValues({ [`${prefix}tx_status`]: value })
 		} else if (key == 'TX_TYPE' || key == 'TX_MODEL') {
 			channel.txType = value
-			this.instance.setVariable(prefix + 'tx_model', value)
+			this.instance.setVariableValues({ [`${prefix}tx_model`]: value })
 			this.instance.checkFeedbacks('transmitter_turned_off')
 		} else if (key == 'TX_DEVICE_ID') {
 			channel.txDeviceId = value.replace('{', '').replace('}', '').trim()
-			this.instance.setVariable(prefix + 'tx_device_id', channel.txDeviceId)
+			this.instance.setVariableValues({ [`${prefix}tx_device_id`]: channel.txDeviceId })
 			this.instance.checkFeedbacks('slot_is_active')
 		} else if (key == 'TX_LOCK') {
 			switch (value) {
@@ -642,12 +656,14 @@ class instance_api {
 					break
 			}
 			channel.txLock = value
-			this.instance.setVariable(prefix + 'tx_lock', channel.txLock)
-			this.instance.setVariable(prefix + 'tx_power_lock', channel.txPowerLock)
-			this.instance.setVariable(prefix + 'tx_menu_lock', channel.txMenuLock)
+			this.instance.setVariableValues({
+				[`${prefix}tx_lock`]: channel.txLock,
+				[`${prefix}tx_power_lock`]: channel.txPowerLock,
+				[`${prefix}tx_menu_lock`]: channel.txMenuLock,
+			})
 		} else if (key == 'TX_MENU_LOCK') {
 			channel.txMenuLock = value
-			this.instance.setVariable(prefix + 'tx_menu_lock', value)
+			this.instance.setVariableValues({ [`${prefix}tx_menu_lock`]: value })
 
 			if (channel.txMenuLock == 'OFF' && channel.txPowerLock == 'OFF') {
 				channel.txLock = 'NONE'
@@ -660,10 +676,10 @@ class instance_api {
 			} else {
 				channel.txLock = 'Unknown'
 			}
-			this.instance.setVariable(prefix + 'tx_lock', channel.txLock)
+			this.instance.setVariableValues({ [`${prefix}tx_lock`]: channel.txLock })
 		} else if (key == 'TX_PWR_LOCK') {
 			channel.txPowerLock = value
-			this.instance.setVariable(prefix + 'tx_power_lock', value)
+			this.instance.setVariableValues({ [`${prefix}tx_power_lock`]: value })
 
 			if (channel.txMenuLock == 'OFF' && channel.txPowerLock == 'OFF') {
 				channel.txLock = 'NONE'
@@ -676,10 +692,10 @@ class instance_api {
 			} else {
 				channel.txLock = 'Unknown'
 			}
-			this.instance.setVariable(prefix + 'tx_lock', channel.txLock)
+			this.instance.setVariableValues({ [`${prefix}tx_lock`]: channel.txLock })
 		} else if (key == 'TX_POWER_SOURCE') {
 			channel.txPowerSource = value
-			this.instance.setVariable(prefix + 'tx_power_source', value)
+			this.instance.setVariableValues({ [`${prefix}tx_power_source`]: value })
 		} else if (key.match(/MUTE_MODE_STATUS/)) {
 			switch (value) {
 				case 'ON':
@@ -693,11 +709,11 @@ class instance_api {
 					break
 			}
 			channel.txMuteStatus = variable
-			this.instance.setVariable(prefix + 'tx_mute_status', variable)
+			this.instance.setVariableValues({ [`${prefix}tx_mute_status`]: variable })
 			this.instance.checkFeedbacks('transmitter_muted')
 		} else if (key.match(/MUTE_STATUS/)) {
 			channel.txMuteStatus = value
-			this.instance.setVariable(prefix + 'tx_mute_status', value)
+			this.instance.setVariableValues({ [`${prefix}tx_mute_status`]: value })
 			this.instance.checkFeedbacks('transmitter_muted')
 		} else if (key == 'TX_MUTE_BUTTON_STATUS' || key == 'TX_TALK_SWITCH' || key == 'BUTTON_STS') {
 			switch (value) {
@@ -712,7 +728,7 @@ class instance_api {
 					break
 			}
 			channel.txTalkSwitch = variable
-			this.instance.setVariable(prefix + 'tx_talk_switch', variable)
+			this.instance.setVariableValues({ [`${prefix}tx_talk_switch`]: variable })
 		} else if (key == 'TX_OFFSET') {
 			channel.txOffset = parseInt(value)
 			if (channel.txOffset == 255) {
@@ -724,7 +740,7 @@ class instance_api {
 					variable = channel.txOffset + ' dB'
 				}
 			}
-			this.instance.setVariable(prefix + 'tx_offset', variable)
+			this.instance.setVariableValues({ [`${prefix}tx_offset`]: variable })
 		} else if (key == 'TX_INPUT_PAD') {
 			channel.txInputPad = parseInt(value)
 			if (channel.txInputPad == 255) {
@@ -732,7 +748,7 @@ class instance_api {
 			} else {
 				variable = (channel.txInputPad - 12).toString() + ' dB'
 			}
-			this.instance.setVariable(prefix + 'tx_input_pad', variable)
+			this.instance.setVariableValues({ [`${prefix}tx_input_pad`]: variable })
 		} else if (key == 'TX_POWER_LEVEL') {
 			channel.txPowerLevel = parseInt(value)
 			if (channel.txPowerLevel == 255) {
@@ -740,7 +756,7 @@ class instance_api {
 			} else {
 				variable = channel.txPowerLevel + ' mW'
 			}
-			this.instance.setVariable(prefix + 'tx_power_level', variable)
+			this.instance.setVariableValues({ [`${prefix}tx_power_level`]: variable })
 		} else if (key.match(/POWER_MODE/) || key == 'TX_RF_PWR') {
 			channel.txPowerMode = value
 			if (model.family == 'ulx' || model.family == 'qlx') {
@@ -762,21 +778,21 @@ class instance_api {
 						variable = 'Unknown'
 						break
 				}
-				this.instance.setVariable(prefix + 'tx_power_level', variable)
+				this.instance.setVariableValues({ [`${prefix}tx_power_level`]: variable })
 			}
-			this.instance.setVariable(prefix + 'tx_power_mode', value)
+			this.instance.setVariableValues({ [`${prefix}tx_power_mode`]: value })
 		} else if (key == 'TX_POLARITY') {
 			channel.txPolarity = value
-			this.instance.setVariable(prefix + 'tx_polarity', value)
+			this.instance.setVariableValues({ [`${prefix}tx_polarity`]: value })
 		} else if (key == 'LED_STATUS') {
 			variable = value.split(',')
 			if (variable[0] != 'NC') {
 				channel.ledStatusRed = variable[0]
-				this.instance.setVariable(prefix + 'led_status_red', this.MXW_LED_STATUS[variable[0]])
+				this.instance.setVariableValues({ [`${prefix}led_status_red`]: this.MXW_LED_STATUS[variable[0]] })
 			}
 			if (variable[1] != 'NC') {
 				channel.ledStatusGreen = variable[1]
-				this.instance.setVariable(prefix + 'led_status_green', this.MXW_LED_STATUS[variable[1]])
+				this.instance.setVariableValues({ [`${prefix}led_status_green`]: this.MXW_LED_STATUS[variable[1]] })
 			}
 		} else if (key.match(/BATT_BARS/)) {
 			channel.batteryBars = parseInt(value)
@@ -785,9 +801,8 @@ class instance_api {
 			} else {
 				variable = channel.batteryBars
 			}
-			this.instance.setVariable(prefix + 'battery_bars', variable)
-			this.instance.checkFeedbacks('battery_level')
-			this.instance.checkFeedbacks('transmitter_turned_off')
+			this.instance.setVariableValues({ [`${prefix}battery_bars`]: variable })
+			this.instance.checkFeedbacks('battery_level', 'transmitter_turned_off')
 		} else if (key.match(/BATT_CHARGE/)) {
 			channel.batteryCharge = parseInt(value)
 			if (channel.batteryCharge == 255) {
@@ -795,7 +810,7 @@ class instance_api {
 			} else {
 				variable = value + '%'
 			}
-			this.instance.setVariable(prefix + 'battery_charge', variable)
+			this.instance.setVariableValues({ [`${prefix}battery_charge`]: variable })
 		} else if (key.match(/BATT_CYCLE/)) {
 			channel.batteryCycle = parseInt(value)
 			if (channel.batteryCycle == 65535) {
@@ -803,7 +818,7 @@ class instance_api {
 			} else {
 				variable = value
 			}
-			this.instance.setVariable(prefix + 'battery_cycle', variable)
+			this.instance.setVariableValues({ [`${prefix}battery_cycle`]: variable })
 		} else if (key.match(/BATT_HEALTH/)) {
 			channel.batteryHealth = parseInt(value)
 			if (channel.batteryHealth == 255) {
@@ -811,7 +826,7 @@ class instance_api {
 			} else {
 				variable = value + '%'
 			}
-			this.instance.setVariable(prefix + 'battery_health', variable)
+			this.instance.setVariableValues({ [`${prefix}battery_health`]: variable })
 		} else if (key == 'TX_BATT_MINS' || key == 'BATT_RUN_TIME') {
 			channel.batteryRuntime = parseInt(value)
 			if (channel.batteryRuntime == 65535) {
@@ -840,10 +855,10 @@ class instance_api {
 				variable = `${h}:${m}`
 			}
 			if (model.family == 'mxw') {
-				this.instance.setVariable(prefix + 'tx_power_source', channel.txPowerSource)
+				this.instance.setVariableValues({ [`${prefix}tx_power_source`]: channel.txPowerSource })
 			}
 			channel.batteryRuntime2 = variable
-			this.instance.setVariable(prefix + 'battery_runtime', variable)
+			this.instance.setVariableValues({ [`${prefix}battery_runtime`]: variable })
 		} else if (key.match(/BATT_TEMP_C/)) {
 			channel.batteryTempC = parseInt(value)
 			if (channel.batteryTempC == 255) {
@@ -851,7 +866,7 @@ class instance_api {
 			} else {
 				variable = channel.batteryTempC + 40 + '°'
 			}
-			this.instance.setVariable(prefix + 'battery_temp_c', variable)
+			this.instance.setVariableValues({ [`${prefix}battery_temp_c`]: variable })
 		} else if (key.match(/BATT_TEMP_F/)) {
 			channel.batteryTempF = parseInt(value)
 			if (channel.batteryTempF == 255) {
@@ -859,10 +874,10 @@ class instance_api {
 			} else {
 				variable = channel.batteryTempF + 40 + '°'
 			}
-			this.instance.setVariable(prefix + 'battery_temp_f', variable)
+			this.instance.setVariableValues({ [`${prefix}battery_temp_f`]: variable })
 		} else if (key.match(/BATT_TYPE/)) {
 			channel.batteryType = value
-			this.instance.setVariable(prefix + 'battery_type', value)
+			this.instance.setVariableValues({ [`${prefix}battery_type`]: value })
 		} else if (key == 'BATT_TIME_TO_FULL') {
 			channel.batteryTimeToFull = parseInt(value)
 			if (channel.batteryTimeToFull == 65535) {
@@ -876,7 +891,7 @@ class instance_api {
 				m = m < 10 ? '0' + m : m
 				variable = `${h}:${m}`
 			}
-			this.instance.setVariable(prefix + 'battery_time_to_full', variable)
+			this.instance.setVariableValues({ [`${prefix}battery_time_to_full`]: variable })
 		}
 	}
 
@@ -895,16 +910,16 @@ class instance_api {
 
 		if (key == 'FW_VER') {
 			this.receiver.firmwareVersion = value.replace('{', '').replace('}', '').trim()
-			this.instance.setVariable('firmware_version', this.receiver.firmwareVersion)
+			this.instance.setVariableValues({ firmware_version: this.receiver.firmwareVersion })
 		} else if (key == 'DEVICE_ID') {
 			this.receiver.deviceId = value.replace('{', '').replace('}', '').trim()
-			this.instance.setVariable('device_id', this.receiver.deviceId)
+			this.instance.setVariableValues({ device_id: this.receiver.deviceId })
 		} else if (key == 'FREQUENCY_DIVERSITY_MODE') {
 			this.receiver.frequencyDiversity = value
-			this.instance.setVariable('frequency_diversity_mode', value)
+			this.instance.setVariableValues({ frequency_diversity_mode: value })
 		} else if (key == 'AUDIO_SUMMING_MODE') {
 			this.receiver.audioSumming = value
-			this.instance.setVariable('audio_summing_mode', value)
+			this.instance.setVariableValues({ audio_summing_mode: value })
 		} else if (key == 'HIGH_DENSITY' || key == 'TRANSMISSION_MODE') {
 			// changed from: (key =='HIGH_DENSITY' || id == 'TRANSMISSION_MODE') in order to try fix the "Reference error: id is not defined" error (ticket #5 and #6)
 
@@ -915,7 +930,7 @@ class instance_api {
 			}
 
 			this.receiver.highDensity = value
-			this.instance.setVariable('high_density_mode', value)
+			this.instance.setVariableValues({ high_density_mode: value })
 		} else if (key.match(/ENCRYPTION/)) {
 			if (value == 'INACTIVE') {
 				value = 'OFF'
@@ -923,22 +938,22 @@ class instance_api {
 				value = 'ON'
 			}
 			this.receiver.encryption = value
-			this.instance.setVariable('encryption', value)
+			this.instance.setVariableValues({ encryption: value })
 		} else if (key == 'FLASH') {
 			this.receiver.flash = value
-			//this.instance.setVariable('flash', value);
+			//this.instance.setVariableValues({'flash': value});
 		} else if (key == 'QUADVERSITY_MODE') {
 			this.receiver.quadversityMode = value
-			this.instance.setVariable('quadversity_mode', value)
+			this.instance.setVariableValues({ quadversity_mode: value })
 		} else if (key == 'MODEL') {
 			this.receiver.model = value
-			this.instance.setVariable('model', value)
+			this.instance.setVariableValues({ model: value })
 		} else if (key == 'RF_BAND') {
 			this.receiver.rfBand = value
-			this.instance.setVariable('rf_band', value)
+			this.instance.setVariableValues({ rf_band: value })
 		} else if (key == 'LOCK_STATUS') {
 			this.receiver.lockStatus = value
-			this.instance.setVariable('lock_status', value)
+			this.instance.setVariableValues({ lock_status: value })
 		}
 	}
 
@@ -953,10 +968,10 @@ class instance_api {
 	 * @since 1.0.0
 	 */
 	updateSlot(channel, id, key, value) {
-		var slot = this.getSlot(channel, id)
+		let slot = this.getSlot(channel, id)
 		id = id < 10 ? '0' + id : id
-		var prefix = `slot_${channel}:${id}_`
-		var variable
+		let prefix = `slot_${channel}-${id}_`
+		let variable
 
 		if (value == 'UNKN' || value == 'UNKNOWN') {
 			value = 'Unknown'
@@ -965,9 +980,8 @@ class instance_api {
 		switch (key) {
 			case 'SLOT_STATUS':
 				slot.status = value
-				this.instance.setVariable(prefix + 'status', value)
-				this.instance.checkFeedbacks('slot_status')
-				this.instance.checkFeedbacks('slot_is_active')
+				this.instance.setVariableValues({ [`${prefix}status`]: value })
+				this.instance.checkFeedbacks('slot_status', 'slot_is_active')
 				break
 			case 'SLOT_SHOWLINK_STATUS':
 				slot.showLinkStatus = parseInt(value)
@@ -976,17 +990,17 @@ class instance_api {
 				} else {
 					variable = value
 				}
-				this.instance.setVariable(prefix + 'link_status', variable)
+				this.instance.setVariableValues({ [`${prefix}link_status`]: variable })
 				break
 			case 'SLOT_TX_MODEL':
 				slot.txType = value
-				this.instance.setVariable(prefix + 'tx_model', value)
+				this.instance.setVariableValues({ [`${prefix}tx_model`]: value })
 				break
 			case 'SLOT_TX_DEVICE_ID':
 				slot.txDeviceId = value.replace('{', '').replace('}', '').trim()
-				this.instance.setVariable(prefix + 'tx_device_id', slot.txDeviceId)
-				this.instance.initActions()
-				this.instance.initFeedbacks()
+				this.instance.setVariableValues({ [`${prefix}tx_device_id`]: slot.txDeviceId })
+				this.instance.updateActions()
+				this.instance.updateFeedbacks()
 				this.instance.checkFeedbacks('slot_is_active')
 				break
 			case 'SLOT_OFFSET':
@@ -996,7 +1010,7 @@ class instance_api {
 				} else {
 					variable = (slot.txOffset - 12).toString() + ' dB'
 				}
-				this.instance.setVariable(prefix + 'tx_offset', variable)
+				this.instance.setVariableValues({ [`${prefix}tx_offset`]: variable })
 				break
 			case 'SLOT_INPUT_PAD':
 				slot.txInputPad = parseInt(value)
@@ -1005,7 +1019,7 @@ class instance_api {
 				} else {
 					variable = (slot.txInputPad - 12).toString() + ' dB'
 				}
-				this.instance.setVariable(prefix + 'tx_input_pad', variable)
+				this.instance.setVariableValues({ [`${prefix}tx_input_pad`]: variable })
 				break
 			case 'SLOT_RF_POWER':
 				slot.txPowerLevel = parseInt(value)
@@ -1014,17 +1028,16 @@ class instance_api {
 				} else {
 					variable = value + ' mW'
 				}
-				this.instance.setVariable(prefix + 'tx_power_level', variable)
-				this.instance.checkFeedbacks('slot_rf_power')
-				this.instance.checkFeedbacks('slot_is_active')
+				this.instance.setVariableValues({ [`${prefix}tx_power_level`]: variable })
+				this.instance.checkFeedbacks('slot_rf_power', 'slot_is_active')
 				break
 			case 'SLOT_RF_POWER_MODE':
 				slot.txPowerMode = value
-				this.instance.setVariable(prefix + 'tx_power_mode', value)
+				this.instance.setVariableValues({ [`${prefix}tx_power_mode`]: value })
 				break
 			case 'SLOT_POLARITY':
 				slot.txPolarity = value
-				this.instance.setVariable(prefix + 'tx_polarity', value)
+				this.instance.setVariableValues({ [`${prefix}tx_polarity`]: value })
 				break
 			case 'SLOT_RF_OUTPUT':
 				slot.txRfOutput = value
@@ -1035,7 +1048,7 @@ class instance_api {
 				} else {
 					variable = value
 				}
-				this.instance.setVariable(prefix + 'rf_output', variable)
+				this.instance.setVariableValues({ [`${prefix}rf_output`]: variable })
 				this.instance.checkFeedbacks('slot_rf_output')
 				break
 			case 'SLOT_BATT_BARS':
@@ -1045,7 +1058,7 @@ class instance_api {
 				} else {
 					variable = value
 				}
-				this.instance.setVariable(prefix + 'battery_bars', variable)
+				this.instance.setVariableValues({ [`${prefix}battery_bars`]: variable })
 				break
 			case 'SLOT_BATT_CHARGE_PERCENT':
 				slot.batteryCharge = parseInt(value)
@@ -1054,7 +1067,7 @@ class instance_api {
 				} else {
 					variable = value + '%'
 				}
-				this.instance.setVariable(prefix + 'battery_charge', variable)
+				this.instance.setVariableValues({ [`${prefix}battery_charge`]: variable })
 				break
 			case 'SLOT_BATT_CYCLE_COUNT':
 				slot.batteryCycle = parseInt(value)
@@ -1063,7 +1076,7 @@ class instance_api {
 				} else {
 					variable = value
 				}
-				this.instance.setVariable(prefix + 'battery_cycle', variable)
+				this.instance.setVariableValues({ [`${prefix}battery_cycle`]: variable })
 				break
 			case 'SLOT_BATT_HEALTH_PERCENT':
 				slot.batteryHealth = parseInt(value)
@@ -1072,7 +1085,7 @@ class instance_api {
 				} else {
 					variable = value + '%'
 				}
-				this.instance.setVariable(prefix + 'battery_health', variable)
+				this.instance.setVariableValues({ [`${prefix}battery_health`]: variable })
 				break
 			case 'SLOT_BATT_MINS':
 				slot.batteryRuntime = parseInt(value)
@@ -1089,14 +1102,12 @@ class instance_api {
 					m = m < 10 ? '0' + m : m
 					variable = `${h}:${m}`
 				}
-				this.instance.setVariable(prefix + 'battery_runtime', variable)
+				this.instance.setVariableValues({ [`${prefix}battery_runtime`]: variable })
 				break
 			case 'SLOT_BATT_TYPE':
 				slot.batteryType = value
-				this.instance.setVariable(prefix + 'battery_type', value)
+				this.instance.setVariableValues({ [`${prefix}battery_type`]: value })
 				break
 		}
 	}
 }
-
-exports = module.exports = instance_api

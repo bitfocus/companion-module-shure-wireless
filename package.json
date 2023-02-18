@@ -1,35 +1,24 @@
 {
 	"name": "shure-wireless",
-	"version": "1.2.4",
-	"api_version": "1.0.0",
-	"keywords": [
-		"Wireless Microphone"
-	],
-	"manufacturer": "Shure",
-	"product": [
-		"ULX-D",
-		"QLX-D",
-		"SLX-D",
-		"Axient Digital (AD)",
-		"Microflex (MXW)"
-	],
-	"shortname": "shure-wx",
-	"description": "",
-	"main": "index.js",
+	"version": "2.0.0",
+	"main": "src/index.js",
+	"type": "module",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"format": "prettier --write ."
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/bitfocus/companion-module-shure-wireless.git"
 	},
-	"author": "Keith Rocheck <keith.rocheck@gmail.com>",
-	"contributors": [
-		"Joseph Adams <josephdadams@gmail.com>"
-	],
 	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/bitfocus/companion-module-shure-wireless/issues"
+	"dependencies": {
+		"@companion-module/base": "~1.1",
+		"pngjs": "~6.0.0",
+		"prettier": "^2.8.3"
 	},
-	"homepage": "https://github.com/bitfocus/companion-module-shure-wireless#readme"
+	"devDependencies": {
+		"@companion-module/tools": "~1.0"
+	},
+	"prettier": "@companion-module/tools/.prettierrc.json"
 }

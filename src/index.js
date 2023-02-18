@@ -1,92 +1,37 @@
-var tcp = require('../../tcp')
-var instance_skel = require('../../instance_skel')
-var upgrades = require('./upgrades')
+import {
+	CreateConvertToBooleanFeedbackUpgradeScript,
+	InstanceBase,
+	Regex,
+	runEntrypoint,
+	TCPHelper,
+} from '@companion-module/base'
+import { updateActions } from './actions.js'
+import { updateFeedbacks } from './feedback.js'
+import { updateVariables } from './variables.js'
+import API from './internalAPI.js'
+import { BooleanFeedbackUpgradeMap } from './upgrades.js'
 
 /**
  * Companion instance class for the Shure Wireless Microphones.
  *
- * @extends instance_skel
+ * @extends InstanceBase
  * @since 1.0.0
  * @author Joseph Adams <josephdadams@gmail.com>
  * @author Keith Rocheck <keith.rocheck@gmail.com>
  */
-class instance extends instance_skel {
+class ShureWirelessInstance extends InstanceBase {
 	/**
 	 * Create an instance of a shure WX module.
 	 *
-	 * @param {EventEmitter} system - the brains of the operation
-	 * @param {string} id - the instance ID
-	 * @param {Object} config - saved user configuration parameters
+	 * @param {Object} internal - Companion internals
 	 * @since 1.0.0
 	 */
-	constructor(system, id, config) {
-		super(system, id, config)
+	constructor(internal) {
+		super(internal)
 
-		this.model = {}
-		this.deviceName = ''
-		this.initDone = false
-
-		this.heartbeatInterval = null
-		this.heartbeatTimeout = null
-
-		let actions = require('./actions')
-		let feedback = require('./feedback')
-		let variables = require('./variables')
-
-		Object.assign(this, {
-			...actions,
-			...feedback,
-			...variables,
-		})
-
-		this.CONFIG_MODEL = {
-			ulxd4: { id: 'ulxd4', family: 'ulx', label: 'ULXD4 Single Receiver', channels: 1, slots: 0 },
-			ulxd4d: { id: 'ulxd4d', family: 'ulx', label: 'ULXD4D Dual Receiver', channels: 2, slots: 0 },
-			ulxd4q: { id: 'ulxd4q', family: 'ulx', label: 'ULXD4Q Quad Receiver', channels: 4, slots: 0 },
-			qlxd4: { id: 'qlxd4', family: 'qlx', label: 'QLXD4 Single Receiver', channels: 1, slots: 0 },
-			ad4d: { id: 'ad4d', family: 'ad', label: 'AD4D Dual Receiver', channels: 2, slots: 8 },
-			ad4q: { id: 'ad4q', family: 'ad', label: 'AD4Q Quad Receiver', channels: 4, slots: 8 },
-			mxwani4: { id: 'mxwani4', family: 'mxw', label: 'MXWANI4 Quad Receiver', channels: 4, slots: 0 },
-			mxwani8: { id: 'mxwani8', family: 'mxw', label: 'MXWANI8 Octo Receiver', channels: 8, slots: 0 },
-			slxd4: { id: 'slxd4', family: 'slx', label: 'SLXD4 Single Receiver', channels: 1, slots: 0 },
-			slxd4d: { id: 'slxd4d', family: 'slx', label: 'SLXD4D Dual Receiver', channels: 2, slots: 0 },
-		}
-
-		this.CHOICES_CHANNELS = []
-		this.CHOICES_CHANNELS_A = []
-		this.CHOICES_SLOTS = []
-		this.CHOICES_SLOTS_A = []
-
-		this.CHOICES_MODEL = Object.values(this.CONFIG_MODEL)
-		// Sort alphabetical
-		this.CHOICES_MODEL.sort(function (a, b) {
-			var x = a.label.toLowerCase()
-			var y = b.label.toLowerCase()
-			if (x < y) {
-				return -1
-			}
-			if (x > y) {
-				return 1
-			}
-			return 0
-		})
-
-		if (this.config.modelID !== undefined) {
-			this.model = this.CONFIG_MODEL[this.config.modelID]
-		} else {
-			this.config.modelID = 'ulxd4'
-			this.model = this.CONFIG_MODEL['ulxd4']
-		}
-	}
-
-	/**
-	 * Provide the upgrade scripts for the module
-	 * @returns {function[]} the scripts
-	 * @static
-	 * @since 1.2.0
-	 */
-	static GetUpgradeScripts() {
-		return [instance_skel.CreateConvertToBooleanFeedbackUpgradeScript(upgrades.BooleanFeedbackUpgradeMap)]
+		this.updateActions = updateActions.bind(this)
+		this.updateFeedbacks = updateFeedbacks.bind(this)
+		this.updateVariables = updateVariables.bind(this)
 	}
 
 	/**
@@ -96,14 +41,14 @@ class instance extends instance_skel {
 	 * @access public
 	 * @since 1.0.0
 	 */
-	config_fields() {
+	getConfigFields() {
 		return [
 			{
 				type: 'textinput',
 				id: 'host',
 				label: 'Target IP',
 				width: 6,
-				regex: this.REGEX_IP,
+				regex: Regex.IP,
 			},
 			{
 				type: 'textinput',
@@ -111,7 +56,7 @@ class instance extends instance_skel {
 				label: 'Target Port',
 				default: 2202,
 				width: 2,
-				regex: this.REGEX_PORT,
+				regex: Regex.PORT,
 			},
 			{
 				type: 'dropdown',
@@ -147,7 +92,7 @@ class instance extends instance_skel {
 	 * @access public
 	 * @since 1.0.0
 	 */
-	destroy() {
+	async destroy() {
 		if (this.socket !== undefined) {
 			this.socket.destroy()
 		}
@@ -160,7 +105,7 @@ class instance extends instance_skel {
 			clearTimeout(this.heartbeatTimeout)
 		}
 
-		this.debug('destroy', this.id)
+		this.log('debug', 'destroy', this.id)
 	}
 
 	/**
@@ -170,18 +115,63 @@ class instance extends instance_skel {
 	 * @access public
 	 * @since 1.0.0
 	 */
-	init() {
-		this.status(this.STATUS_WARNING, 'Connecting')
+	async init(config) {
+		this.config = config
+		this.model = {}
+		this.deviceName = ''
+		this.initDone = false
 
-		let instance_api = require('./internalAPI')
-		this.api = new instance_api(this)
+		this.heartbeatInterval = null
+		this.heartbeatTimeout = null
+
+		this.CONFIG_MODEL = {
+			ulxd4: { id: 'ulxd4', family: 'ulx', label: 'ULXD4 Single Receiver', channels: 1, slots: 0 },
+			ulxd4d: { id: 'ulxd4d', family: 'ulx', label: 'ULXD4D Dual Receiver', channels: 2, slots: 0 },
+			ulxd4q: { id: 'ulxd4q', family: 'ulx', label: 'ULXD4Q Quad Receiver', channels: 4, slots: 0 },
+			qlxd4: { id: 'qlxd4', family: 'qlx', label: 'QLXD4 Single Receiver', channels: 1, slots: 0 },
+			ad4d: { id: 'ad4d', family: 'ad', label: 'AD4D Dual Receiver', channels: 2, slots: 8 },
+			ad4q: { id: 'ad4q', family: 'ad', label: 'AD4Q Quad Receiver', channels: 4, slots: 8 },
+			mxwani4: { id: 'mxwani4', family: 'mxw', label: 'MXWANI4 Quad Receiver', channels: 4, slots: 0 },
+			mxwani8: { id: 'mxwani8', family: 'mxw', label: 'MXWANI8 Octo Receiver', channels: 8, slots: 0 },
+			slxd4: { id: 'slxd4', family: 'slx', label: 'SLXD4 Single Receiver', channels: 1, slots: 0 },
+			slxd4d: { id: 'slxd4d', family: 'slx', label: 'SLXD4D Dual Receiver', channels: 2, slots: 0 },
+		}
+
+		this.CHOICES_CHANNELS = []
+		this.CHOICES_CHANNELS_A = []
+		this.CHOICES_SLOTS = []
+		this.CHOICES_SLOTS_A = []
+
+		this.CHOICES_MODEL = Object.values(this.CONFIG_MODEL)
+		// Sort alphabetical
+		this.CHOICES_MODEL.sort(function (a, b) {
+			let x = a.label.toLowerCase()
+			let y = b.label.toLowerCase()
+			if (x < y) {
+				return -1
+			}
+			if (x > y) {
+				return 1
+			}
+			return 0
+		})
+
+		if (this.config.modelID !== undefined) {
+			this.model = this.CONFIG_MODEL[this.config.modelID]
+		} else {
+			this.config.modelID = 'ulxd4'
+			this.model = this.CONFIG_MODEL['ulxd4']
+		}
+
+		this.updateStatus('disconnected', 'Connecting')
+
+		this.api = new API(this)
 
 		this.setupFields()
 
-		this.initActions() // export actions
-		this.initVariables()
-		this.initFeedbacks()
-		this.checkFeedbacks('sample')
+		this.updateActions()
+		this.updateVariables()
+		this.updateFeedbacks()
 
 		this.initTCP()
 	}
@@ -213,19 +203,18 @@ class instance extends instance_skel {
 		}
 
 		if (this.config.host) {
-			this.socket = new tcp(this.config.host, this.config.port)
+			this.socket = new TCPHelper(this.config.host, this.config.port)
 
 			this.socket.on('status_change', (status, message) => {
-				this.status(status, message)
+				this.updateStatus(status, message)
 			})
 
 			this.socket.on('error', (err) => {
-				this.debug('Network error', err)
 				this.log('error', `Network error: ${err.message}`)
 			})
 
 			this.socket.on('connect', () => {
-				this.debug('Connected')
+				this.log('debug', 'Connected')
 				let cmd = '< GET 0 ALL >'
 				this.socket.send(cmd)
 
@@ -241,7 +230,7 @@ class instance extends instance_skel {
 
 			// separate buffered stream into lines with responses
 			this.socket.on('data', (chunk) => {
-				var i = 0,
+				let i = 0,
 					line = '',
 					offset = 0
 				receivebuffer += chunk
@@ -342,10 +331,10 @@ class instance extends instance_skel {
 	 */
 	sendCommand(cmd) {
 		if (cmd !== undefined) {
-			if (this.socket !== undefined && this.socket.connected) {
+			if (this.socket !== undefined && this.socket.isConnected) {
 				this.socket.send(`< ${cmd} >`)
 			} else {
-				this.debug('Socket not connected :(')
+				this.log('debug', 'Socket not connected :(')
 			}
 		}
 	}
@@ -370,8 +359,8 @@ class instance extends instance_skel {
 			this.CHOICES_SLOTS_A.push({ id: '0:0', label: 'All Channels & Slots' })
 		}
 
-		for (var i = 1; i <= this.model.channels; i++) {
-			var data = `Channel ${i}`
+		for (let i = 1; i <= this.model.channels; i++) {
+			let data = `Channel ${i}`
 
 			if (this.api.getChannel(i).name != '') {
 				data += ' (' + this.api.getChannel(i).name + ')'
@@ -383,7 +372,7 @@ class instance extends instance_skel {
 			if (this.model.slots > 0) {
 				this.CHOICES_SLOTS_A.push({ id: `${i}:0`, label: `${data}, All Slots` })
 
-				for (var j = 1; j <= this.model.slots; j++) {
+				for (let j = 1; j <= this.model.slots; j++) {
 					let id = `${i}:${j}`
 					data = id
 
@@ -539,9 +528,9 @@ class instance extends instance_skel {
 	 * @access public
 	 * @since 1.0.0
 	 */
-	updateConfig(config) {
-		var resetConnection = false
-		var cmd
+	async configUpdated(config) {
+		let resetConnection = false
+		let cmd
 
 		if (this.config.host != config.host) {
 			resetConnection = true
@@ -562,12 +551,12 @@ class instance extends instance_skel {
 		if (this.CONFIG_MODEL[this.config.modelID] !== undefined) {
 			this.model = this.CONFIG_MODEL[this.config.modelID]
 		} else {
-			this.debug(`Shure Model: ${this.config.modelID} NOT FOUND`)
+			this.log('debug', `Shure Model: ${this.config.modelID} NOT FOUND`)
 		}
 
-		this.initActions()
-		this.initFeedbacks()
-		this.initVariables()
+		this.updateActions()
+		this.updateFeedbacks()
+		this.updateVariables()
 
 		if (resetConnection === true || this.socket === undefined) {
 			this.initTCP()
@@ -577,4 +566,4 @@ class instance extends instance_skel {
 	}
 }
 
-exports = module.exports = instance
+runEntrypoint(ShureWirelessInstance, [CreateConvertToBooleanFeedbackUpgradeScript(BooleanFeedbackUpgradeMap)])
