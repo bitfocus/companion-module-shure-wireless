@@ -31,12 +31,7 @@ export function updateActions() {
 		name: 'Set audio gain of channel',
 		options: [this.CHANNELS_A_FIELD, this.GAIN_SET_FIELD(this.model.family)],
 		callback: async ({ options }) => {
-			let value = options.gain
-			if (this.model.family == 'mxw') {
-				value += 25
-			} else {
-				value += 18
-			}
+			let value = options.gain + 18
 			this.sendCommand(`SET ${options.channel} AUDIO_GAIN ${value}`)
 		},
 	}
@@ -57,14 +52,12 @@ export function updateActions() {
 		},
 	}
 
-	if (this.model.family != 'mxw') {
-		actions['channel_frequency'] = {
-			name: 'Set frequency of channel',
-			options: [this.CHANNELS_FIELD, this.FREQUENCY_FIELD],
-			callback: async ({ options }) => {
-				this.sendCommand(`SET ${options.channel} FREQUENCY ${options.value.replace('.', '')}`)
-			},
-		}
+	actions['channel_frequency'] = {
+		name: 'Set frequency of channel',
+		options: [this.CHANNELS_FIELD, this.FREQUENCY_FIELD],
+		callback: async ({ options }) => {
+			this.sendCommand(`SET ${options.channel} FREQUENCY ${options.value.replace('.', '')}`)
+		},
 	}
 
 	if (this.model.family != 'qlx') {
@@ -78,7 +71,7 @@ export function updateActions() {
 		}
 	}
 
-	if (this.model.family == 'ad' || this.model.family == 'mxw' || this.model.family == 'slx') {
+	if (this.model.family == 'ad' || this.model.family == 'slx') {
 		actions['flash_channel'] = {
 			name: 'Flash lights on receiver channel',
 			tooltip: 'It will automatically turn off after 60 seconds',

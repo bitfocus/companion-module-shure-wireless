@@ -131,8 +131,6 @@ class ShureWirelessInstance extends InstanceBase {
 			qlxd4: { id: 'qlxd4', family: 'qlx', label: 'QLXD4 Single Receiver', channels: 1, slots: 0 },
 			ad4d: { id: 'ad4d', family: 'ad', label: 'AD4D Dual Receiver', channels: 2, slots: 8 },
 			ad4q: { id: 'ad4q', family: 'ad', label: 'AD4Q Quad Receiver', channels: 4, slots: 8 },
-			mxwani4: { id: 'mxwani4', family: 'mxw', label: 'MXWANI4 Quad Receiver', channels: 4, slots: 0 },
-			mxwani8: { id: 'mxwani8', family: 'mxw', label: 'MXWANI8 Octo Receiver', channels: 8, slots: 0 },
 			slxd4: { id: 'slxd4', family: 'slx', label: 'SLXD4 Single Receiver', channels: 1, slots: 0 },
 			slxd4d: { id: 'slxd4d', family: 'slx', label: 'SLXD4D Dual Receiver', channels: 2, slots: 0 },
 		}
@@ -284,17 +282,12 @@ class ShureWirelessInstance extends InstanceBase {
 			if (commandType == 'REP') {
 				//this is a report command
 
-				if (isNaN(commandNum) && commandArr[0] != 'PRI' && commandArr[0] != 'SEC') {
+				if (isNaN(commandNum)) {
 					//this command isn't about a specific channel
 					this.api.updateReceiver(commandArr[0], joinData(commandArr, 1))
 				} else if (commandArr[1].startsWith('SLOT')) {
 					//this command is about a specific SLOT in AD
 					this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], joinData(commandArr, 3))
-				} else if (commandArr[0] == 'PRI' || commandArr[0] == 'SEC') {
-					//ignore pri/sec commands in MXW
-				} else if (commandArr[1] == 'LED_STATUS') {
-					//this command is led status for a MXW channel
-					this.api.updateChannel(commandNum, commandArr[1], commandArr[2] + ',' + commandArr[3])
 				} else {
 					//this command is about a specific channel
 					this.api.updateChannel(commandNum, commandArr[1], joinData(commandArr, 2))
@@ -309,9 +302,6 @@ class ShureWirelessInstance extends InstanceBase {
 						break
 					case 'ad':
 						this.api.parseADSample(commandNum, command)
-						break
-					case 'mxw':
-						this.api.parseMXWSample(commandNum, command)
 						break
 					case 'slx':
 						this.api.parseSLXSample(commandNum, command)
@@ -436,7 +426,7 @@ class ShureWirelessInstance extends InstanceBase {
 				label: 'Gain Value (dB)',
 				id: 'gain',
 				min: 1,
-				max: family == 'mxw' ? 40 : 60,
+				max: 60,
 				default: 3,
 				required: true,
 				range: true,
@@ -447,8 +437,8 @@ class ShureWirelessInstance extends InstanceBase {
 				type: 'number',
 				label: 'Gain Value (dB)',
 				id: 'gain',
-				min: family == 'mxw' ? -25 : -18,
-				max: family == 'mxw' ? 15 : 42,
+				min: -18,
+				max: 42,
 				default: 0,
 				required: true,
 				range: true,

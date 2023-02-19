@@ -18,16 +18,14 @@ export function updateVariables() {
 			variables.push({ variableId: `${prefix}_audio_mute`, name: `Channel ${i} Audio Mute` })
 		}
 
-		if (this.model.family != 'mxw') {
-			variables.push({ variableId: `${prefix}_group_chan`, name: `Channel ${i} Group & Channel` })
-			variables.push({ variableId: `${prefix}_frequency`, name: `Channel ${i} Frequency` })
-		}
+		variables.push({ variableId: `${prefix}_group_chan`, name: `Channel ${i} Group & Channel` })
+		variables.push({ variableId: `${prefix}_frequency`, name: `Channel ${i} Frequency` })
 
-		if (this.model.family != 'mxw' && this.model.family != 'slx') {
+		if (this.model.family != 'slx') {
 			variables.push({ variableId: `${prefix}_encryption_status`, name: `Channel ${i} Encryption Status` })
 		}
 
-		/*if (this.model.family == 'ad' || this.model.family == 'mxw' || this.model.family == 'slx') {
+		/*if (this.model.family == 'ad' || this.model.family == 'slx') {
 			variables.push({ variableId: `${prefix}_flash`, name: `Channel ${i} Flash` });
 		}*/
 
@@ -47,7 +45,7 @@ export function updateVariables() {
 			variables.push({ variableId: `${prefix}_interference_status2`, name: `Channel ${i} Interference Status 2` })
 		}
 
-		if (this.model.family != 'mxw' && this.model.family != 'slx') {
+		if (this.model.family != 'slx') {
 			variables.push({ variableId: `${prefix}_antenna`, name: `Channel ${i} Antenna Status` })
 		}
 
@@ -70,12 +68,7 @@ export function updateVariables() {
 
 		variables.push({ variableId: `${prefix}_tx_model`, name: `Channel ${i} Transmitter Model` })
 
-		if (this.model.family == 'mxw') {
-			variables.push({ variableId: `${prefix}_tx_available`, name: `Channel ${i} Transmitter Available` })
-			variables.push({ variableId: `${prefix}_tx_status`, name: `Channel ${i} Transmitter Status` })
-		}
-
-		if (this.model.family != 'mxw' && this.model.family != 'slx') {
+		if (this.model.family != 'slx') {
 			variables.push({ variableId: `${prefix}_tx_device_id`, name: `Channel ${i} Transmitter Device ID` })
 			variables.push({ variableId: `${prefix}_tx_offset`, name: `Channel ${i} Transmitter Offset` })
 		}
@@ -85,7 +78,7 @@ export function updateVariables() {
 			variables.push({ variableId: `${prefix}_tx_polarity`, name: `Channel ${i} Transmitter Polarity` })
 		}
 
-		if (this.model.family != 'mxw' && this.model.family != 'slx') {
+		if (this.model.family != 'slx') {
 			variables.push({ variableId: `${prefix}_tx_power_level`, name: `Channel ${i} Transmitter Power Level` })
 			variables.push({ variableId: `${prefix}_tx_mute_status`, name: `Channel ${i} Transmitter Mute Status` })
 			variables.push({ variableId: `${prefix}_tx_lock`, name: `Channel ${i} Transmitter Lock` })
@@ -105,34 +98,26 @@ export function updateVariables() {
 			variables.push({ variableId: `${prefix}_tx_talk_switch`, name: `Channel ${i} Transmitter Mute Button Status` })
 		}
 
-		if (this.model.family != 'mxw') {
-			variables.push({ variableId: `${prefix}_battery_bars`, name: `Channel ${i} Battery Bars` })
-		}
+		variables.push({ variableId: `${prefix}_battery_bars`, name: `Channel ${i} Battery Bars` })
 
 		if (this.model.family != 'slx') {
 			variables.push({ variableId: `${prefix}_battery_charge`, name: `Channel ${i} Battery Charge Status` })
 		}
 
-		if (this.model.family != 'mxw' && this.model.family != 'slx') {
+		if (this.model.family != 'slx') {
 			variables.push({ variableId: `${prefix}_battery_cycle`, name: `Channel ${i} Battery Cycle` })
 		}
 
-		if (this.model.family == 'ad' || this.model.family == 'mxw') {
+		if (this.model.family == 'ad') {
 			variables.push({ variableId: `${prefix}_battery_health`, name: `Channel ${i} Battery Health` })
 		}
 
 		variables.push({ variableId: `${prefix}_battery_runtime`, name: `Channel ${i} Battery Run Time` })
 
-		if (this.model.family != 'mxw' && this.model.family != 'slx') {
+		if (this.model.family != 'slx') {
 			variables.push({ variableId: `${prefix}_battery_temp_f`, name: `Channel ${i} Battery Temperature (F)` })
 			variables.push({ variableId: `${prefix}_battery_temp_c`, name: `Channel ${i} Battery Temperature (C)` })
 			variables.push({ variableId: `${prefix}_battery_type`, name: `Channel ${i} Battery Type` })
-		}
-
-		if (this.model.family == 'mxw') {
-			variables.push({ variableId: `${prefix}_battery_time_to_full`, name: `Channel ${i} Battery Type` })
-			variables.push({ variableId: `${prefix}_led_status_green`, name: `Channel ${i} Green LED Status` })
-			variables.push({ variableId: `${prefix}_led_status_red`, name: `Channel ${i} Red LED Status` })
 		}
 
 		if (this.model.slots > 0) {
@@ -180,13 +165,11 @@ export function updateVariables() {
 		variables.push({ variableId: 'quadversity_mode', name: 'Quadversity Mode' })
 	}
 
-	if (this.model.family != 'mxw' && this.model.family != 'slx') {
+	if (this.model.family != 'slx') {
 		variables.push({ variableId: 'encryption', name: 'Encryption' })
 	}
 
-	if (this.model.family != 'mxw') {
-		variables.push({ variableId: 'firmware_version', name: 'Firmware Version' })
-	}
+	variables.push({ variableId: 'firmware_version', name: 'Firmware Version' })
 
 	/*if (this.model.family != 'qlx') {
 		variables.push({ variableId: 'flash', name: 'Flash Lights On/Off' });

@@ -24,30 +24,21 @@ export default class API {
 		//qlx-d [FW_VER,DEVICE_ID,ENCRYPTION]
 		//ulx-d [FW_VER,DEVICE_ID,ENCRYPTION,AUDIO_SUMMING_MODE,FREQUENCY_DIVERSITY_MODE,HIGH_DENSITY,FLASH]
 		//ad    [FW_VER,DEVICE_ID,ENCRYPTION_MODE,MODEL,QUADVERSITY_MODE,RF_BAND,TRANSMISSION_MODE,FLASH]
-		//mxw   [DEVICE_ID,FLASH]
 		//slx-d [FW_VER,DEVICE_ID,RF_BAND,MODEL,LOCK_STATUS,FLASH]
 		this.receiver = {
 			firmwareVersion: '', // (ULX|QLX) 18 | (AD|SLX) 24
-			deviceId: '', // (ULX|QLX|SLX) 8 | (AD|MXW) 31
+			deviceId: '', // (ULX|QLX|SLX) 8 | (AD) 31
 			encryption: 'OFF', // (QLX|AD:ENCRYPTION_MODE) OFF - ON | (ULX) OFF - MANUAL - AUTO
 			audioSumming: 'OFF', // (ULXD4D|ULXD4Q only) OFF - 1+2 - 3+4 - 1+2/3+4 - 1+2+3+4
 			frequencyDiversity: 'OFF', // (ULXD4D|ULXD4Q only) OFF - 1+2 - 3+4 - 1+2/3+4
 			highDensity: 'OFF', // (ULX) OFF - ON | (AD:TRANSMISSION_MODE) STANDARD = OFF - HIGH_DENSITY = ON
-			flash: 'OFF', // (ULX|AD|MXW|SLX) OFF - ON
+			flash: 'OFF', // (ULX|AD|SLX) OFF - ON
 			quadversityMode: 'OFF', // (AD) OFF - ON
 			model: '', // (AD|SLX) 32
 			rfBand: '', // (AD|SLX) 8
 			lockStatus: 'OFF', // (SLX) OFF - MENU - ALL
 		}
 		this.channels = []
-
-		this.MXW_LED_STATUS = {
-			ON: 'On',
-			OF: 'Off',
-			ST: 'Strobe',
-			FL: 'Flash',
-			PU: 'Pulse',
-		}
 	}
 
 	/**
@@ -64,7 +55,6 @@ export default class API {
 			//ulx-d rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,AUDIO_MUTE,GROUP_CHAN,FREQUENCY,ENCRYPTION_WARNING,RF_INT_DET]
 			//ad    rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,AUDIO_MUTE,GROUP_CHANNEL,FREQUENCY,FLASH,ENCRYPTION_STATUS,INTERFERENCE_STATUS,UNREGISTERED_TX_STATUS]
 			//         [FD_MODE,GROUP_CHANNEL2,FREQUENCY2,INTERFERENCE_STATUS2]
-			//mxw   rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,FLASH]
 			//slx-d rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,GROUP_CHAN,FREQUENCY,AUDIO_OUT_LVL_SWITCH]
 			//qlx-d tx [TX_TYPE,TX_DEVICE_ID,TX_OFFSET,TX_RF_PWR,TX_MUTE_STATUS,TX_PWR_LOCK,TX_MENU_LOCK,TX_MUTE_BUTTON_STATUS,TX_POWER_SOURCE]
 			//         [BATT_BARS,BATT_CHARGE,BATT_CYCLE,BATT_RUN_TIME,BATT_TEMP_F,BATT_TEMP_C,BATT_TYPE]
@@ -72,20 +62,19 @@ export default class API {
 			//         [BATT_BARS,BATT_CHARGE,BATT_CYCLE,BATT_RUN_TIME,BATT_TEMP_F,BATT_TEMP_C,BATT_TYPE]
 			//ad    tx [TX_MODEL,TX_DEVICE_ID,TX_OFFSET,TX_INPUT_PAD,TX_POWER_LEVEL,TX_MUTE_MODE_STATUS,TX_POLARITY,TX_LOCK,TX_TALK_SWITCH]
 			//         [TX_BATT_BARS,TX_BATT_CHARGE_PERCENT,TX_BATT_CYCLE_COUNT,TX_BATT_HEALTH_PERCENT,TX_BATT_MINS,TX_BATT_TEMP_F,TX_BATT_TEMP_C,TX_BATT_TYPE]
-			//mxw   tx [TX_TYPE,TX_AVAILABLE,TX_STATUS,BUTTON_STS,LED_STATUS,BATT_CHARGE,BATT_HEALTH,BATT_RUN_TIME,BATT_TIME_TO_FULL]
 			//slx-d tx [TX_TYPE,TX_BATT_BARS,TX_BATT_MINS]
 			this.channels[id] = {
 				slots: [], // AD TX Slots
 				//rx
-				name: '', // (ULX|QLX) 8 | (AD|MXW|SLX) 31
+				name: '', // (ULX|QLX) 8 | (AD|SLX) 31
 				meterRate: 0, // 0=disabled, 100-99999 [in ms]
-				audioGain: 0, // (ULX|QLX|AD|SLX) 0-60,-18dB | (MXW) 0-40,-25dB
+				audioGain: 0, // (ULX|QLX|AD|SLX) 0-60,-18dB
 				audioMute: 'OFF', // (ULX|AD) OFF - ON - TOGGLE[set]
 				groupChan: '--,--', // xx,yy
 				group: 0, // (ULX|QLX|(AD|SLX):GROUP_CHANNEL) xx,yy (xx)
 				channel: 0, // (ULX|QLX|(AD|SLX):GROUP_CHANNEL) xx,yy (yy)
 				frequency: '000.000', // (ULX|QLX|AD|SLX) 6, xxx[.]yyy
-				flash: 'OFF', // (AD|MXW) OFF - ON
+				flash: 'OFF', // (AD) OFF - ON
 				encryptionStatus: 'OK', // (AD) OK - ERROR | (ULX+QLD:ENCRYPTION_WARNING) OFF=OK - ON=ERROR
 				interferenceStatus: 'NONE', // (AD) NONE - DETECTED | (ULX:RF_INT_DET) NONE - CRITICAL=DETECTED
 				unregisteredTxStatus: 'OK', // (AD) OK - ERROR
@@ -103,7 +92,7 @@ export default class API {
 				antennaB: 'X', // (ULX|QLX) X - B | (AD) X - B - R
 				antennaC: 'X', // (AD:QUADVERITY ON) X - B - R
 				antennaD: 'X', // (AD:QUADVERITY ON) X - B - R
-				rfLevel: -120, // (ULX|QLX) 0-115,-120dBm | (SLX) 0-120,-120dBm | (MXW) 0-96?
+				rfLevel: -120, // (ULX|QLX) 0-115,-120dBm | (SLX) 0-120,-120dBm
 				rfLevelA: -120, // (AD) 0-120, -120dBm
 				rfLevelB: -120, // (AD) 0-120, -120dBm
 				rfLevelC: -120, // (AD) 0-120, -120dBm
@@ -112,7 +101,7 @@ export default class API {
 				rfBitmapB: 0, // (AD) 0-255, 8 bit color segment
 				rfBitmapC: 0, // (AD) 0-255, 8 bit color segment
 				rfBitmapD: 0, // (AD) 0-255, 8 bit color segment
-				audioLevel: -50, // (ULX|QLX) 0-50,-50dB | (AD|SLX) 0-120,-120dB | (MXW) 0-98,-98dB?
+				audioLevel: -50, // (ULX|QLX) 0-50,-50dB | (AD|SLX) 0-120,-120dB
 				audioLevelPeak: -120, // (AD|SLX) 0-120,-120dB
 				audioLED: 0, // (AD) 0-255 binary, 1-7=level, 8=OL | (ULX|QLX|SLX) 0-6
 				signalQuality: 255, // (AD) 0-5,255=UNKN
@@ -120,9 +109,6 @@ export default class API {
 				//tx
 				txType: 'Unknown', // (ULX|QLX) QLXD1 - QLXD2 - ULXD1 - ULXD2 - ULXD6 - ULXD8 - UNKN
 				// ((AD|SLX):TX_MODEL) AD1 - AD2 - ADX1 - ADX1M - ADX2 - ADX2FD - SLXD1 - SLXD2 - UNKNOWN
-				// (MXW) MXW1 - MXW2 - MXW6 - MXW8 - UNKNOWN
-				txAvailable: 'NO', // (MXW) YES - NO
-				txStatus: 'Unknown', // (MXW) ACTIVE[set] - MUTE[set] - STANDBY[set] - ON_CHARGER - UNKNOWN - OFF[set-only]
 				txDeviceId: '', // (ULX+QLX:ULXD6/ULXD8 only) 8 | (AD) 31
 				txOffset: 255, // (ULX|QLX) 0,3,6,9,12,15,18,21 255=UNKN | (AD) 0-32,-12 255=UNKN
 				txInputPad: 255, // (AD) 0=ON(-12), 12=OFF(0), 255=UNKN
@@ -134,21 +120,17 @@ export default class API {
 				txPowerLock: 'Unknown', // (ULX|QLX) OFF - ON - UNKN | (AD:TX_LOCK) POWER|ALL=ON - MENU|NONE=OFF - UNKNOWN
 				txMenuLock: 'Unknown', // (ULX|QLX) OFF - ON - UNKN | (AD:TX_LOCK) MENU|ALL=ON - POWER|NONE=OFF - UNKNOWN
 				txTalkSwitch: 'Unknown', // (ULX+QLX:TX_MUTE_BUTTON_STATUS) PRESSED - RELEASED - UNKN | (AD|MWX:BUTTON_STS) OFF=RELEASED - ON=PRESSED - UNKNOWN
-				txPowerSource: 'Unknown', // (ULX|QLX) BATTERY - EXTERNAL - UNKN | (MXW) SEE batteryRuntime
-				ledStatusRed: 'Off', // (MXW) rr gg (rr) ON=On,OF=Off,ST=Strobe,FL=Flash,PU=Pulse,NC=No Change
-				ledStatusGreen: 'Off', // (MXW) rr gg (gg) ON=On,OF=Off,ST=Strobe,FL=Flash,PU=Pulse,NC=No Change
+				txPowerSource: 'Unknown', // (ULX|QLX) BATTERY - EXTERNAL - UNKN
 				batteryBars: 255, // (ULX|QLX|(AD|SLX):TX_BATT_BARS) 0-5, 255=UNKN
-				batteryCharge: 255, // (ULX|QLX|MXW|AD:TX_BATT_CHARGE_PERCENT) 0-100, 255=UNKN
+				batteryCharge: 255, // (ULX|QLX|AD:TX_BATT_CHARGE_PERCENT) 0-100, 255=UNKN
 				batteryCycle: 65535, // (ULX|QLX|AD:TX_BATT_CYCLE_COUNT) 0+, 65535=UNKN
-				batteryHealth: 255, // (MXW|AD:TX_BATT_HEALTH_PERCENT) 0-100, 255=UNKN
+				batteryHealth: 255, // (AD:TX_BATT_HEALTH_PERCENT) 0-100, 255=UNKN
 				batteryRuntime: 65535, // (ULX|QLX) 0+, 65535=UNKN
 				// ((AD|SLX):TX_BATT_MINS) 0+, 65535=UNKN 65534=calcuating 65533=comm warning
-				// (MXW) 0+, 65535=UNKN 65534=calcuating 65533=charging 65532=wall power
 				batteryRuntime2: 'Unknown', // Text representation of batteryRuntime
 				batteryTempF: 255, // (ULX|QLX|AD:TX_BATT_TEMP_F) +40 255=UNKN
 				batteryTempC: 255, // (ULX|QLX|AD:TX_BATT_TEMP_C)  +40 255=UNKN
 				batteryType: 'Unknown', // (ULX|QLX|AD:TX_BATT_TYPE) ALKA - LION - LITH - NIMH - UNKN
-				batteryTimeToFull: 65535, // (MXW) 0+, 65535=UNKN (not charging), 65534=charged
 			}
 		}
 
@@ -348,28 +330,6 @@ export default class API {
 	}
 
 	/**
-	 * Parse sample data for MXW.
-	 *
-	 * @param {number} id - the channel id
-	 * @param {String} data - the sample data
-	 * @access public
-	 * @since 1.0.0
-	 */
-	parseMXWSample(id, data) {
-		let channel = this.getChannel(id)
-		let prefix = 'ch_' + id + '_'
-		let sample = data.split(' ')
-
-		channel.rfLevel = parseInt(sample[1])
-		channel.audioLevel = parseInt(sample[2])
-
-		this.instance.setVariableValues({
-			[`${prefix}rf_level`]: channel.rfLevel,
-			[`${prefix}audio_level`]: channel.audioLevel,
-		})
-	}
-
-	/**
 	 * Parse sample data for SLX.
 	 *
 	 * @param {number} id - the channel id
@@ -533,7 +493,7 @@ export default class API {
 			}
 			this.instance.setVariableValues({ [`${prefix}meter_rate`]: variable })
 		} else if (key == 'AUDIO_GAIN') {
-			channel.audioGain = model.family == 'mxw' ? parseInt(value) - 25 : parseInt(value) - 18
+			channel.audioGain = parseInt(value) - 18
 			variable = (channel.audioGain > 0 ? '+' : '') + channel.audioGain.toString() // + ' dB'
 			this.instance.setVariableValues({ [`${prefix}audio_gain`]: variable })
 			this.instance.checkFeedbacks('channel_gain')
@@ -605,23 +565,6 @@ export default class API {
 		} else if (key == 'FD_MODE') {
 			channel.fdMode = value
 			this.instance.setVariableValues({ [`${prefix}fd_mode`]: value })
-		} else if (key == 'TX_AVAILABLE') {
-			if (channel.txAvailable != value && value == 'YES') {
-				//poll for tx when becoming available (per Shure spec)
-				this.socket.send('< GET ' + id + ' TX_STATUS >')
-				this.socket.send('< GET ' + id + ' AUDIO_GAIN >')
-				this.socket.send('< GET ' + id + ' BATT_RUN_TIME >')
-				this.socket.send('< GET ' + id + ' BATT_CHARGE >')
-				this.socket.send('< GET ' + id + ' BATT_HEALTH >')
-				this.socket.send('< GET ' + id + ' BUTTON_STS >')
-				this.socket.send('< GET ' + id + ' LED_STATUS >')
-				this.socket.send('< GET ' + id + ' TX_TYPE >')
-			}
-			channel.txAvailable = value
-			this.instance.setVariableValues({ [`${prefix}tx_available`]: value })
-		} else if (key == 'TX_STATUS') {
-			channel.txStatus = value
-			this.instance.setVariableValues({ [`${prefix}tx_status`]: value })
 		} else if (key == 'TX_TYPE' || key == 'TX_MODEL') {
 			channel.txType = value
 			this.instance.setVariableValues({ [`${prefix}tx_model`]: value })
@@ -693,9 +636,6 @@ export default class API {
 				channel.txLock = 'Unknown'
 			}
 			this.instance.setVariableValues({ [`${prefix}tx_lock`]: channel.txLock })
-		} else if (key == 'TX_POWER_SOURCE') {
-			channel.txPowerSource = value
-			this.instance.setVariableValues({ [`${prefix}tx_power_source`]: value })
 		} else if (key.match(/MUTE_MODE_STATUS/)) {
 			switch (value) {
 				case 'ON':
@@ -784,16 +724,6 @@ export default class API {
 		} else if (key == 'TX_POLARITY') {
 			channel.txPolarity = value
 			this.instance.setVariableValues({ [`${prefix}tx_polarity`]: value })
-		} else if (key == 'LED_STATUS') {
-			variable = value.split(',')
-			if (variable[0] != 'NC') {
-				channel.ledStatusRed = variable[0]
-				this.instance.setVariableValues({ [`${prefix}led_status_red`]: this.MXW_LED_STATUS[variable[0]] })
-			}
-			if (variable[1] != 'NC') {
-				channel.ledStatusGreen = variable[1]
-				this.instance.setVariableValues({ [`${prefix}led_status_green`]: this.MXW_LED_STATUS[variable[1]] })
-			}
 		} else if (key.match(/BATT_BARS/)) {
 			channel.batteryBars = parseInt(value)
 			if (channel.batteryBars == 255) {
@@ -831,31 +761,16 @@ export default class API {
 			channel.batteryRuntime = parseInt(value)
 			if (channel.batteryRuntime == 65535) {
 				variable = 'Unknown'
-				if (model.family == 'mxw') {
-					channel.txPowerSource = 'Unknown'
-				}
 			} else if (channel.batteryRuntime == 65534) {
 				variable = 'Calculating'
-				if (model.family == 'mxw') {
-					channel.txPowerSource = 'BATTERY'
-				}
-			} else if (channel.batteryRuntime == 65533 && (model.family == 'ad' || model.family == 'slx')) {
+			} else if (channel.batteryRuntime == 65533) {
 				variable = 'Error'
-			} else if (channel.batteryRuntime == 65533 && model.family == 'mxw') {
-				variable = 'Charging'
-				channel.txPowerSource = 'EXTERNAL'
-			} else if (channel.batteryRuntime == 65532 && model.family == 'mxw') {
-				variable = 'Wall Power'
-				channel.txPowerSource = 'EXTERNAL'
 			} else {
 				let mins = channel.batteryRuntime
 				let h = Math.floor(mins / 60)
 				let m = mins % 60
 				m = m < 10 ? '0' + m : m
 				variable = `${h}:${m}`
-			}
-			if (model.family == 'mxw') {
-				this.instance.setVariableValues({ [`${prefix}tx_power_source`]: channel.txPowerSource })
 			}
 			channel.batteryRuntime2 = variable
 			this.instance.setVariableValues({ [`${prefix}battery_runtime`]: variable })
@@ -878,20 +793,6 @@ export default class API {
 		} else if (key.match(/BATT_TYPE/)) {
 			channel.batteryType = value
 			this.instance.setVariableValues({ [`${prefix}battery_type`]: value })
-		} else if (key == 'BATT_TIME_TO_FULL') {
-			channel.batteryTimeToFull = parseInt(value)
-			if (channel.batteryTimeToFull == 65535) {
-				variable = 'Unknown'
-			} else if (channel.batteryTimeToFull == 65534) {
-				variable = 'Charged'
-			} else {
-				let mins = channel.batteryTimeToFull
-				let h = Math.floor(mins / 60)
-				let m = mins % 60
-				m = m < 10 ? '0' + m : m
-				variable = `${h}:${m}`
-			}
-			this.instance.setVariableValues({ [`${prefix}battery_time_to_full`]: variable })
 		}
 	}
 

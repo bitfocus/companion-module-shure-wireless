@@ -9,148 +9,146 @@ export function updateFeedbacks() {
 	// feedbacks
 	let feedbacks = {}
 
-	if (this.model.family != 'mxw') {
-		let labelChoices, labelDefault, iconChoices, iconDefault
+	let labelChoices, labelDefault, iconChoices, iconDefault
 
-		switch (this.model.family) {
-			case 'qlx':
-			case 'ulx':
-				labelChoices = [
-					{ id: 'name', label: 'Channel Name' },
-					{ id: 'txDeviceId', label: 'TX Device ID' },
-					{ id: 'frequency', label: 'Frequency' },
-					{ id: 'groupChan', label: 'Group/Channel' },
-					{ id: 'audioGain', label: 'Audio Gain' },
-					{ id: 'txType', label: 'TX Model' },
-					{ id: 'txPowerLevel', label: 'TX Power Level' },
-					{ id: 'batteryType', label: 'Battery Type' },
-					{ id: 'batteryRuntime', label: 'Battery Runtime' },
-				]
-				labelDefault = ['name', 'frequency', 'txType', 'txPowerLevel']
-				iconChoices = [
-					{ id: 'battery', label: 'Battery' },
-					{ id: 'locks', label: 'Locks' },
-					{ id: 'rf', label: 'RF' },
-					{ id: 'audio', label: 'Audio Level' },
-					{ id: 'encryption', label: 'Encryption' },
-				]
-				iconDefault = ['battery', 'locks', 'rf', 'audio', 'encryption']
-				break
-			case 'slx':
-				labelChoices = [
-					{ id: 'name', label: 'Channel Name' },
-					{ id: 'frequency', label: 'Frequency' },
-					{ id: 'groupChan', label: 'Group/Channel' },
-					{ id: 'audioGain', label: 'Audio Gain' },
-					{ id: 'txType', label: 'TX Model' },
-					{ id: 'batteryRuntime', label: 'Battery Runtime' },
-				]
-				labelDefault = ['name', 'frequency', 'audioGain', 'txType']
-				iconChoices = [
-					{ id: 'battery', label: 'Battery' },
-					{ id: 'rf', label: 'RF' },
-					{ id: 'audio', label: 'Audio Level' },
-				]
-				iconDefault = ['battery', 'rf', 'audio']
-				break
-			case 'ad':
-				labelChoices = [
-					{ id: 'name', label: 'Channel Name' },
-					{ id: 'txDeviceId', label: 'TX Device ID' },
-					{ id: 'frequency', label: 'Frequency' },
-					{ id: 'groupChan', label: 'Group/Channel' },
-					{ id: 'audioGain', label: 'Audio Gain' },
-					{ id: 'txType', label: 'TX Model' },
-					{ id: 'txPowerLevel', label: 'TX Power Level' },
-					{ id: 'batteryType', label: 'Battery Type' },
-					{ id: 'batteryRuntime', label: 'Battery Runtime' },
-				]
-				labelDefault = ['name', 'frequency', 'txType', 'txPowerLevel']
-				iconChoices = [
-					{ id: 'battery', label: 'Battery' },
-					{ id: 'locks', label: 'Locks' },
-					{ id: 'rf', label: 'RF' },
-					{ id: 'audio', label: 'Audio Level' },
-					{ id: 'encryption', label: 'Encryption' },
-					{ id: 'quality', label: 'Quality' },
-				]
-				iconDefault = ['battery', 'locks', 'rf', 'audio', 'encryption', 'quality']
-				break
-		}
+	switch (this.model.family) {
+		case 'qlx':
+		case 'ulx':
+			labelChoices = [
+				{ id: 'name', label: 'Channel Name' },
+				{ id: 'txDeviceId', label: 'TX Device ID' },
+				{ id: 'frequency', label: 'Frequency' },
+				{ id: 'groupChan', label: 'Group/Channel' },
+				{ id: 'audioGain', label: 'Audio Gain' },
+				{ id: 'txType', label: 'TX Model' },
+				{ id: 'txPowerLevel', label: 'TX Power Level' },
+				{ id: 'batteryType', label: 'Battery Type' },
+				{ id: 'batteryRuntime', label: 'Battery Runtime' },
+			]
+			labelDefault = ['name', 'frequency', 'txType', 'txPowerLevel']
+			iconChoices = [
+				{ id: 'battery', label: 'Battery' },
+				{ id: 'locks', label: 'Locks' },
+				{ id: 'rf', label: 'RF' },
+				{ id: 'audio', label: 'Audio Level' },
+				{ id: 'encryption', label: 'Encryption' },
+			]
+			iconDefault = ['battery', 'locks', 'rf', 'audio', 'encryption']
+			break
+		case 'slx':
+			labelChoices = [
+				{ id: 'name', label: 'Channel Name' },
+				{ id: 'frequency', label: 'Frequency' },
+				{ id: 'groupChan', label: 'Group/Channel' },
+				{ id: 'audioGain', label: 'Audio Gain' },
+				{ id: 'txType', label: 'TX Model' },
+				{ id: 'batteryRuntime', label: 'Battery Runtime' },
+			]
+			labelDefault = ['name', 'frequency', 'audioGain', 'txType']
+			iconChoices = [
+				{ id: 'battery', label: 'Battery' },
+				{ id: 'rf', label: 'RF' },
+				{ id: 'audio', label: 'Audio Level' },
+			]
+			iconDefault = ['battery', 'rf', 'audio']
+			break
+		case 'ad':
+			labelChoices = [
+				{ id: 'name', label: 'Channel Name' },
+				{ id: 'txDeviceId', label: 'TX Device ID' },
+				{ id: 'frequency', label: 'Frequency' },
+				{ id: 'groupChan', label: 'Group/Channel' },
+				{ id: 'audioGain', label: 'Audio Gain' },
+				{ id: 'txType', label: 'TX Model' },
+				{ id: 'txPowerLevel', label: 'TX Power Level' },
+				{ id: 'batteryType', label: 'Battery Type' },
+				{ id: 'batteryRuntime', label: 'Battery Runtime' },
+			]
+			labelDefault = ['name', 'frequency', 'txType', 'txPowerLevel']
+			iconChoices = [
+				{ id: 'battery', label: 'Battery' },
+				{ id: 'locks', label: 'Locks' },
+				{ id: 'rf', label: 'RF' },
+				{ id: 'audio', label: 'Audio Level' },
+				{ id: 'encryption', label: 'Encryption' },
+				{ id: 'quality', label: 'Quality' },
+			]
+			iconDefault = ['battery', 'locks', 'rf', 'audio', 'encryption', 'quality']
+			break
+	}
 
-		feedbacks['sample'] = {
-			type: 'advanced',
-			name: 'Channel Status Display',
-			description: "Provide a visual display of the channel's status.",
-			options: [
-				this.CHANNELS_FIELD,
-				{
-					type: 'multidropdown',
-					label: 'Label Data',
-					id: 'labels',
-					default: labelDefault,
-					choices: labelChoices,
-				},
-				{
-					type: 'multidropdown',
-					label: 'Icons',
-					id: 'icons',
-					default: iconDefault,
-					choices: iconChoices,
-				},
-				this.BATTERY_LEVEL_FIELD,
-			],
-			callback: (event) => {
-				let opt = event.options
-				let channel = this.api.getChannel(parseInt(opt.channel))
-				let out = {
-					alignment: 'left:top',
-					imageBuffers: [{ buffer: this.api.getIcon(opt, event.image) }],
-					size: '7',
-					text: '',
-				}
-
-				let addLabelData = function (item, channel, out) {
-					switch (item) {
-						case 'name':
-							out.text += channel.name + '\\n'
-							break
-						case 'txDeviceId':
-							out.text += channel.txDeviceId + '\\n'
-							break
-						case 'frequency':
-							out.text += channel.frequency + '\\n'
-							break
-						case 'groupChan':
-							out.text += channel.groupChan + '\\n'
-							break
-						case 'audioGain':
-							out.text += (channel.audioGain > 0 ? '+' : '') + channel.audioGain.toString() + ' dB\\n'
-							break
-						case 'txType':
-							out.text += channel.txType + '\\n'
-							break
-						case 'txPowerLevel':
-							out.text += channel.txPowerLevel == 255 ? 'Unknown' : channel.txPowerLevel + ' mW\\n'
-							break
-						case 'batteryType':
-							out.text += channel.batteryType + '\\n'
-							break
-						case 'batteryRuntime':
-							out.text += channel.batteryRuntime2 + '\\n'
-							break
-					}
-				}
-
-				if (typeof opt.labels === 'string') {
-					addLabelData(opt.labels, channel, out)
-				} else if (Array.isArray(opt.labels)) {
-					opt.labels.forEach((item) => addLabelData(item, channel, out))
-				}
-
-				return out
+	feedbacks['sample'] = {
+		type: 'advanced',
+		name: 'Channel Status Display',
+		description: "Provide a visual display of the channel's status.",
+		options: [
+			this.CHANNELS_FIELD,
+			{
+				type: 'multidropdown',
+				label: 'Label Data',
+				id: 'labels',
+				default: labelDefault,
+				choices: labelChoices,
 			},
-		}
+			{
+				type: 'multidropdown',
+				label: 'Icons',
+				id: 'icons',
+				default: iconDefault,
+				choices: iconChoices,
+			},
+			this.BATTERY_LEVEL_FIELD,
+		],
+		callback: (event) => {
+			let opt = event.options
+			let channel = this.api.getChannel(parseInt(opt.channel))
+			let out = {
+				alignment: 'left:top',
+				imageBuffers: [{ buffer: this.api.getIcon(opt, event.image) }],
+				size: '7',
+				text: '',
+			}
+
+			let addLabelData = function (item, channel, out) {
+				switch (item) {
+					case 'name':
+						out.text += channel.name + '\\n'
+						break
+					case 'txDeviceId':
+						out.text += channel.txDeviceId + '\\n'
+						break
+					case 'frequency':
+						out.text += channel.frequency + '\\n'
+						break
+					case 'groupChan':
+						out.text += channel.groupChan + '\\n'
+						break
+					case 'audioGain':
+						out.text += (channel.audioGain > 0 ? '+' : '') + channel.audioGain.toString() + ' dB\\n'
+						break
+					case 'txType':
+						out.text += channel.txType + '\\n'
+						break
+					case 'txPowerLevel':
+						out.text += channel.txPowerLevel == 255 ? 'Unknown' : channel.txPowerLevel + ' mW\\n'
+						break
+					case 'batteryType':
+						out.text += channel.batteryType + '\\n'
+						break
+					case 'batteryRuntime':
+						out.text += channel.batteryRuntime2 + '\\n'
+						break
+				}
+			}
+
+			if (typeof opt.labels === 'string') {
+				addLabelData(opt.labels, channel, out)
+			} else if (Array.isArray(opt.labels)) {
+				opt.labels.forEach((item) => addLabelData(item, channel, out))
+			}
+
+			return out
+		},
 	}
 
 	feedbacks['battery_level'] = {
@@ -192,24 +190,22 @@ export function updateFeedbacks() {
 			}
 		}
 
-		if (this.model.family != 'mxw') {
-			feedbacks['transmitter_muted'] = {
-				type: 'boolean',
-				name: 'Transmitter Muted',
-				description: "If the selected channel's transmitter is muted, change the color of the button.",
-				defaultStyle: {
-					color: combineRgb(255, 255, 255),
-					bgcolor: combineRgb(128, 0, 0),
-				},
-				options: [this.CHANNELS_FIELD],
-				callback: ({ options }) => {
-					if (this.api.getChannel(parseInt(options.channel)).txMuteStatus == 'ON') {
-						return true
-					} else {
-						return false
-					}
-				},
-			}
+		feedbacks['transmitter_muted'] = {
+			type: 'boolean',
+			name: 'Transmitter Muted',
+			description: "If the selected channel's transmitter is muted, change the color of the button.",
+			defaultStyle: {
+				color: combineRgb(255, 255, 255),
+				bgcolor: combineRgb(128, 0, 0),
+			},
+			options: [this.CHANNELS_FIELD],
+			callback: ({ options }) => {
+				if (this.api.getChannel(parseInt(options.channel)).txMuteStatus == 'ON') {
+					return true
+				} else {
+					return false
+				}
+			},
 		}
 
 		feedbacks['interference_status'] = {
@@ -231,24 +227,22 @@ export function updateFeedbacks() {
 		}
 	}
 
-	if (this.model.family != 'mxw') {
-		feedbacks['channel_frequency'] = {
-			type: 'boolean',
-			name: 'Channel Frequency',
-			description: "If the selected channel's frequency is set, change the color of the button.",
-			defaultStyle: {
-				color: combineRgb(0, 0, 0),
-				bgcolor: combineRgb(255, 255, 0),
-			},
-			options: [this.CHANNELS_FIELD, this.FREQUENCY_FIELD],
-			callback: ({ options }) => {
-				if (this.api.getChannel(parseInt(options.channel)).frequency == options.value) {
-					return true
-				} else {
-					return false
-				}
-			},
-		}
+	feedbacks['channel_frequency'] = {
+		type: 'boolean',
+		name: 'Channel Frequency',
+		description: "If the selected channel's frequency is set, change the color of the button.",
+		defaultStyle: {
+			color: combineRgb(0, 0, 0),
+			bgcolor: combineRgb(255, 255, 0),
+		},
+		options: [this.CHANNELS_FIELD, this.FREQUENCY_FIELD],
+		callback: ({ options }) => {
+			if (this.api.getChannel(parseInt(options.channel)).frequency == options.value) {
+				return true
+			} else {
+				return false
+			}
+		},
 	}
 
 	feedbacks['channel_gain'] = {

@@ -25,6 +25,6 @@
 		"entrypoint": "..\\src\\index.js"
 	},
 	"manufacturer": "Shure",
-	"products": ["ULX-D", "QLX-D", "SLX-D", "Axient Digital (AD)", "Microflex (MXW)"],
+	"products": ["ULX-D", "QLX-D", "SLX-D", "Axient Digital (AD)"],
 	"keywords": ["Wireless Microphone"]
 }

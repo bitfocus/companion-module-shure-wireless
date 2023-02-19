@@ -6,7 +6,6 @@ This module will connect to the Shure receivers below to provide feedback status
 - Shure QLX-D (QLXD4)
 - Shure SLX-D (SLXD4, SLXD4D)
 - Shure Axient Digital (AD4D, AD4Q)
-- Shure Microflex Wireless (MXWANI4, MXWANI8)
 
 ### Available actions
 
@@ -18,8 +17,8 @@ This module will connect to the Shure receivers below to provide feedback status
 | Increase Audio Gain of Channel     | All                 |
 | Decrease Audio Gain of Channel     | All                 |
 | Set Frequency of Channel           | ULX, QLX, SLX, & AD |
-| Flash Lights on Receiver           | ULX, SLX, AD, & MXW |
-| Flash Lights on Receiver Channel   | SLX, AD, & MXW      |
+| Flash Lights on Receiver           | ULX, SLX, AD        |
+| Flash Lights on Receiver Channel   | SLX, AD             |
 | Set slot RF output                 | ADX only            |
 | Set slot RF power level            | ADX only            |
 
@@ -30,9 +29,9 @@ This module will connect to the Shure receivers below to provide feedback status
 | Battery Level          | If the battery bar drops to or below a certain value, change the color of the button.         | All                 |
 | Channel Frequency      | If the selected channel\'s frequency is set, change the color of the button.                  | ULX, QLX, SLX, & AD |
 | Channel Gain           | If the selected channel\'s gain is set, change the color of the button.                       | All                 |
-| Channel Muted          | If the selected channel is muted, change the color of the button.                             | ULX, AD, & MXW      |
+| Channel Muted          | If the selected channel is muted, change the color of the button.                             | ULX, AD             |
 | Channel Status Display | **See below**                                                                                 | ULX, QLX, SLX, & AD |
-| Interference Status    | If the selected channel gets interference, change the color of the button.                    | ULX, QLX, AD, & MXW |
+| Interference Status    | If the selected channel gets interference, change the color of the button.                    | ULX, QLX, AD        |
 | Transmitter Muted      | If the selected channel\'s transmitter is muted, change the color of the button.              | ULX, QLX, & AD      |
 | Transmitter Turned Off | If the selected channel\'s transmitter is powered off, change the color of the button.        | All                 |
 | Slot is Active         | If the selected slot\'s transmitter is active to the channel, change the color of the button. | AD                  |
