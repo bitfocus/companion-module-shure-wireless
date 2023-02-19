@@ -326,10 +326,10 @@ export default class API {
 			this.instance.setVariableValues({
 				[`${prefix}antenna`]: channel.antenna,
 				[`${prefix}signal_quality`]: channel.signalQuality,
-				[`${prefix}rf_level_a`]: channel.rfLevelA + ' dBm',
-				[`${prefix}rf_level_b`]: channel.rfLevelB + ' dBm',
-				[`${prefix}audio_level`]: channel.audioLevel + ' dBFS',
-				[`${prefix}audio_level_peak`]: channel.audioLevelPeak + ' dBFS',
+				[`${prefix}rf_level_a`]: channel.rfLevelA, //+ ' dBm',
+				[`${prefix}rf_level_b`]: channel.rfLevelB, //+ ' dBm',
+				[`${prefix}audio_level`]: channel.audioLevel, //+ ' dBFS',
+				[`${prefix}audio_level_peak`]: channel.audioLevelPeak, //+ ' dBFS',
 			})
 
 			if (this.receiver.quadversityMode == 'ON') {
@@ -340,8 +340,8 @@ export default class API {
 				channel.antennaC = sample[7].substr(2, 1)
 				channel.antennaD = sample[7].substr(3, 1)
 				this.instance.setVariableValues({
-					[`${prefix}rf_level_c`]: channel.rfLevelC + ' dBm',
-					[`${prefix}rf_level_d`]: channel.rfLevelD + ' dBm',
+					[`${prefix}rf_level_c`]: channel.rfLevelC, //+ ' dBm',
+					[`${prefix}rf_level_d`]: channel.rfLevelD, //+ ' dBm',
 				})
 			}
 		}
@@ -421,9 +421,9 @@ export default class API {
 		}
 
 		this.instance.setVariableValues({
-			[`${prefix}rf_level`]: channel.rfLevel + ' dBm',
-			[`${prefix}audio_level`]: channel.audioLevel + ' dBFS',
-			[`${prefix}audio_level_peak`]: channel.audioLevelPeak + ' dBFS',
+			[`${prefix}rf_level`]: channel.rfLevel, //+ ' dBm',
+			[`${prefix}audio_level`]: channel.audioLevel, //+ ' dBFS',
+			[`${prefix}audio_level_peak`]: channel.audioLevelPeak, //+ ' dBFS',
 		})
 	}
 
@@ -495,8 +495,8 @@ export default class API {
 
 		this.instance.setVariableValues({
 			[`${prefix}antenna`]: channel.antenna,
-			[`${prefix}rf_level`]: channel.rfLevel + ' dBm',
-			[`${prefix}audio_level`]: channel.audioLevel + ' dBFS',
+			[`${prefix}rf_level`]: channel.rfLevel, //+ ' dBm',
+			[`${prefix}audio_level`]: channel.audioLevel, //+ ' dBFS',
 		})
 	}
 
@@ -534,7 +534,7 @@ export default class API {
 			this.instance.setVariableValues({ [`${prefix}meter_rate`]: variable })
 		} else if (key == 'AUDIO_GAIN') {
 			channel.audioGain = model.family == 'mxw' ? parseInt(value) - 25 : parseInt(value) - 18
-			variable = (channel.audioGain > 0 ? '+' : '') + channel.audioGain.toString() + ' dB'
+			variable = (channel.audioGain > 0 ? '+' : '') + channel.audioGain.toString() // + ' dB'
 			this.instance.setVariableValues({ [`${prefix}audio_gain`]: variable })
 			this.instance.checkFeedbacks('channel_gain')
 		} else if (key == 'AUDIO_MUTE') {
@@ -556,13 +556,13 @@ export default class API {
 		} else if (key == 'FREQUENCY') {
 			value = '' + parseInt(value)
 			channel.frequency = value.substring(0, 3) + '.' + value.substring(3, 6)
-			variable = channel.frequency + ' MHz'
+			variable = channel.frequency //+ ' MHz'
 			this.instance.setVariableValues({ [`${prefix}frequency`]: variable })
 			this.instance.checkFeedbacks('channel_frequency')
 		} else if (key == 'FREQUENCY2') {
 			value = '' + parseInt(value)
 			channel.frequency2 = value.substring(0, 3) + '.' + value.substring(3, 6)
-			variable = channel.frequency2 + ' MHz'
+			variable = channel.frequency2 //+ ' MHz'
 			this.instance.setVariableValues({ [`${prefix}frequency2`]: variable })
 		} else if (key.match(/ENCRYPTION/)) {
 			switch (value) {
@@ -735,9 +735,9 @@ export default class API {
 				variable = 'Unknown'
 			} else {
 				if (model.family == 'ad') {
-					variable = (channel.txOffset - 12).toString() + ' dB'
+					variable = (channel.txOffset - 12).toString() //+ ' dB'
 				} else {
-					variable = channel.txOffset + ' dB'
+					variable = channel.txOffset //+ ' dB'
 				}
 			}
 			this.instance.setVariableValues({ [`${prefix}tx_offset`]: variable })
@@ -746,7 +746,7 @@ export default class API {
 			if (channel.txInputPad == 255) {
 				variable = 'Unknown'
 			} else {
-				variable = (channel.txInputPad - 12).toString() + ' dB'
+				variable = (channel.txInputPad - 12).toString() //+ ' dB'
 			}
 			this.instance.setVariableValues({ [`${prefix}tx_input_pad`]: variable })
 		} else if (key == 'TX_POWER_LEVEL') {
@@ -754,7 +754,7 @@ export default class API {
 			if (channel.txPowerLevel == 255) {
 				variable = 'Unknown'
 			} else {
-				variable = channel.txPowerLevel + ' mW'
+				variable = channel.txPowerLevel //+ ' mW'
 			}
 			this.instance.setVariableValues({ [`${prefix}tx_power_level`]: variable })
 		} else if (key.match(/POWER_MODE/) || key == 'TX_RF_PWR') {
@@ -808,7 +808,7 @@ export default class API {
 			if (channel.batteryCharge == 255) {
 				variable = 'Unknown'
 			} else {
-				variable = value + '%'
+				variable = value //+ '%'
 			}
 			this.instance.setVariableValues({ [`${prefix}battery_charge`]: variable })
 		} else if (key.match(/BATT_CYCLE/)) {
@@ -824,7 +824,7 @@ export default class API {
 			if (channel.batteryHealth == 255) {
 				variable = 'Unknown'
 			} else {
-				variable = value + '%'
+				variable = value //+ '%'
 			}
 			this.instance.setVariableValues({ [`${prefix}battery_health`]: variable })
 		} else if (key == 'TX_BATT_MINS' || key == 'BATT_RUN_TIME') {
@@ -864,7 +864,7 @@ export default class API {
 			if (channel.batteryTempC == 255) {
 				variable = 'Unknown'
 			} else {
-				variable = channel.batteryTempC + 40 + '°'
+				variable = channel.batteryTempC + 40 //+ '°'
 			}
 			this.instance.setVariableValues({ [`${prefix}battery_temp_c`]: variable })
 		} else if (key.match(/BATT_TEMP_F/)) {
@@ -872,7 +872,7 @@ export default class API {
 			if (channel.batteryTempF == 255) {
 				variable = 'Unknown'
 			} else {
-				variable = channel.batteryTempF + 40 + '°'
+				variable = channel.batteryTempF + 40 //+ '°'
 			}
 			this.instance.setVariableValues({ [`${prefix}battery_temp_f`]: variable })
 		} else if (key.match(/BATT_TYPE/)) {
@@ -1008,7 +1008,7 @@ export default class API {
 				if (slot.txOffset == 255) {
 					variable = 'Unknown'
 				} else {
-					variable = (slot.txOffset - 12).toString() + ' dB'
+					variable = (slot.txOffset - 12).toString() //+ ' dB'
 				}
 				this.instance.setVariableValues({ [`${prefix}tx_offset`]: variable })
 				break
@@ -1017,7 +1017,7 @@ export default class API {
 				if (slot.txInputPad == 255) {
 					variable = 'Unknown'
 				} else {
-					variable = (slot.txInputPad - 12).toString() + ' dB'
+					variable = (slot.txInputPad - 12).toString() //+ ' dB'
 				}
 				this.instance.setVariableValues({ [`${prefix}tx_input_pad`]: variable })
 				break
@@ -1065,7 +1065,7 @@ export default class API {
 				if (slot.batteryCharge == 255) {
 					variable = 'Unknown'
 				} else {
-					variable = value + '%'
+					variable = value //+ '%'
 				}
 				this.instance.setVariableValues({ [`${prefix}battery_charge`]: variable })
 				break
@@ -1083,7 +1083,7 @@ export default class API {
 				if (slot.batteryHealth == 255) {
 					variable = 'Unknown'
 				} else {
-					variable = value + '%'
+					variable = value //+ '%'
 				}
 				this.instance.setVariableValues({ [`${prefix}battery_health`]: variable })
 				break
