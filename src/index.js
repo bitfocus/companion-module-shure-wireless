@@ -83,6 +83,19 @@ class ShureWirelessInstance extends InstanceBase {
 				default: 5000,
 				required: true,
 			},
+			{
+				type: 'dropdown',
+				id: 'variableFormat',
+				label: 'Variable Format',
+				choices: [
+					{ id: 'units', label: 'Include Units' },
+					{ id: 'numeric', label: 'Numeric Only' },
+				],
+				width: 6,
+				default: 'units',
+				tooltip:
+					'Changing this setting will apply to new values received.  To refresh all variables with the new setting, disable and re-enable the connection after saving these settings.',
+			},
 		]
 	}
 
@@ -159,6 +172,10 @@ class ShureWirelessInstance extends InstanceBase {
 		} else {
 			this.config.modelID = 'ulxd4'
 			this.model = this.CONFIG_MODEL['ulxd4']
+		}
+
+		if (this.config.variableFormat === undefined) {
+			this.config.variableFormat = 'units'
 		}
 
 		this.updateStatus('disconnected', 'Connecting')
