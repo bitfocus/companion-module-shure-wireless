@@ -29,7 +29,7 @@ export function updateActions() {
 
 	actions['channel_setaudiogain'] = {
 		name: 'Set audio gain of channel',
-		options: [this.CHANNELS_A_FIELD, this.GAIN_SET_FIELD(this.model.family)],
+		options: [this.CHANNELS_A_FIELD, this.GAIN_SET_FIELD],
 		callback: async ({ options }) => {
 			let value = options.gain + 18
 			this.sendCommand(`SET ${options.channel} AUDIO_GAIN ${value}`)
@@ -38,7 +38,7 @@ export function updateActions() {
 
 	actions['channel_increasegain'] = {
 		name: 'Increase audio gain of channel',
-		options: [this.CHANNELS_A_FIELD, this.GAIN_INC_FIELD(this.model.family)],
+		options: [this.CHANNELS_A_FIELD, this.GAIN_INC_FIELD],
 		callback: async ({ options }) => {
 			this.sendCommand(`SET ${options.channel} AUDIO_GAIN INC ${options.gain}`)
 		},
@@ -46,7 +46,7 @@ export function updateActions() {
 
 	actions['channel_decreasegain'] = {
 		name: 'Decrease audio gain of channel',
-		options: [this.CHANNELS_A_FIELD, this.GAIN_INC_FIELD(this.model.family)],
+		options: [this.CHANNELS_A_FIELD, this.GAIN_INC_FIELD],
 		callback: async ({ options }) => {
 			this.sendCommand(`SET ${options.channel} AUDIO_GAIN DEC ${options.gain}`)
 		},

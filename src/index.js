@@ -35,6 +35,72 @@ class ShureWirelessInstance extends InstanceBase {
 	}
 
 	/**
+	 * Process an updated configuration array.
+	 *
+	 * @param {Object} config - the new configuration
+	 * @access public
+	 * @since 1.0.0
+	 */
+	async configUpdated(config) {
+		let resetConnection = false
+		let cmd
+
+		if (this.config.host != config.host) {
+			resetConnection = true
+		}
+
+		if (this.config.meteringOn !== config.meteringOn) {
+			if (config.meteringOn === true) {
+				cmd = `< SET 0 METER_RATE ${this.config.meteringInterval} >`
+			} else {
+				cmd = '< SET 0 METER_RATE 0 >'
+			}
+		} else if (this.config.meteringRate != config.meteringRate && this.config.meteringOn === true) {
+			cmd = `< SET 0 METER_RATE ${config.meteringInterval} >`
+		}
+
+		this.config = config
+
+		if (this.CONFIG_MODEL[this.config.modelID] !== undefined) {
+			this.model = this.CONFIG_MODEL[this.config.modelID]
+		} else {
+			this.log('debug', `Shure Model: ${this.config.modelID} NOT FOUND`)
+		}
+
+		this.updateActions()
+		this.updateFeedbacks()
+		this.updateVariables()
+
+		if (resetConnection === true || this.socket === undefined) {
+			this.initTCP()
+		} else if (cmd !== undefined) {
+			this.socket.send(cmd)
+		}
+	}
+
+	/**
+	 * Clean up the instance before it is destroyed.
+	 *
+	 * @access public
+	 * @since 1.0.0
+	 */
+	async destroy() {
+		if (this.socket !== undefined) {
+			this.socket.destroy()
+		}
+
+		if (this.heartbeatInterval !== undefined) {
+			clearInterval(this.heartbeatInterval)
+		}
+
+		if (this.heartbeatTimeout !== undefined) {
+			clearTimeout(this.heartbeatTimeout)
+		}
+
+		this.log('debug', 'destroy', this.id)
+	}
+
+	/**
 	 * Creates the configuration fields for web config.
 	 *
 	 * @returns {Array} the config fields
@@ -97,28 +163,6 @@ class ShureWirelessInstance extends InstanceBase {
 					'Changing this setting will apply to new values received.  To refresh all variables with the new setting, disable and re-enable the connection after saving these settings.',
 			},
 		]
-	}
-
-	/**
-	 * Clean up the instance before it is destroyed.
-	 *
-	 * @access public
-	 * @since 1.0.0
-	 */
-	async destroy() {
-		if (this.socket !== undefined) {
-			this.socket.destroy()
-		}
-
-		if (this.heartbeatInterval !== undefined) {
-			clearInterval(this.heartbeatInterval)
-		}
-
-		if (this.heartbeatTimeout !== undefined) {
-			clearTimeout(this.heartbeatTimeout)
-		}
-
-		this.log('debug', 'destroy', this.id)
 	}
 
 	/**
@@ -437,29 +481,25 @@ class ShureWirelessInstance extends InstanceBase {
 			default: '470.000',
 			regex: '/^(4[7-9][0-9]|[5-8][0-9]{2}|9[0-2][0-9]|93[0-7])\\.\\d(00|25|50|75)$/',
 		}
-		this.GAIN_INC_FIELD = function (family) {
-			return {
-				type: 'number',
-				label: 'Gain Value (dB)',
-				id: 'gain',
-				min: 1,
-				max: 60,
-				default: 3,
-				required: true,
-				range: true,
-			}
+		this.GAIN_INC_FIELD = {
+			type: 'number',
+			label: 'Gain Value (dB)',
+			id: 'gain',
+			min: 1,
+			max: 60,
+			default: 3,
+			required: true,
+			range: true,
 		}
-		this.GAIN_SET_FIELD = function (family) {
-			return {
-				type: 'number',
-				label: 'Gain Value (dB)',
-				id: 'gain',
-				min: -18,
-				max: 42,
-				default: 0,
-				required: true,
-				range: true,
-			}
+		this.GAIN_SET_FIELD = {
+			type: 'number',
+			label: 'Gain Value (dB)',
+			id: 'gain',
+			min: -18,
+			max: 42,
+			default: 0,
+			required: true,
+			range: true,
 		}
 		this.MUTE_FIELD = {
 			type: 'dropdown',
@@ -525,50 +565,6 @@ class ShureWirelessInstance extends InstanceBase {
 				{ id: 'LINKED.INACTIVE', label: 'Linked - Inactive' },
 				{ id: 'LINKED.ACTIVE', label: 'Linked - Active' },
 			],
-		}
-	}
-
-	/**
-	 * Process an updated configuration array.
-	 *
-	 * @param {Object} config - the new configuration
-	 * @access public
-	 * @since 1.0.0
-	 */
-	async configUpdated(config) {
-		let resetConnection = false
-		let cmd
-
-		if (this.config.host != config.host) {
-			resetConnection = true
-		}
-
-		if (this.config.meteringOn !== config.meteringOn) {
-			if (config.meteringOn === true) {
-				cmd = `< SET 0 METER_RATE ${this.config.meteringInterval} >`
-			} else {
-				cmd = '< SET 0 METER_RATE 0 >'
-			}
-		} else if (this.config.meteringRate != config.meteringRate && this.config.meteringOn === true) {
-			cmd = `< SET 0 METER_RATE ${config.meteringInterval} >`
-		}
-
-		this.config = config
-
-		if (this.CONFIG_MODEL[this.config.modelID] !== undefined) {
-			this.model = this.CONFIG_MODEL[this.config.modelID]
-		} else {
-			this.log('debug', `Shure Model: ${this.config.modelID} NOT FOUND`)
-		}
-
-		this.updateActions()
-		this.updateFeedbacks()
-		this.updateVariables()
-
-		if (resetConnection === true || this.socket === undefined) {
-			this.initTCP()
-		} else if (cmd !== undefined) {
-			this.socket.send(cmd)
 		}
 	}
 }

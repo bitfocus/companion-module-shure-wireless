@@ -253,7 +253,7 @@ export function updateFeedbacks() {
 			color: combineRgb(0, 0, 0),
 			bgcolor: combineRgb(255, 255, 0),
 		},
-		options: [this.CHANNELS_FIELD, this.GAIN_SET_FIELD(this.model.family)],
+		options: [this.CHANNELS_FIELD, this.GAIN_SET_FIELD],
 		callback: ({ options }) => {
 			if (this.api.getChannel(parseInt(options.channel)).audioGain == options.gain) {
 				return true

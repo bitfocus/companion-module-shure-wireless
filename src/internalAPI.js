@@ -311,7 +311,8 @@ export default class API {
 				[`${prefix}rf_level_a`]: channel.rfLevelA + (this.instance.config.variableFormat == 'units' ? ' dBm' : ''),
 				[`${prefix}rf_level_b`]: channel.rfLevelB + (this.instance.config.variableFormat == 'units' ? ' dBm' : ''),
 				[`${prefix}audio_level`]: channel.audioLevel + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),
-				[`${prefix}audio_level_peak`]: channel.audioLevelPeak + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),
+				[`${prefix}audio_level_peak`]:
+					channel.audioLevelPeak + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),
 			})
 
 			if (this.receiver.quadversityMode == 'ON') {
@@ -383,7 +384,8 @@ export default class API {
 		this.instance.setVariableValues({
 			[`${prefix}rf_level`]: channel.rfLevel + (this.instance.config.variableFormat == 'units' ? ' dBm' : ''),
 			[`${prefix}audio_level`]: channel.audioLevel + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),
-			[`${prefix}audio_level_peak`]: channel.audioLevelPeak + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),
+			[`${prefix}audio_level_peak`]:
+				channel.audioLevelPeak + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),
 		})
 	}
 
@@ -494,7 +496,10 @@ export default class API {
 			this.instance.setVariableValues({ [`${prefix}meter_rate`]: variable })
 		} else if (key == 'AUDIO_GAIN') {
 			channel.audioGain = parseInt(value) - 18
-			variable = (channel.audioGain > 0 ? '+' : '') + channel.audioGain.toString() + (this.instance.config.variableFormat == 'units' ? ' dB' : '')
+			variable =
+				(channel.audioGain > 0 ? '+' : '') +
+				channel.audioGain.toString() +
+				(this.instance.config.variableFormat == 'units' ? ' dB' : '')
 			this.instance.setVariableValues({ [`${prefix}audio_gain`]: variable })
 			this.instance.checkFeedbacks('channel_gain')
 		} else if (key == 'AUDIO_MUTE') {
