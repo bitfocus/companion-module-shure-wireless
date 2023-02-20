@@ -1,4 +1,6 @@
 import { combineRgb } from '@companion-module/base'
+import { Fields } from './setup.js'
+
 /**
  * INTERNAL: initialize feedbacks.
  *
@@ -97,7 +99,7 @@ export function updateFeedbacks() {
 				default: iconDefault,
 				choices: iconChoices,
 			},
-			this.BATTERY_LEVEL_FIELD,
+			Fields.BatteryLevel,
 		],
 		callback: (event) => {
 			let opt = event.options
@@ -159,7 +161,7 @@ export function updateFeedbacks() {
 			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(255, 0, 0),
 		},
-		options: [this.CHANNELS_FIELD, this.BATTERY_LEVEL_FIELD],
+		options: [this.CHANNELS_FIELD, Fields.BatteryLevel],
 		callback: ({ options }) => {
 			if (this.api.getChannel(parseInt(options.channel)).batteryBars <= options.barlevel) {
 				return true
@@ -235,7 +237,7 @@ export function updateFeedbacks() {
 			color: combineRgb(0, 0, 0),
 			bgcolor: combineRgb(255, 255, 0),
 		},
-		options: [this.CHANNELS_FIELD, this.FREQUENCY_FIELD],
+		options: [this.CHANNELS_FIELD, Fields.Frequency],
 		callback: ({ options }) => {
 			if (this.api.getChannel(parseInt(options.channel)).frequency == options.value) {
 				return true
@@ -253,7 +255,7 @@ export function updateFeedbacks() {
 			color: combineRgb(0, 0, 0),
 			bgcolor: combineRgb(255, 255, 0),
 		},
-		options: [this.CHANNELS_FIELD, this.GAIN_SET_FIELD],
+		options: [this.CHANNELS_FIELD, Fields.GainSet],
 		callback: ({ options }) => {
 			if (this.api.getChannel(parseInt(options.channel)).audioGain == options.gain) {
 				return true
@@ -316,7 +318,7 @@ export function updateFeedbacks() {
 				color: combineRgb(0, 0, 0),
 				bgcolor: combineRgb(255, 255, 0),
 			},
-			options: [this.SLOTS_FIELD, this.SLOT_STATUS_FIELD],
+			options: [this.SLOTS_FIELD, Fields.SlotStatus],
 			callback: ({ options }) => {
 				let slot = options.slot.split(':')
 				if (this.api.getSlot(parseInt(slot[0]), parseInt(slot[1])).status == options.value) {
@@ -335,7 +337,7 @@ export function updateFeedbacks() {
 				color: combineRgb(255, 255, 255),
 				bgcolor: combineRgb(100, 255, 0),
 			},
-			options: [this.SLOTS_FIELD, this.RFOUTPUT_FIELD],
+			options: [this.SLOTS_FIELD, Fields.RfOutput],
 			callback: ({ options }) => {
 				let slot = options.slot.split(':')
 				if (this.api.getSlot(parseInt(slot[0]), parseInt(slot[1])).txRfOutput == options.onoff) {
@@ -354,7 +356,7 @@ export function updateFeedbacks() {
 				color: combineRgb(255, 255, 255),
 				bgcolor: combineRgb(100, 255, 0),
 			},
-			options: [this.SLOTS_FIELD, this.RFPOWER_FIELD],
+			options: [this.SLOTS_FIELD, Fields.RfPower],
 			callback: ({ options }) => {
 				let slot = options.slot.split(':')
 				if (this.api.getSlot(parseInt(slot[0]), parseInt(slot[1])).txPowerMode == parseInt(options.power)) {
