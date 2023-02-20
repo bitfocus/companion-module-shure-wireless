@@ -1,3 +1,56 @@
+function CreateModelChoices() {
+	let choices = Object.values(Models)
+	// Sort alphabetical
+	choices.sort(function (a, b) {
+		let x = a.label.toLowerCase()
+		let y = b.label.toLowerCase()
+		if (x < y) {
+			return -1
+		}
+		if (x > y) {
+			return 1
+		}
+		return 0
+	})
+
+	return choices
+}
+
+export const Models = {
+	ulxd4: { id: 'ulxd4', family: 'ulx', label: 'ULXD4 Single Receiver', channels: 1, slots: 0 },
+	ulxd4d: { id: 'ulxd4d', family: 'ulx', label: 'ULXD4D Dual Receiver', channels: 2, slots: 0 },
+	ulxd4q: { id: 'ulxd4q', family: 'ulx', label: 'ULXD4Q Quad Receiver', channels: 4, slots: 0 },
+	qlxd4: { id: 'qlxd4', family: 'qlx', label: 'QLXD4 Single Receiver', channels: 1, slots: 0 },
+	ad4d: { id: 'ad4d', family: 'ad', label: 'AD4D Dual Receiver', channels: 2, slots: 8 },
+	ad4q: { id: 'ad4q', family: 'ad', label: 'AD4Q Quad Receiver', channels: 4, slots: 8 },
+	slxd4: { id: 'slxd4', family: 'slx', label: 'SLXD4 Single Receiver', channels: 1, slots: 0 },
+	slxd4d: { id: 'slxd4d', family: 'slx', label: 'SLXD4D Dual Receiver', channels: 2, slots: 0 },
+}
+
+export const Choices = {
+	Models: CreateModelChoices(),
+	OnOffToggle: [
+		{ id: 'ON', label: 'Mute' },
+		{ id: 'OFF', label: 'Unmute' },
+		{ id: 'TOGGLE', label: 'Toggle Mute/Unmute' },
+	],
+	RfOutput: [
+		{ id: 'RF_ON', label: 'RF On' },
+		{ id: 'RF_MUTE', label: 'RF Mute' },
+	],
+	RfPower: [
+		{ id: 'LOW', label: 'Low' },
+		{ id: 'NORMAL', label: 'Normal' },
+		{ id: 'HIGH', label: 'High' },
+	],
+	SlotStatus: [
+		{ id: 'EMPTY', label: 'Empty' },
+		{ id: 'STANDARD', label: 'Standard' },
+		{ id: 'LINKED.INACTIVE', label: 'Linked - Inactive' },
+		{ id: 'LINKED.ACTIVE', label: 'Linked - Active' },
+	],
+}
+
 export const Fields = {
 	BatteryLevel: {
 		type: 'number',
@@ -71,27 +124,4 @@ export const Fields = {
 		default: 'LINKED.ACTIVE',
 		choices: Choices.SlotStatus,
 	},
-}
-
-export const Choices = {
-	OnOffToggle: [
-		{ id: 'ON', label: 'Mute' },
-		{ id: 'OFF', label: 'Unmute' },
-		{ id: 'TOGGLE', label: 'Toggle Mute/Unmute' },
-	],
-	RfOutput: [
-		{ id: 'RF_ON', label: 'RF On' },
-		{ id: 'RF_MUTE', label: 'RF Mute' },
-	],
-	RfPower: [
-		{ id: 'LOW', label: 'Low' },
-		{ id: 'NORMAL', label: 'Normal' },
-		{ id: 'HIGH', label: 'High' },
-	],
-	SlotStatus: [
-		{ id: 'EMPTY', label: 'Empty' },
-		{ id: 'STANDARD', label: 'Standard' },
-		{ id: 'LINKED.INACTIVE', label: 'Linked - Inactive' },
-		{ id: 'LINKED.ACTIVE', label: 'Linked - Active' },
-	],
 }

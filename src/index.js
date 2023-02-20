@@ -10,6 +10,7 @@ import { updateFeedbacks } from './feedback.js'
 import { updateVariables } from './variables.js'
 import API from './internalAPI.js'
 import { BooleanFeedbackUpgradeMap } from './upgrades.js'
+import { Choices, Models } from './setup.js'
 
 /**
  * Companion instance class for the Shure Wireless Microphones.
@@ -61,8 +62,8 @@ class ShureWirelessInstance extends InstanceBase {
 
 		this.config = config
 
-		if (this.CONFIG_MODEL[this.config.modelID] !== undefined) {
-			this.model = this.CONFIG_MODEL[this.config.modelID]
+		if (Models[this.config.modelID] !== undefined) {
+			this.model = Models[this.config.modelID]
 		} else {
 			this.log('debug', `Shure Model: ${this.config.modelID} NOT FOUND`)
 		}
@@ -128,7 +129,7 @@ class ShureWirelessInstance extends InstanceBase {
 				type: 'dropdown',
 				id: 'modelID',
 				label: 'Model Type',
-				choices: this.CHOICES_MODEL,
+				choices: Choices.Models,
 				width: 6,
 				default: 'ulxd4',
 			},
@@ -181,41 +182,16 @@ class ShureWirelessInstance extends InstanceBase {
 		this.heartbeatInterval = null
 		this.heartbeatTimeout = null
 
-		this.CONFIG_MODEL = {
-			ulxd4: { id: 'ulxd4', family: 'ulx', label: 'ULXD4 Single Receiver', channels: 1, slots: 0 },
-			ulxd4d: { id: 'ulxd4d', family: 'ulx', label: 'ULXD4D Dual Receiver', channels: 2, slots: 0 },
-			ulxd4q: { id: 'ulxd4q', family: 'ulx', label: 'ULXD4Q Quad Receiver', channels: 4, slots: 0 },
-			qlxd4: { id: 'qlxd4', family: 'qlx', label: 'QLXD4 Single Receiver', channels: 1, slots: 0 },
-			ad4d: { id: 'ad4d', family: 'ad', label: 'AD4D Dual Receiver', channels: 2, slots: 8 },
-			ad4q: { id: 'ad4q', family: 'ad', label: 'AD4Q Quad Receiver', channels: 4, slots: 8 },
-			slxd4: { id: 'slxd4', family: 'slx', label: 'SLXD4 Single Receiver', channels: 1, slots: 0 },
-			slxd4d: { id: 'slxd4d', family: 'slx', label: 'SLXD4D Dual Receiver', channels: 2, slots: 0 },
-		}
-
 		this.CHOICES_CHANNELS = []
 		this.CHOICES_CHANNELS_A = []
 		this.CHOICES_SLOTS = []
 		this.CHOICES_SLOTS_A = []
 
-		this.CHOICES_MODEL = Object.values(this.CONFIG_MODEL)
-		// Sort alphabetical
-		this.CHOICES_MODEL.sort(function (a, b) {
-			let x = a.label.toLowerCase()
-			let y = b.label.toLowerCase()
-			if (x < y) {
-				return -1
-			}
-			if (x > y) {
-				return 1
-			}
-			return 0
-		})
-
 		if (this.config.modelID !== undefined) {
-			this.model = this.CONFIG_MODEL[this.config.modelID]
+			this.model = Models[this.config.modelID]
 		} else {
 			this.config.modelID = 'ulxd4'
-			this.model = this.CONFIG_MODEL['ulxd4']
+			this.model = Models['ulxd4']
 		}
 
 		if (this.config.variableFormat === undefined) {
