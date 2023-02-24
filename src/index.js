@@ -8,7 +8,7 @@ import {
 import { updateActions } from './actions.js'
 import { updateFeedbacks } from './feedback.js'
 import { updateVariables } from './variables.js'
-import API from './internalAPI.js'
+import WirelessApi from './internalAPI.js'
 import { BooleanFeedbackUpgradeMap } from './upgrades.js'
 import { Choices, Models } from './setup.js'
 
@@ -201,7 +201,7 @@ class ShureWirelessInstance extends InstanceBase {
 
 		this.updateStatus('disconnected', 'Connecting')
 
-		this.api = new API(this)
+		this.api = new WirelessApi(this)
 
 		this.setupFields()
 

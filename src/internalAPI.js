@@ -9,7 +9,7 @@ import Icons from './icons.js'
  * @author Joseph Adams <josephdadams@gmail.com>
  * @author Keith Rocheck <keith.rocheck@gmail.com>
  */
-export default class API {
+export default class WirelessApi {
 	/**
 	 * Create an instance of a Shure API module.
 	 *
