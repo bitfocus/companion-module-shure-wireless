@@ -13,11 +13,11 @@
 	},
 	"license": "MIT",
 	"dependencies": {
-		"@companion-module/base": "~1.1",
+		"@companion-module/base": "~1.2",
 		"pngjs": "~6.0.0"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "~1.0",
+		"@companion-module/tools": "~1.1",
 		"prettier": "^2.8.3"
 	},
 	"prettier": "@companion-module/tools/.prettierrc.json"
