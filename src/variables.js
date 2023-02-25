@@ -25,10 +25,6 @@ export function updateVariables() {
 			variables.push({ variableId: `${prefix}_encryption_status`, name: `Channel ${i} Encryption Status` })
 		}
 
-		/*if (this.model.family == 'ad' || this.model.family == 'slx') {
-			variables.push({ variableId: `${prefix}_flash`, name: `Channel ${i} Flash` });
-		}*/
-
 		if (this.model.family == 'ad' || this.model.family == 'ulx') {
 			variables.push({ variableId: `${prefix}_interference_status`, name: `Channel ${i} Interference Status` })
 		}
@@ -170,10 +166,6 @@ export function updateVariables() {
 	}
 
 	variables.push({ variableId: 'firmware_version', name: 'Firmware Version' })
-
-	/*if (this.model.family != 'qlx') {
-		variables.push({ variableId: 'flash', name: 'Flash Lights On/Off' });
-	}*/
 
 	if (this.model.family == 'slx') {
 		variables.push({ variableId: 'lock_status', name: 'Lock Status' })

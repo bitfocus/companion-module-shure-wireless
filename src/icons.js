@@ -16,8 +16,6 @@ export default class Icons {
 	 */
 	constructor(instance) {
 		this.instance = instance
-		this.width = 72
-		this.height = 58
 
 		this.savedIcons = {}
 
@@ -589,7 +587,7 @@ export default class Icons {
 	drawFromPNGdata(img, icon, xStart, yStart, width, height, halign, valign) {
 		if (icon !== undefined) {
 			try {
-				img.drawFromPNGdata(icon, xStart, this.height == 72 ? yStart + 14 : yStart, width, height, halign, valign)
+				img.drawFromPNGdata(icon, xStart, yStart, width, height, halign, valign)
 			} catch (e) {
 				return
 			}
@@ -786,20 +784,5 @@ export default class Icons {
 		}
 
 		return out
-	}
-
-	/**
-	 * Set the raster to the current setting
-	 *
-	 * @param {Object} info - the bank configuration
-	 * @access public
-	 * @since 1.2.2
-	 */
-	setRaster(info) {
-		if (info.height !== this.height || info.width !== this.width) {
-			this.height = info.height
-			this.width = info.width
-			this.savedIcons = {}
-		}
 	}
 }
