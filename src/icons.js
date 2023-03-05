@@ -1,3 +1,5 @@
+import Image from './vendor/companion/Image.js'
+
 /**
  * Companion instance icons class for Shure Wireless.
  * Utilized to generate/recall the icons for realtime monitoring.
@@ -5,7 +7,7 @@
  * @since 1.1.0
  * @author Keith Rocheck <keith.rocheck@gmail.com>
  */
-class instance_icons {
+export default class Icons {
 	/**
 	 * Create an instance of a Shure icons module.
 	 *
@@ -14,10 +16,6 @@ class instance_icons {
 	 */
 	constructor(instance) {
 		this.instance = instance
-		this.Image = instance.Image
-		this.rgb = instance.rgb
-		this.width = 72
-		this.height = 58
 
 		this.savedIcons = {}
 
@@ -589,7 +587,7 @@ class instance_icons {
 	drawFromPNGdata(img, icon, xStart, yStart, width, height, halign, valign) {
 		if (icon !== undefined) {
 			try {
-				img.drawFromPNGdata(icon, xStart, this.height == 72 ? yStart + 14 : yStart, width, height, halign, valign)
+				img.drawFromPNGdata(icon, xStart, yStart, width, height, halign, valign)
 			} catch (e) {
 				return
 			}
@@ -599,6 +597,7 @@ class instance_icons {
 	/**
 	 * Returns the desired channel state object.
 	 *
+	 * @param {Object} image - the image raster object
 	 * @param {String} ant - the antenna status
 	 * @param {number} audio - the audio status
 	 * @param {number} rfA - the RF A status
@@ -612,75 +611,71 @@ class instance_icons {
 	 * @access public
 	 * @since 1.1.0
 	 */
-	getADStatus(ant, audio, rfA, rfB, battery, batteryAlertLevel, lock, encryption, quality) {
-		var id =
-			(ant ? 'a' + ant : '') +
-			(audio ? 'b' + audio : '') +
-			(rfA ? 'c' + rfA : '') +
-			(rfB ? 'd' + rfB : '') +
-			(battery ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '') +
-			(lock ? 'f' + lock : '') +
-			(encryption ? 'g' + encryption : '') +
-			(quality ? 'h' + quality : '')
-		var out
+	getADStatus(image, ant, audio, rfA, rfB, battery, batteryAlertLevel, lock, encryption, quality) {
+		let out
 
-		if (this.savedIcons[id] === undefined) {
-			var img = this.getBaseImage()
+		if (image && image.width && image.height) {
+			let id =
+				image.width +
+				'x' +
+				image.height +
+				(ant ? 'a' + ant : '') +
+				(audio ? 'b' + audio : '') +
+				(rfA ? 'c' + rfA : '') +
+				(rfB ? 'd' + rfB : '') +
+				(battery ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '') +
+				(lock ? 'f' + lock : '') +
+				(encryption ? 'g' + encryption : '') +
+				(quality ? 'h' + quality : '')
 
-			if (audio === undefined) {
-				this.drawFromPNGdata(img, this.AD_ANT[ant], 58, 13, 11, 10, 'left', 'top')
-				this.drawFromPNGdata(img, this.AD_RF[rfA], 58, 24, 4, 31, 'left', 'top')
-				this.drawFromPNGdata(img, this.AD_RF[rfB], 64, 24, 4, 31, 'left', 'top')
-			} else if (ant === undefined) {
-				this.drawFromPNGdata(img, this.AD_AUDIO[audio], 64, 13, 4, 42, 'left', 'top')
+			if (this.savedIcons[id] === undefined) {
+				let img = new Image(image.width, image.height)
+
+				if (audio === undefined) {
+					this.drawFromPNGdata(img, this.AD_ANT[ant], 58, 13, 11, 10, 'left', 'top')
+					this.drawFromPNGdata(img, this.AD_RF[rfA], 58, 24, 4, 31, 'left', 'top')
+					this.drawFromPNGdata(img, this.AD_RF[rfB], 64, 24, 4, 31, 'left', 'top')
+				} else if (ant === undefined) {
+					this.drawFromPNGdata(img, this.AD_AUDIO[audio], 64, 13, 4, 42, 'left', 'top')
+				} else {
+					this.drawFromPNGdata(img, this.AD_ANT[ant], 51, 13, 11, 10, 'left', 'top')
+					this.drawFromPNGdata(img, this.AD_AUDIO[audio], 64, 13, 4, 42, 'left', 'top')
+					this.drawFromPNGdata(img, this.AD_RF[rfA], 51, 24, 4, 31, 'left', 'top')
+					this.drawFromPNGdata(img, this.AD_RF[rfB], 57, 24, 4, 31, 'left', 'top')
+				}
+
+				if (battery !== undefined && battery <= batteryAlertLevel) {
+					this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46, 25, 9, 'left', 'top')
+				} else {
+					this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46, 25, 9, 'left', 'top')
+				}
+
+				if (battery === undefined && lock === undefined) {
+					this.drawFromPNGdata(img, this.AD_QUALITY[quality], 6, 51, 40, 4, 'left', 'top')
+				} else {
+					this.drawFromPNGdata(img, this.AD_QUALITY[quality], 6, 40, 40, 4, 'left', 'top')
+				}
+
+				this.drawFromPNGdata(img, this.ENCRYPTION[encryption], 52, 2, 16, 6, 'left', 'top')
+
+				if (lock == 'ALL' || lock == 'POWER' || lock == 'MENU') {
+					this.drawFromPNGdata(img, this.LOCK[lock], 31, 46, 18, 8, 'left', 'top')
+				}
+
+				out = img.toBase64()
+				this.savedIcons[id] = out
 			} else {
-				this.drawFromPNGdata(img, this.AD_ANT[ant], 51, 13, 11, 10, 'left', 'top')
-				this.drawFromPNGdata(img, this.AD_AUDIO[audio], 64, 13, 4, 42, 'left', 'top')
-				this.drawFromPNGdata(img, this.AD_RF[rfA], 51, 24, 4, 31, 'left', 'top')
-				this.drawFromPNGdata(img, this.AD_RF[rfB], 57, 24, 4, 31, 'left', 'top')
+				out = this.savedIcons[id]
 			}
-
-			if (battery !== undefined && battery <= batteryAlertLevel) {
-				this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46, 25, 9, 'left', 'top')
-			} else {
-				this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46, 25, 9, 'left', 'top')
-			}
-
-			if (battery === undefined && lock === undefined) {
-				this.drawFromPNGdata(img, this.AD_QUALITY[quality], 6, 51, 40, 4, 'left', 'top')
-			} else {
-				this.drawFromPNGdata(img, this.AD_QUALITY[quality], 6, 40, 40, 4, 'left', 'top')
-			}
-
-			this.drawFromPNGdata(img, this.ENCRYPTION[encryption], 52, 2, 16, 6, 'left', 'top')
-
-			if (lock == 'ALL' || lock == 'POWER' || lock == 'MENU') {
-				this.drawFromPNGdata(img, this.LOCK[lock], 31, 46, 18, 8, 'left', 'top')
-			}
-
-			out = img.toBase64()
-			this.savedIcons[id] = out
-		} else {
-			out = this.savedIcons[id]
 		}
 
 		return out
 	}
 
 	/**
-	 * Returns a new image with a proper raster
-	 *
-	 * @returns {Image} the new image
-	 * @access protected
-	 * @since 1.2.1
-	 */
-	getBaseImage() {
-		return new this.Image(this.width, this.height)
-	}
-
-	/**
 	 * Returns the desired channel state object.
 	 *
+	 * @param {Object} image - the image raster object
 	 * @param {number} audio - the audio status
 	 * @param {number} rf - the RF status
 	 * @param {number} battery - the battery status
@@ -689,33 +684,39 @@ class instance_icons {
 	 * @access public
 	 * @since 1.1.0
 	 */
-	getSLXStatus(audio, rf, battery, batteryAlertLevel) {
-		var id =
-			(audio ? 'b' + audio : '') +
-			(rf ? 'c' + rf : '') +
-			(battery ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '')
-		var out
+	getSLXStatus(image, audio, rf, battery, batteryAlertLevel) {
+		let out
 
-		if (this.savedIcons[id] === undefined) {
-			var img = this.getBaseImage()
+		if (image && image.width && image.height) {
+			let id =
+				image.width +
+				'x' +
+				image.height +
+				(audio ? 'b' + audio : '') +
+				(rf ? 'c' + rf : '') +
+				(battery ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '')
 
-			if (audio === undefined) {
-				this.drawFromPNGdata(img, this.SLX_RF[rf], 63, 11, 6, 44, 'left', 'top')
+			if (this.savedIcons[id] === undefined) {
+				let img = new Image(image.width, image.height)
+
+				if (audio === undefined) {
+					this.drawFromPNGdata(img, this.SLX_RF[rf], 63, 11, 6, 44, 'left', 'top')
+				} else {
+					this.drawFromPNGdata(img, this.ULX_AUDIO[audio], 63, 12, 5, 43, 'left', 'top')
+					this.drawFromPNGdata(img, this.SLX_RF[rf], 55, 11, 6, 44, 'left', 'top')
+				}
+
+				if (battery <= batteryAlertLevel) {
+					this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46, 25, 9, 'left', 'top')
+				} else {
+					this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46, 25, 9, 'left', 'top')
+				}
+
+				out = img.toBase64()
+				this.savedIcons[id] = out
 			} else {
-				this.drawFromPNGdata(img, this.ULX_AUDIO[audio], 63, 12, 5, 43, 'left', 'top')
-				this.drawFromPNGdata(img, this.SLX_RF[rf], 55, 11, 6, 44, 'left', 'top')
+				out = this.savedIcons[id]
 			}
-
-			if (battery <= batteryAlertLevel) {
-				this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46, 25, 9, 'left', 'top')
-			} else {
-				this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46, 25, 9, 'left', 'top')
-			}
-
-			out = img.toBase64()
-			this.savedIcons[id] = out
-		} else {
-			out = this.savedIcons[id]
 		}
 
 		return out
@@ -724,6 +725,7 @@ class instance_icons {
 	/**
 	 * Returns the desired channel state object.
 	 *
+	 * @param {Object} image - the image raster object
 	 * @param {String} ant - the antenna status
 	 * @param {number} audio - the audio status
 	 * @param {number} rf - the RF status
@@ -735,63 +737,52 @@ class instance_icons {
 	 * @access public
 	 * @since 1.1.0
 	 */
-	getULXStatus(ant, audio, rf, battery, batteryAlertLevel, lock, encryption) {
-		var id =
-			(ant ? 'a' + ant : '') +
-			(audio ? 'b' + audio : '') +
-			(rf ? 'c' + rf : '') +
-			(battery ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '') +
-			(lock ? 'f' + lock : '') +
-			(encryption ? 'g' + encryption : '')
-		var out
+	getULXStatus(image, ant, audio, rf, battery, batteryAlertLevel, lock, encryption) {
+		let out
 
-		if (this.savedIcons[id] === undefined) {
-			var img = this.getBaseImage()
+		if (image && image.width && image.height) {
+			let id =
+				image.width +
+				'x' +
+				image.height +
+				(ant ? 'a' + ant : '') +
+				(audio ? 'b' + audio : '') +
+				(rf ? 'c' + rf : '') +
+				(battery ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '') +
+				(lock ? 'f' + lock : '') +
+				(encryption ? 'g' + encryption : '')
 
-			if (audio === undefined) {
-				this.drawFromPNGdata(img, this.ULX_ANT[ant], 56, 12, 13, 5, 'left', 'top')
-				this.drawFromPNGdata(img, this.ULX_RF[rf], 59, 19, 6, 37, 'left', 'top')
+			if (this.savedIcons[id] === undefined) {
+				let img = new Image(image.width, image.height)
+
+				if (audio === undefined) {
+					this.drawFromPNGdata(img, this.ULX_ANT[ant], 56, 12, 13, 5, 'left', 'top')
+					this.drawFromPNGdata(img, this.ULX_RF[rf], 59, 19, 6, 37, 'left', 'top')
+				} else {
+					this.drawFromPNGdata(img, this.ULX_ANT[ant], 47, 12, 13, 5, 'left', 'top')
+					this.drawFromPNGdata(img, this.ULX_AUDIO[audio], 63, 12, 5, 43, 'left', 'top')
+					this.drawFromPNGdata(img, this.ULX_RF[rf], 50, 19, 6, 37, 'left', 'top')
+				}
+
+				if (battery <= batteryAlertLevel) {
+					this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46, 25, 9, 'left', 'top')
+				} else {
+					this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46, 25, 9, 'left', 'top')
+				}
+
+				this.drawFromPNGdata(img, this.ENCRYPTION[encryption], 52, 2, 16, 6, 'left', 'top')
+
+				if (lock == 'ALL' || lock == 'POWER' || lock == 'MENU') {
+					this.drawFromPNGdata(img, this.LOCK[lock], 31, 46, 18, 8, 'left', 'top')
+				}
+
+				out = img.toBase64()
+				this.savedIcons[id] = out
 			} else {
-				this.drawFromPNGdata(img, this.ULX_ANT[ant], 47, 12, 13, 5, 'left', 'top')
-				this.drawFromPNGdata(img, this.ULX_AUDIO[audio], 63, 12, 5, 43, 'left', 'top')
-				this.drawFromPNGdata(img, this.ULX_RF[rf], 50, 19, 6, 37, 'left', 'top')
+				out = this.savedIcons[id]
 			}
-
-			if (battery <= batteryAlertLevel) {
-				this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46, 25, 9, 'left', 'top')
-			} else {
-				this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46, 25, 9, 'left', 'top')
-			}
-
-			this.drawFromPNGdata(img, this.ENCRYPTION[encryption], 52, 2, 16, 6, 'left', 'top')
-
-			if (lock == 'ALL' || lock == 'POWER' || lock == 'MENU') {
-				this.drawFromPNGdata(img, this.LOCK[lock], 31, 46, 18, 8, 'left', 'top')
-			}
-
-			out = img.toBase64()
-			this.savedIcons[id] = out
-		} else {
-			out = this.savedIcons[id]
 		}
 
 		return out
 	}
-
-	/**
-	 * Set the raster to the current setting
-	 *
-	 * @param {Object} info - the bank configuration
-	 * @access public
-	 * @since 1.2.2
-	 */
-	setRaster(info) {
-		if (info.height !== this.height || info.width !== this.width) {
-			this.height = info.height
-			this.width = info.width
-			this.savedIcons = {}
-		}
-	}
 }
-
-exports = module.exports = instance_icons

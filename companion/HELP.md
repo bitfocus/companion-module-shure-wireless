@@ -6,7 +6,6 @@ This module will connect to the Shure receivers below to provide feedback status
 - Shure QLX-D (QLXD4)
 - Shure SLX-D (SLXD4, SLXD4D)
 - Shure Axient Digital (AD4D, AD4Q)
-- Shure Microflex Wireless (MXWANI4, MXWANI8)
 
 ### Available actions
 
@@ -18,8 +17,8 @@ This module will connect to the Shure receivers below to provide feedback status
 | Increase Audio Gain of Channel     | All                 |
 | Decrease Audio Gain of Channel     | All                 |
 | Set Frequency of Channel           | ULX, QLX, SLX, & AD |
-| Flash Lights on Receiver           | ULX, SLX, AD, & MXW |
-| Flash Lights on Receiver Channel   | SLX, AD, & MXW      |
+| Flash Lights on Receiver           | ULX, SLX, AD        |
+| Flash Lights on Receiver Channel   | SLX, AD             |
 | Set slot RF output                 | ADX only            |
 | Set slot RF power level            | ADX only            |
 
@@ -30,9 +29,9 @@ This module will connect to the Shure receivers below to provide feedback status
 | Battery Level          | If the battery bar drops to or below a certain value, change the color of the button.         | All                 |
 | Channel Frequency      | If the selected channel\'s frequency is set, change the color of the button.                  | ULX, QLX, SLX, & AD |
 | Channel Gain           | If the selected channel\'s gain is set, change the color of the button.                       | All                 |
-| Channel Muted          | If the selected channel is muted, change the color of the button.                             | ULX, AD, & MXW      |
+| Channel Muted          | If the selected channel is muted, change the color of the button.                             | ULX, AD             |
 | Channel Status Display | **See below**                                                                                 | ULX, QLX, SLX, & AD |
-| Interference Status    | If the selected channel gets interference, change the color of the button.                    | ULX, QLX, AD, & MXW |
+| Interference Status    | If the selected channel gets interference, change the color of the button.                    | ULX, QLX, AD        |
 | Transmitter Muted      | If the selected channel\'s transmitter is muted, change the color of the button.              | ULX, QLX, & AD      |
 | Transmitter Turned Off | If the selected channel\'s transmitter is powered off, change the color of the button.        | All                 |
 | Slot is Active         | If the selected slot\'s transmitter is active to the channel, change the color of the button. | AD                  |
@@ -44,27 +43,27 @@ This module will connect to the Shure receivers below to provide feedback status
 
 The "Channel Status Display" is a customizable feedback to provide a graphic status readout for a channel, similar to information available on the front panel or in Wireless Workbench.
 
-| Axient                              | ULX-D                                 | QLX-D                                 | SLX-D                                 |
-| ----------------------------------- | ------------------------------------- | ------------------------------------- | ------------------------------------- |
-| ![AD example](icons/example-ad.png) | ![ULX example](icons/example-ulx.png) | ![QLX example](icons/example-qlx.png) | ![SLX example](icons/example-slx.png) |
+| Axient                               | ULX-D                                  | QLX-D                                  | SLX-D                                  |
+| ------------------------------------ | -------------------------------------- | -------------------------------------- | -------------------------------------- |
+| ![AD example](images/example-ad.png) | ![ULX example](images/example-ulx.png) | ![QLX example](images/example-qlx.png) | ![SLX example](images/example-slx.png) |
 
 #### Setup
 
 To utilize the feedback, you will utilize the "Instance Feedback" section of a button, selecting the "+ Add feedback" option.
 
-![Instance feedback section](icons/doc-fb-block.png)
+![Instance feedback section](images/doc-fb-block.png)
 
 In the dropdown you'll locate the "Channel Status Display" option for your Shure wireless instance.
 
-![Instance feedback add](icons/doc-add-fb.png)
+![Instance feedback add](images/doc-add-fb.png)
 
 Once added, the feedback will have option to select a channel to display, a field to select text labels to display, a field to select which visual icons should display, and a battery level alert option for the battery icon. A default selection of these options is loaded. Please reference the below tables for further information about them.
 
-![Instance feedback options](icons/doc-options.png)
+![Instance feedback options](images/doc-options.png)
 
 Most of the data that presents is automatically populated from the receiver as information changes, however, a data flow called "metering" is used for the audio and RF data. By default the instance will ask for updates to that data every 5 seconds (5000 ms). In the instance's configuration, metering can be disabled or the interval changed to between 500 and 60000 ms. Because of the graphical nature of this display, additional CPU resources are needed to update the displays timely. For this reason it is recommended to test faster metering intervals with your configuration if you would like the audio and RF displays to update faster.
 
-![Instance metering](icons/doc-metering.PNG)
+![Instance metering](images/doc-metering.PNG)
 
 #### Labels
 
@@ -84,11 +83,11 @@ _Labels cannot be re-ordered and will display in the order listed here based on 
 
 #### Icons
 
-| Title      | Description                                                                                                                                                                                                                        | Model Support  | Examples                                                                                                                                                                       |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Audio      | Will display a 6 or 8 segment audio meter on the right edge of the bank.                                                                                                                                                           | All            | ![ULX audio example](icons/example-ulx-audio.png) ![AD audio example](icons/example-ad-audio.png)                                                                              |
-| Battery    | Will display the 5-segment battery indicator in the bottom left of the bank. Based on the "Battery Alert Level" the icon will turn red when the amounts reaches that level. The icon will appear gray when the transmitter is off. | All            | ![Full battery example](icons/example-battery-1.png) ![Low battery example](icons/example-battery-2.png) ![Transmitter off battery example](icons/example-battery-3.png)       |
-| Encryption | Will display a key icon in the top right of the bank. This will appear white when encyption is enabled, gray when it is disabled, or red when there's an encryption error with the transmitter.                                    | UlX, QLX, & AD | ![Encryption on example](icons/example-encryption-1.png) ![Encryption off example](icons/example-encryption-3.png) ![Encryption error example](icons/example-encryption-2.png) |
-| Locks      | Will display a transmitter lock indication on the bottom of the bank. If a lock is detected the lock icon will be displayed along with an 'M' and/or 'P' to designate Menu and Power locks, repsectively.                          | UlX, QLX, & AD | ![Locks example](icons/example-locks.png)                                                                                                                                      |
-| Quality    | Will display 5-segment quality indicator above the battery and lock icons (if enabled) or along the bottom of the bank.                                                                                                            | AD             | ![Quality example](icons/example-ad-quality.png)                                                                                                                               |
-| RF         | Will display a RF monitoring block appropriate for the model on the right edge of the bank and inside the audio meter (if enabled).                                                                                                | All            | ![ULX rf example](icons/example-ulx-rf.png) ![AD rf example](icons/example-ad-rf.png)                                                                                          |
+| Title      | Description                                                                                                                                                                                                                        | Model Support  | Examples                                                                                                                                                                          |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Audio      | Will display a 6 or 8 segment audio meter on the right edge of the bank.                                                                                                                                                           | All            | ![ULX audio example](images/example-ulx-audio.png) ![AD audio example](images/example-ad-audio.png)                                                                               |
+| Battery    | Will display the 5-segment battery indicator in the bottom left of the bank. Based on the "Battery Alert Level" the icon will turn red when the amounts reaches that level. The icon will appear gray when the transmitter is off. | All            | ![Full battery example](images/example-battery-1.png) ![Low battery example](images/example-battery-2.png) ![Transmitter off battery example](images/example-battery-3.png)       |
+| Encryption | Will display a key icon in the top right of the bank. This will appear white when encyption is enabled, gray when it is disabled, or red when there's an encryption error with the transmitter.                                    | UlX, QLX, & AD | ![Encryption on example](images/example-encryption-1.png) ![Encryption off example](images/example-encryption-3.png) ![Encryption error example](images/example-encryption-2.png) |
+| Locks      | Will display a transmitter lock indication on the bottom of the bank. If a lock is detected the lock icon will be displayed along with an 'M' and/or 'P' to designate Menu and Power locks, repsectively.                          | UlX, QLX, & AD | ![Locks example](images/example-locks.png)                                                                                                                                        |
+| Quality    | Will display 5-segment quality indicator above the battery and lock icons (if enabled) or along the bottom of the bank.                                                                                                            | AD             | ![Quality example](images/example-ad-quality.png)                                                                                                                                 |
+| RF         | Will display a RF monitoring block appropriate for the model on the right edge of the bank and inside the audio meter (if enabled).                                                                                                | All            | ![ULX rf example](images/example-ulx-rf.png) ![AD rf example](images/example-ad-rf.png)                                                                                           |
