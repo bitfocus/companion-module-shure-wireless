@@ -181,6 +181,7 @@ class ShureWirelessInstance extends InstanceBase {
 				type: 'number',
 				id: 'meteringInterval',
 				label: 'Metering Interval (in ms)',
+				tooltip: 'If this value is too low (fast)\nthe GUI may lock up.',
 				width: 4,
 				min: 50,
 				max: 99999,
