@@ -51,6 +51,11 @@ export const Choices = {
 	],
 }
 
+export const Regex = {
+	Frequency: '/^(4[7-9][0-9]|[5-8][0-9]{2}|9[0-2][0-9]|93[0-7])\\.\\d(00|25|50|75)$/',
+	Name: '/^.{1,8}$/',
+}
+
 export const Fields = {
 	BatteryLevel: {
 		type: 'number',
@@ -67,25 +72,30 @@ export const Fields = {
 		label: 'Frequency (MHz)',
 		id: 'value',
 		default: '470.000',
-		regex: '/^(4[7-9][0-9]|[5-8][0-9]{2}|9[0-2][0-9]|93[0-7])\\.\\d(00|25|50|75)$/',
+		useVariables: true,
+		// regex: '/^(4[7-9][0-9]|[5-8][0-9]{2}|9[0-2][0-9]|93[0-7])\\.\\d(00|25|50|75)$/',
 	},
 	GainIncrement: {
-		type: 'number',
+		type: 'textinput',
+//		type: 'number',
 		label: 'Gain Value (dB)',
 		id: 'gain',
 		min: 1,
 		max: 60,
 		default: 3,
+		useVariables: true,
 		required: true,
 		range: true,
 	},
 	GainSet: {
-		type: 'number',
+		type: 'textinput',
+//		type: 'number',
 		label: 'Gain Value (dB)',
 		id: 'gain',
 		min: -18,
 		max: 42,
 		default: 0,
+		useVariables: true,
 		required: true,
 		range: true,
 	},
@@ -101,7 +111,8 @@ export const Fields = {
 		label: 'Name (8 characters max)',
 		id: 'name',
 		default: '',
-		regex: '/^.{1,8}$/',
+		useVariables: true,
+		// regex: '/^.{1,8}$/',
 	},
 	RfOutput: {
 		type: 'dropdown',
