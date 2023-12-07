@@ -15,7 +15,7 @@ export function updateActions() {
 		name: 'Set channel name',
 		options: [this.CHANNELS_FIELD, Fields.Name],
 		callback: async (event, context) => {
-			const options = event.options // db Value is 1/256 db
+			const options = event.options 
 			let name = await this.parseActionOptions(event, 'name', context, Regex.Name)
 			if (name) {
 				this.sendCommand(`SET ${options.channel} CHAN_NAME {${name}}`)
