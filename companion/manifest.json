@@ -3,7 +3,7 @@
 	"name": "shure-wireless",
 	"shortname": "shure-wx",
 	"description": "",
-	"version": "2.0.0",
+	"version": "0.0.0",
 	"license": "MIT",
 	"repository": "git+https://github.com/bitfocus/companion-module-shure-wireless.git",
 	"bugs": "https://github.com/bitfocus/companion-module-shure-wireless/issues",
