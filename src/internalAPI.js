@@ -66,7 +66,7 @@ export default class WirelessApi {
 			this.channels[id] = {
 				slots: [], // AD TX Slots
 				//rx
-				name: '', // (ULX|QLX) 8 | (AD|SLX) 31
+				name: `CH ${id}`, // (ULX|QLX) 8 | (AD|SLX) 31
 				meterRate: 0, // 0=disabled, 100-99999 [in ms]
 				audioGain: 0, // (ULX|QLX|AD|SLX) 0-60,-18dB
 				audioMute: 'OFF', // (ULX|AD) OFF - ON - TOGGLE[set]

@@ -132,7 +132,7 @@ export function updateFeedbacks() {
 						out.text += channel.txType + '\\n'
 						break
 					case 'txPowerLevel':
-						out.text += channel.txPowerLevel == 255 ? 'Unknown' : channel.txPowerLevel + ' mW\\n'
+						out.text += channel.txPowerLevel == 255 ? 'Unknown\\n' : channel.txPowerLevel + ' mW\\n'
 						break
 					case 'batteryType':
 						out.text += channel.batteryType + '\\n'

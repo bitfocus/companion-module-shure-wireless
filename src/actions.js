@@ -1,4 +1,4 @@
-import { Fields } from './setup.js'
+import { Fields, Regex } from './setup.js'
 
 /**
  * INTERNAL: Set the available actions.
@@ -14,8 +14,12 @@ export function updateActions() {
 	actions['set_channel_name'] = {
 		name: 'Set channel name',
 		options: [this.CHANNELS_FIELD, Fields.Name],
-		callback: async ({ options }) => {
-			this.sendCommand(`SET ${options.channel} CHAN_NAME {${options.name.substr(0, 8)}}`)
+		callback: async (event, context) => {
+			const options = event.options 
+			let name = await this.parseActionOptions(event, 'name', context, Regex.Name)
+			if (name) {
+				this.sendCommand(`SET ${options.channel} CHAN_NAME {${name}}`)
+			}
 		},
 	}
 
@@ -57,8 +61,13 @@ export function updateActions() {
 	actions['channel_frequency'] = {
 		name: 'Set frequency of channel',
 		options: [this.CHANNELS_FIELD, Fields.Frequency],
-		callback: async ({ options }) => {
-			this.sendCommand(`SET ${options.channel} FREQUENCY ${options.value.replace('.', '')}`)
+		callback: async (event, context) => {
+			const options = event.options
+			let freq = await this.parseActionOptions(event, 'value', context, Regex.Frequency)
+			if (freq) {
+				this.sendCommand(`SET ${options.channel} FREQUENCY {${freq.replace('.', '')}}`)
+			}
+			// this.sendCommand(`SET ${options.channel} FREQUENCY ${options.value.replace('.', '')}`)
 		},
 	}
 

@@ -579,15 +579,13 @@ export default class Icons {
 	 * @param {number} yStart - y start
 	 * @param {number} width - width
 	 * @param {number} height - height
-	 * @param {String} halign - horizontal alignment
-	 * @param {String} valign - vertical alignment
 	 * @access protected
 	 * @since 1.1.0
 	 */
-	drawFromPNGdata(img, icon, xStart, yStart, width, height, halign, valign) {
+	drawFromPNGdata(img, icon, xStart, yStart, width, height) {
 		if (icon !== undefined) {
 			try {
-				img.drawFromPNGdata(icon, xStart, yStart, width, height, halign, valign)
+				img.drawFromPNGdata(icon, xStart, yStart, width, height)
 			} catch (e) {
 				return
 			}
@@ -630,36 +628,37 @@ export default class Icons {
 
 			if (this.savedIcons[id] === undefined) {
 				let img = new Image(image.width, image.height)
+				let yOffset = image.height == 72 ? 14 : 0
 
 				if (audio === undefined) {
-					this.drawFromPNGdata(img, this.AD_ANT[ant], 58, 13, 11, 10, 'left', 'top')
-					this.drawFromPNGdata(img, this.AD_RF[rfA], 58, 24, 4, 31, 'left', 'top')
-					this.drawFromPNGdata(img, this.AD_RF[rfB], 64, 24, 4, 31, 'left', 'top')
+					this.drawFromPNGdata(img, this.AD_ANT[ant], 58, 13 + yOffset, 11, 10)
+					this.drawFromPNGdata(img, this.AD_RF[rfA], 58, 24 + yOffset, 4, 31)
+					this.drawFromPNGdata(img, this.AD_RF[rfB], 64, 24 + yOffset, 4, 31)
 				} else if (ant === undefined) {
-					this.drawFromPNGdata(img, this.AD_AUDIO[audio], 64, 13, 4, 42, 'left', 'top')
+					this.drawFromPNGdata(img, this.AD_AUDIO[audio], 64, 13 + yOffset, 4, 42)
 				} else {
-					this.drawFromPNGdata(img, this.AD_ANT[ant], 51, 13, 11, 10, 'left', 'top')
-					this.drawFromPNGdata(img, this.AD_AUDIO[audio], 64, 13, 4, 42, 'left', 'top')
-					this.drawFromPNGdata(img, this.AD_RF[rfA], 51, 24, 4, 31, 'left', 'top')
-					this.drawFromPNGdata(img, this.AD_RF[rfB], 57, 24, 4, 31, 'left', 'top')
+					this.drawFromPNGdata(img, this.AD_ANT[ant], 51, 13 + yOffset, 11, 10)
+					this.drawFromPNGdata(img, this.AD_AUDIO[audio], 64, 13 + yOffset, 4, 42)
+					this.drawFromPNGdata(img, this.AD_RF[rfA], 51, 24 + yOffset, 4, 31)
+					this.drawFromPNGdata(img, this.AD_RF[rfB], 57, 24 + yOffset, 4, 31)
 				}
 
 				if (battery !== undefined && battery <= batteryAlertLevel) {
-					this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46, 25, 9, 'left', 'top')
+					this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46 + yOffset, 25, 9)
 				} else {
-					this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46, 25, 9, 'left', 'top')
+					this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46 + yOffset, 25, 9)
 				}
 
 				if (battery === undefined && lock === undefined) {
-					this.drawFromPNGdata(img, this.AD_QUALITY[quality], 6, 51, 40, 4, 'left', 'top')
+					this.drawFromPNGdata(img, this.AD_QUALITY[quality], 6, 51 + yOffset, 40, 4)
 				} else {
-					this.drawFromPNGdata(img, this.AD_QUALITY[quality], 6, 40, 40, 4, 'left', 'top')
+					this.drawFromPNGdata(img, this.AD_QUALITY[quality], 6, 40 + yOffset, 40, 4)
 				}
 
-				this.drawFromPNGdata(img, this.ENCRYPTION[encryption], 52, 2, 16, 6, 'left', 'top')
+				this.drawFromPNGdata(img, this.ENCRYPTION[encryption], 52, 2 + yOffset, 16, 6)
 
 				if (lock == 'ALL' || lock == 'POWER' || lock == 'MENU') {
-					this.drawFromPNGdata(img, this.LOCK[lock], 31, 46, 18, 8, 'left', 'top')
+					this.drawFromPNGdata(img, this.LOCK[lock], 31, 46 + yOffset, 18, 8)
 				}
 
 				out = img.toBase64()
@@ -698,18 +697,19 @@ export default class Icons {
 
 			if (this.savedIcons[id] === undefined) {
 				let img = new Image(image.width, image.height)
+				let yOffset = image.height == 72 ? 14 : 0
 
 				if (audio === undefined) {
-					this.drawFromPNGdata(img, this.SLX_RF[rf], 63, 11, 6, 44, 'left', 'top')
+					this.drawFromPNGdata(img, this.SLX_RF[rf], 63, 11 + yOffset, 6, 44)
 				} else {
-					this.drawFromPNGdata(img, this.ULX_AUDIO[audio], 63, 12, 5, 43, 'left', 'top')
-					this.drawFromPNGdata(img, this.SLX_RF[rf], 55, 11, 6, 44, 'left', 'top')
+					this.drawFromPNGdata(img, this.ULX_AUDIO[audio], 63, 12 + yOffset, 5, 43)
+					this.drawFromPNGdata(img, this.SLX_RF[rf], 55, 11 + yOffset, 6, 44)
 				}
 
 				if (battery <= batteryAlertLevel) {
-					this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46, 25, 9, 'left', 'top')
+					this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46 + yOffset, 25, 9)
 				} else {
-					this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46, 25, 9, 'left', 'top')
+					this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46 + yOffset, 25, 9)
 				}
 
 				out = img.toBase64()
@@ -754,26 +754,27 @@ export default class Icons {
 
 			if (this.savedIcons[id] === undefined) {
 				let img = new Image(image.width, image.height)
+				let yOffset = image.height == 72 ? 14 : 0
 
 				if (audio === undefined) {
-					this.drawFromPNGdata(img, this.ULX_ANT[ant], 56, 12, 13, 5, 'left', 'top')
-					this.drawFromPNGdata(img, this.ULX_RF[rf], 59, 19, 6, 37, 'left', 'top')
+					this.drawFromPNGdata(img, this.ULX_ANT[ant], 56, 12 + yOffset, 13, 5)
+					this.drawFromPNGdata(img, this.ULX_RF[rf], 59, 19 + yOffset, 6, 37)
 				} else {
-					this.drawFromPNGdata(img, this.ULX_ANT[ant], 47, 12, 13, 5, 'left', 'top')
-					this.drawFromPNGdata(img, this.ULX_AUDIO[audio], 63, 12, 5, 43, 'left', 'top')
-					this.drawFromPNGdata(img, this.ULX_RF[rf], 50, 19, 6, 37, 'left', 'top')
+					this.drawFromPNGdata(img, this.ULX_ANT[ant], 47, 12 + yOffset, 13, 5)
+					this.drawFromPNGdata(img, this.ULX_AUDIO[audio], 63, 12 + yOffset, 5, 43)
+					this.drawFromPNGdata(img, this.ULX_RF[rf], 50, 19 + yOffset, 6, 37)
 				}
 
 				if (battery <= batteryAlertLevel) {
-					this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46, 25, 9, 'left', 'top')
+					this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46 + yOffset, 25, 9)
 				} else {
-					this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46, 25, 9, 'left', 'top')
+					this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46 + yOffset, 25, 9)
 				}
 
-				this.drawFromPNGdata(img, this.ENCRYPTION[encryption], 52, 2, 16, 6, 'left', 'top')
+				this.drawFromPNGdata(img, this.ENCRYPTION[encryption], 52, 2 + yOffset, 16, 6)
 
 				if (lock == 'ALL' || lock == 'POWER' || lock == 'MENU') {
-					this.drawFromPNGdata(img, this.LOCK[lock], 31, 46, 18, 8, 'left', 'top')
+					this.drawFromPNGdata(img, this.LOCK[lock], 31, 46 + yOffset, 18, 8)
 				}
 
 				out = img.toBase64()

@@ -1,6 +1,7 @@
 import {
 	CreateConvertToBooleanFeedbackUpgradeScript,
 	InstanceBase,
+	InstanceStatus,
 	Regex,
 	runEntrypoint,
 	TCPHelper,
@@ -102,6 +103,42 @@ class ShureWirelessInstance extends InstanceBase {
 	}
 
 	/**
+	 *
+	 * @param {object} event - action event
+	 * @param {string} option - which event option to parse
+	 * @param {object} context 	- contains variable parser function
+	 * @param {object} [validate] - optional regexp or range to compare against result
+	 * @returns result of parsing variables in event.options[option] or null if regex or range fails
+	 * @access private
+	 * @since 2.1.0
+	 */
+	async parseActionOption(event, option, context, validate) {
+		let value = String(await context.parseVariablesInString(event.options[option])).trim()
+		let err = null
+
+		if (validate?.regex && !validate.regex.test(value)) {
+			err = [ event.controlId, event.actionId, option ].join(' → ')
+		} else if (validate?.range) {
+			value = parseInt(value)
+			if (value < validate.min || value > validate.max) {
+				err = [event.controlId, event.actionId, option, 'Out of range'].join(' → ')
+			}
+		}
+		if (err && !this.paramErr) {
+			this.updateStatus(InstanceStatus.BadConfig,err)
+			this.paramErr = true
+			value = null
+
+		} else if (this.paramErr) {
+			this.updateStatus(InstanceStatus.Ok)
+			this.paramErr = false
+		}
+
+		return value
+	}
+
+
+	/**
 	 * Creates the configuration fields for web config.
 	 *
 	 * @returns {Array} the config fields
@@ -144,8 +181,9 @@ class ShureWirelessInstance extends InstanceBase {
 				type: 'number',
 				id: 'meteringInterval',
 				label: 'Metering Interval (in ms)',
+				tooltip: 'If this value is too low (fast)\nthe GUI may lock up.',
 				width: 4,
-				min: 500,
+				min: 50,
 				max: 99999,
 				default: 5000,
 				required: true,

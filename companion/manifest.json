@@ -3,7 +3,7 @@
 	"name": "shure-wireless",
 	"shortname": "shure-wx",
 	"description": "",
-	"version": "2.0.0",
+	"version": "0.0.0",
 	"license": "MIT",
 	"repository": "git+https://github.com/bitfocus/companion-module-shure-wireless.git",
 	"bugs": "https://github.com/bitfocus/companion-module-shure-wireless/issues",
@@ -22,7 +22,7 @@
 		"type": "node18",
 		"api": "nodejs-ipc",
 		"apiVersion": "0.0.0",
-		"entrypoint": "..\\src\\index.js"
+		"entrypoint": "../src/index.js"
 	},
 	"manufacturer": "Shure",
 	"products": ["ULX-D", "QLX-D", "SLX-D", "Axient Digital (AD)"],
