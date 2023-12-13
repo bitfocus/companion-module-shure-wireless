@@ -15,8 +15,8 @@ export function updateActions() {
 		name: 'Set channel name',
 		options: [this.CHANNELS_FIELD, Fields.Name],
 		callback: async (event, context) => {
-			const options = event.options 
-			let name = await this.parseActionOptions(event, 'name', context, Regex.Name)
+			const options = event.options
+			let name = await this.parseActionOption(event, 'name', context, Regex.Name)
 			if (name) {
 				this.sendCommand(`SET ${options.channel} CHAN_NAME {${name}}`)
 			}
@@ -63,7 +63,7 @@ export function updateActions() {
 		options: [this.CHANNELS_FIELD, Fields.Frequency],
 		callback: async (event, context) => {
 			const options = event.options
-			let freq = await this.parseActionOptions(event, 'value', context, Regex.Frequency)
+			let freq = await this.parseActionOption(event, 'value', context, Regex.Frequency)
 			if (freq) {
 				this.sendCommand(`SET ${options.channel} FREQUENCY {${freq.replace('.', '')}}`)
 			}
