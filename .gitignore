@@ -2,3 +2,6 @@
 /pkg.tgz
 node_modules/
 yarn-error.log
+DEBUG-INSPECT
+DEBUG-PACKAGE
+DEBUG-PACKAGED
