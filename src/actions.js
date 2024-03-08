@@ -65,7 +65,7 @@ export function updateActions() {
 			const options = event.options
 			let freq = await this.parseActionOption(event, 'value', context, Regex.Frequency)
 			if (freq) {
-				this.sendCommand(`SET ${options.channel} FREQUENCY {${freq.replace('.', '')}}`)
+				this.sendCommand(`SET ${options.channel} FREQUENCY ${freq.replace('.', '')}`)
 			}
 			// this.sendCommand(`SET ${options.channel} FREQUENCY ${options.value.replace('.', '')}`)
 		},
