@@ -1,6 +1,6 @@
 {
 	"name": "shure-wireless",
-	"version": "2.2.1",
+	"version": "2.3.0",
 	"main": "src/index.js",
 	"type": "module",
 	"scripts": {
