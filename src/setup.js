@@ -77,7 +77,7 @@ export const Fields = {
 	},
 	GainIncrement: {
 		type: 'textinput',
-//		type: 'number',
+		//		type: 'number',
 		label: 'Gain Value (dB)',
 		id: 'gain',
 		min: 1,
@@ -89,7 +89,7 @@ export const Fields = {
 	},
 	GainSet: {
 		type: 'textinput',
-//		type: 'number',
+		//		type: 'number',
 		label: 'Gain Value (dB)',
 		id: 'gain',
 		min: -18,

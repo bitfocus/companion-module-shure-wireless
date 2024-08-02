@@ -117,7 +117,7 @@ class ShureWirelessInstance extends InstanceBase {
 		let err = null
 
 		if (validate?.regex && !validate.regex.test(value)) {
-			err = [ event.controlId, event.actionId, option ].join(' → ')
+			err = [event.controlId, event.actionId, option].join(' → ')
 		} else if (validate?.range) {
 			value = parseInt(value)
 			if (value < validate.min || value > validate.max) {
@@ -125,10 +125,9 @@ class ShureWirelessInstance extends InstanceBase {
 			}
 		}
 		if (err && !this.paramErr) {
-			this.updateStatus(InstanceStatus.BadConfig,err)
+			this.updateStatus(InstanceStatus.BadConfig, err)
 			this.paramErr = true
 			value = null
-
 		} else if (this.paramErr) {
 			this.updateStatus(InstanceStatus.Ok)
 			this.paramErr = false
@@ -136,7 +135,6 @@ class ShureWirelessInstance extends InstanceBase {
 
 		return value
 	}
-
 
 	/**
 	 * Creates the configuration fields for web config.
