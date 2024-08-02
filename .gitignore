@@ -5,3 +5,4 @@ yarn-error.log
 DEBUG-INSPECT
 DEBUG-PACKAGE
 DEBUG-PACKAGED
+.yarn/install-state.gz

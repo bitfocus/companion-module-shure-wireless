@@ -36,25 +36,37 @@ export function updateActions() {
 	actions['channel_setaudiogain'] = {
 		name: 'Set audio gain of channel',
 		options: [this.CHANNELS_A_FIELD, Fields.GainSet],
-		callback: async ({ options }) => {
-			let value = options.gain + 18
-			this.sendCommand(`SET ${options.channel} AUDIO_GAIN ${value}`)
+		callback: async (event, context) => {
+			const options = event.options
+			let gainValue = await this.parseActionOption(event, 'gain', context, Regex.GainSet)
+			if (gainValue) {
+				gainValue = 18 + parseInt(gainValue)
+				this.sendCommand(`SET ${options.channel} AUDIO_GAIN ${gainValue}`)
+			}
 		},
 	}
 
 	actions['channel_increasegain'] = {
 		name: 'Increase audio gain of channel',
 		options: [this.CHANNELS_A_FIELD, Fields.GainIncrement],
-		callback: async ({ options }) => {
-			this.sendCommand(`SET ${options.channel} AUDIO_GAIN INC ${options.gain}`)
+		callback: async (event, context) => {
+			const options = event.options
+			let gainIncrement = await this.parseActionOption(event, 'gain', context, Regex.GainIncrement)
+			if (gainIncrement) {
+				this.sendCommand(`SET ${options.channel} AUDIO_GAIN INC ${gainIncrement}`)
+			}
 		},
 	}
 
 	actions['channel_decreasegain'] = {
 		name: 'Decrease audio gain of channel',
 		options: [this.CHANNELS_A_FIELD, Fields.GainIncrement],
-		callback: async ({ options }) => {
-			this.sendCommand(`SET ${options.channel} AUDIO_GAIN DEC ${options.gain}`)
+		callback: async (event, context) => {
+			const options = event.options
+			let gainIncrement = await this.parseActionOption(event, 'gain', context, Regex.GainIncrement)
+			if (gainIncrement) {
+				this.sendCommand(`SET ${options.channel} AUDIO_GAIN DEC ${gainIncrement}`)
+			}
 		},
 	}
 
