@@ -5,40 +5,68 @@ This module will connect to the Shure receivers below to provide feedback status
 - Shure ULX-D (ULXD4, ULXD4D, ULXD4Q)
 - Shure QLX-D (QLXD4)
 - Shure SLX-D (SLXD4, SLXD4D)
+- Shure SLX-D+ (SLXD4+, SLXD4D+, SLXD4Q+, SLXD4QDAN+)
 - Shure Axient Digital (AD4D, AD4Q)
+
+### ⚠️ SLX-D+ pre-flight: enable Controller Access
+
+**SLX-D+ receivers block TCP commands by default.** Before connecting from Companion, on the receiver navigate to:
+
+> `Device Configuration > Device Settings > Controller Access > Allow`
+
+Without this step the device accepts the TCP connection but silently discards every command — no variables update, no actions take effect. (Source: SLXD4Q+ user guide v2.2, page 27.)
+
+### SLX-D+ — using two transmitters on one channel
+
+The SLX-D+ hardware can pair **two** transmitters per channel (e.g. a bodypack and a handheld) via the receiver's `Transmitter > Add Second Tx Link` menu. In operation only one of the two transmitters may be powered on at a time; the receiver automatically follows whichever one is active over RF. Companion sees the active transmitter as the channel's _Side Channel Slot 1_ (model, link status, battery), and the values update automatically when you physically switch between transmitters.
+
+A reference of every TCP command this module uses against SLX-D+ devices is available in [`docs/SLXDplus-protocol.md`](../docs/SLXDplus-protocol.md).
 
 ### Available actions
 
-| Title                                                         | Model Support       |
-| ------------------------------------------------------------- | ------------------- |
-| Set Channel Name <sup>x</sup>                                 | All                 |
-| Mute/Unmute/Toggle Mute of Channel                            | ULX & AD            |
-| Set Audio Gain of Channel <sup>x</sup>                        | All                 |
-| Increase Audio Gain of Channel <sup>x</sup>                   | All                 |
-| Decrease Audio Gain of Channel <sup>x</sup>                   | All                 |
-| Set Frequency of Channel <sup>x</sup>                         | ULX, QLX, SLX, & AD |
-| Flash Lights on Receiver                                      | ULX, SLX, AD        |
-| Flash Lights on Receiver Channel                              | SLX, AD             |
-| Set slot RF output                                            | ADX only            |
-| Set slot RF power level                                       | ADX only            |
-| <sup>x</sup> Dynamic variables can be used with these actions |                     |
+| Title                                                         | Model Support               |
+| ------------------------------------------------------------- | --------------------------- |
+| Set Channel Name <sup>x</sup>                                 | All                         |
+| Mute/Unmute/Toggle Mute of Channel                            | ULX & AD                    |
+| Set Audio Gain of Channel <sup>x</sup>                        | All                         |
+| Increase Audio Gain of Channel <sup>x</sup>                   | All                         |
+| Decrease Audio Gain of Channel <sup>x</sup>                   | All                         |
+| Set Frequency of Channel <sup>x</sup>                         | ULX, QLX, SLX, SLX-D+, & AD |
+| Flash Lights on Receiver                                      | ULX, SLX, SLX-D+, AD        |
+| Flash Lights on Receiver Channel                              | SLX, SLX-D+, AD             |
+| Set slot RF output                                            | ADX only                    |
+| Set slot RF power level                                       | ADX only                    |
+| SLX-D+: Set Group/Channel                                     | SLX-D+                      |
+| SLX-D+: Set channel meter rate                                | SLX-D+                      |
+| SLX-D+: Set audio encryption (device)                         | SLX-D+                      |
+| SLX-D+: Enable / disable app (Bluetooth) connection           | SLX-D+                      |
+| SLX-D+: Remote pairing — enable / disable / accept / reject   | SLX-D+                      |
+| SLX-D+: Reboot the linked transmitter                         | SLX-D+                      |
+| SLX-D+ (Dante): Set Dante channel name                        | SLXD4QDAN+                  |
+| SLX-D+ (Dante): Set network settings (SC / D1 / D2)           | SLXD4QDAN+                  |
+| <sup>x</sup> Dynamic variables can be used with these actions |                             |
 
 ### Available feedbacks
 
-| Title                  | Description                                                                                   | Model Support       |
-| ---------------------- | --------------------------------------------------------------------------------------------- | ------------------- |
-| Battery Level          | If the battery bar drops to or below a certain value, change the color of the button.         | All                 |
-| Channel Frequency      | If the selected channel\'s frequency is set, change the color of the button.                  | ULX, QLX, SLX, & AD |
-| Channel Gain           | If the selected channel\'s gain is set, change the color of the button.                       | All                 |
-| Channel Muted          | If the selected channel is muted, change the color of the button.                             | ULX, AD             |
-| Channel Status Display | **See below**                                                                                 | ULX, QLX, SLX, & AD |
-| Interference Status    | If the selected channel gets interference, change the color of the button.                    | ULX, QLX, AD        |
-| Transmitter Muted      | If the selected channel\'s transmitter is muted, change the color of the button.              | ULX, QLX, & AD      |
-| Transmitter Turned Off | If the selected channel\'s transmitter is powered off, change the color of the button.        | All                 |
-| Slot is Active         | If the selected slot\'s transmitter is active to the channel, change the color of the button. | AD                  |
-| Slot RF Output         | If the selected slot\'s transmitter RF is set, change the color of the button.                | ADX only            |
-| Slot RF Power          | If the selected slot\'s transmitter power level is set, change the color of the button.       | ADX only            |
-| Slot Status            | If the selected slot\'s status is set, change the color of the button.                        | AD                  |
+| Title                      | Description                                                                                   | Model Support               |
+| -------------------------- | --------------------------------------------------------------------------------------------- | --------------------------- |
+| Battery Level              | If the battery bar drops to or below a certain value, change the color of the button.         | All                         |
+| Channel Frequency          | If the selected channel\'s frequency is set, change the color of the button.                  | ULX, QLX, SLX, SLX-D+, & AD |
+| Channel Gain               | If the selected channel\'s gain is set, change the color of the button.                       | All                         |
+| Channel Muted              | If the selected channel is muted, change the color of the button.                             | ULX, AD                     |
+| Channel Status Display     | **See below**                                                                                 | ULX, QLX, SLX, SLX-D+, & AD |
+| Interference Status        | If the selected channel gets interference, change the color of the button.                    | ULX, QLX, SLX-D+, AD        |
+| Transmitter Muted          | If the selected channel\'s transmitter is muted, change the color of the button.              | ULX, QLX, & AD              |
+| Transmitter Turned Off     | If the selected channel\'s transmitter is powered off, change the color of the button.        | All                         |
+| Slot is Active             | If the selected slot\'s transmitter is active to the channel, change the color of the button. | AD                          |
+| Slot RF Output             | If the selected slot\'s transmitter RF is set, change the color of the button.                | ADX only                    |
+| Slot RF Power              | If the selected slot\'s transmitter power level is set, change the color of the button.       | ADX only                    |
+| Slot Status                | If the selected slot\'s status is set, change the color of the button.                        | AD                          |
+| SLX-D+ Encryption Error    | True when the channel reports `ENCRYPTION_STATUS = ERROR` (mismatched transmitter).           | SLX-D+                      |
+| SLX-D+ Remote-Pair Request | True while a transmitter is advertising itself for BLE remote pairing.                        | SLX-D+                      |
+| SLX-D+ Slot Link Active    | True when the side-channel slot is `LINKED.ACTIVE` (TX powered on).                           | SLX-D+                      |
+| SLX-D+ Slot Link Inactive  | True when the slot is `LINKED.INACTIVE` (TX paired but currently powered off).                | SLX-D+                      |
+| SLX-D+ Slot Empty          | True when no transmitter is paired into the slot.                                             | SLX-D+                      |
 
 ### Channel Status Display
 

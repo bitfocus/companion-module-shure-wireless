@@ -362,6 +362,14 @@ class ShureWirelessInstance extends InstanceBase {
 				} else if (commandArr[1].startsWith('SLOT')) {
 					//this command is about a specific SLOT in AD
 					this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], joinData(commandArr, 3))
+				} else if (
+					this.model.family === 'slxplus' &&
+					(commandArr[1] === 'LINK_TX_MODEL' || commandArr[1] === 'LINK_STATUS')
+				) {
+					// SLX-D+ side-channel commands carry a slot number as commandArr[2].
+					// Per PDF v1.0 (2026-A) the slot is "always 1" today, but the
+					// parameter is parsed parametrically in case future firmware adds slots.
+					this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], joinData(commandArr, 3))
 				} else {
 					//this command is about a specific channel
 					this.api.updateChannel(commandNum, commandArr[1], joinData(commandArr, 2))
@@ -379,6 +387,9 @@ class ShureWirelessInstance extends InstanceBase {
 						break
 					case 'slx':
 						this.api.parseSLXSample(commandNum, command)
+						break
+					case 'slxplus':
+						this.api.parseSlxPlusSample(commandNum, command)
 						break
 				}
 
@@ -442,6 +453,15 @@ class ShureWirelessInstance extends InstanceBase {
 
 					if (this.api.getSlot(i, j).txDeviceId != '') {
 						data += ` (${this.api.getSlot(i, j).txDeviceId})`
+					} else if (
+						this.model.family === 'slxplus' &&
+						this.api.getSlot(i, j).txType &&
+						this.api.getSlot(i, j).txType !== 'Unknown'
+					) {
+						// SLX-D+ side-channel slots don't have a separate Device ID;
+						// the LINK_TX_MODEL value (SLXD1+/SLXD2+/SLXD3+) is the most
+						// useful disambiguator in the dropdown.
+						data += ` (${this.api.getSlot(i, j).txType})`
 					}
 
 					this.CHOICES_SLOTS.push({ id: id, label: data })

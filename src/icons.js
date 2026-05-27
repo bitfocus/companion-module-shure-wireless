@@ -737,6 +737,71 @@ export default class Icons {
 	 * @access public
 	 * @since 1.1.0
 	 */
+	/**
+	 * Render the channel status icon for an SLX-D+ receiver.
+	 *
+	 * Layout mirrors the SLX-D icon but uses two RF bars (one per antenna,
+	 * since SLX-D+ exposes per-antenna RSSI via < GET x RSSI >) and an
+	 * optional encryption badge identical to the AD / ULX style.
+	 *
+	 * @param {Object} image - the image raster object
+	 * @param {number} audio - audio LED bucket (0-6)
+	 * @param {number} rfA - RF bar bucket for antenna A (0-5)
+	 * @param {number} rfB - RF bar bucket for antenna B (0-5)
+	 * @param {number} battery - battery bar count (0-5, 255 = unknown)
+	 * @param {number} batteryAlertLevel - threshold at which to switch to the red battery icon
+	 * @param {String} encryption - encryption status ('ON' | 'OFF' | 'ERROR')
+	 * @returns {String} base64 encoded PNG
+	 * @access public
+	 * @since 2.4.0
+	 */
+	getSlxPlusStatus(image, audio, rfA, rfB, battery, batteryAlertLevel, encryption) {
+		let out
+
+		if (image && image.width && image.height) {
+			let id =
+				image.width +
+				'x' +
+				image.height +
+				(audio ? 'b' + audio : '') +
+				(rfA ? 'c' + rfA : '') +
+				(rfB ? 'd' + rfB : '') +
+				(battery ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '') +
+				(encryption ? 'g' + encryption : '')
+
+			if (this.savedIcons[id] === undefined) {
+				let img = new Image(image.width, image.height)
+				let yOffset = image.height == 72 ? 14 : 0
+
+				if (audio === undefined) {
+					this.drawFromPNGdata(img, this.SLX_RF[rfA], 58, 11 + yOffset, 6, 44)
+					this.drawFromPNGdata(img, this.SLX_RF[rfB], 64, 11 + yOffset, 6, 44)
+				} else {
+					this.drawFromPNGdata(img, this.SLX_RF[rfA], 47, 11 + yOffset, 6, 44)
+					this.drawFromPNGdata(img, this.SLX_RF[rfB], 55, 11 + yOffset, 6, 44)
+					this.drawFromPNGdata(img, this.ULX_AUDIO[audio], 63, 12 + yOffset, 5, 43)
+				}
+
+				if (battery <= batteryAlertLevel) {
+					this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46 + yOffset, 25, 9)
+				} else {
+					this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46 + yOffset, 25, 9)
+				}
+
+				if (encryption) {
+					this.drawFromPNGdata(img, this.ENCRYPTION[encryption], 52, 2 + yOffset, 16, 6)
+				}
+
+				out = img.toBase64()
+				this.savedIcons[id] = out
+			} else {
+				out = this.savedIcons[id]
+			}
+		}
+
+		return out
+	}
+
 	getULXStatus(image, ant, audio, rf, battery, batteryAlertLevel, lock, encryption) {
 		let out
 
