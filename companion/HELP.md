@@ -22,6 +22,15 @@ The SLX-D+ hardware can pair **two** transmitters per channel (e.g. a bodypack a
 
 A reference of every TCP command this module uses against SLX-D+ devices is available in [`docs/SLXDplus-protocol.md`](../docs/SLXDplus-protocol.md).
 
+### SLX-D+ — drag-and-drop presets
+
+When an SLX-D+ model is selected, the **Buttons** page in Companion shows a preset palette grouped as:
+
+- **SLX-D+ Channel _N_** — one group per receiver channel, with ready-to-use buttons for status display, Bodypack/Handheld link indicator (colour-coded green/yellow/grey), frequency, battery, audio gain ±3 dB, encryption-error indicator, interference indicator, channel flash, linked-TX reboot, remote-pair listener, and (on SLXD4QDAN+) the Dante channel name.
+- **SLX-D+ Device** — flash device, encryption ON/OFF, app-connection ON/OFF.
+
+Drag any preset onto an empty button and it arrives fully configured — actions, feedbacks and style all wired up. Bodypack/Handheld presets automatically reflect whichever transmitter is currently active on the channel.
+
 ### Available actions
 
 | Title                                                         | Model Support               |
