@@ -63,7 +63,10 @@ a bodypack and a handheld (TX A off → TX B on), the `LINK_TX_MODEL 1` /
 > **Documentation footnotes**
 >
 > - The command-strings PDF writes _“Where x is the channel number and 1 is always the slot number”_ for `LINK_TX_MODEL` and `LINK_STATUS`. The wording _“always”_ is read as a deliberate API restriction to slot 1 — contrast the AD family, whose documentation says _“z is the slot number”_ with slots 1–8 addressable.
-> - The `NA_DEVICE_NAME` variable description in the PDF mentions _“x is the channel number and z is the slot number”_, but the command itself takes no parameters (`< GET NA_DEVICE_NAME >`). This is a copy-paste artefact from a multi-slot template, not a real API variant — `NA_DEVICE_NAME` is purely device-scoped.
+> - The `NA_DEVICE_NAME` variable description in the PDF mentions _“x is the channel number and z is the slot number”_, but the example commands show neither parameter (`< GET NA_DEVICE_NAME >`). Two plausible readings:
+>   1. **Documentation artefact**: the Variables block was copied from a multi-slot template (the AD family uses an identical wording) and `NA_DEVICE_NAME` is in reality device-scoped only.
+>   2. **Undocumented extended form**: the firmware accepts `< GET x NA_DEVICE_NAME z >` and returns something different (e.g. a per-channel/per-slot Dante label) but the examples in the PDF only show the default form.
+>      The menu text in the SLXD4Q+ user guide (p. 6) reads _“Dante Device Name: view and edit names for networked Dante devices”_ — plural — which keeps option 2 in play. To be resolved at first hardware verification by probing `< GET 1 NA_DEVICE_NAME >` and `< GET 1 NA_DEVICE_NAME 2 >` against the device.
 > - The module's slot iteration is fully parametric (`for slot in 1..model.slots`) so that a future firmware revision exposing slot 2 can be enabled by changing a single integer in `src/setup.js`.
 
 ---
@@ -429,18 +432,19 @@ in the command-strings PDF. They may still be reachable over TCP — to be
 verified by probing the live device. Confirmed commands will be added to a
 future revision of this document and to the module.
 
-| Menu function                | Receiver path                                         | Candidate probe                |
-| ---------------------------- | ----------------------------------------------------- | ------------------------------ |
-| Audio Summing                | `Device Configuration > Audio > Audio Summing`        | `< GET 0 AUDIO_SUMMING >`      |
-| Interference Management Mode | `Device Configuration > RF > Interference Management` | `< GET 0 INTERFERENCE_MGMT >`  |
-| Antenna Bias                 | `Device Configuration > RF > Antenna Bias`            | `< GET 0 ANTENNA_BIAS >`       |
-| Feedback Reduction (DFR)     | `Audio Settings > Feedback Reduction`                 | `< GET x FEEDBACK_REDUCTION >` |
-| Mic Offset (TX)              | TX menu via Tx Remote Control                         | `< GET x MIC_OFFSET >`         |
-| RF Power (TX)                | TX menu via Tx Remote Control                         | `< GET x TX_RF_POWER >`        |
-| High-Pass Filter (TX)        | TX menu via Tx Remote Control                         | `< GET x TX_HIGH_PASS >`       |
-| Tx Factory Reset             | `Transmitter > Tx Factory Reset`                      | `< SET x TX_FACTORY_RESET >`   |
-| Tx Preset                    | `Transmitter > Transmitter Preset`                    | `< GET x TX_PRESET >`          |
-| Dante Device Lock            | `Device Configuration > Dante > Dante Device Lock`    | `< GET 0 DANTE_DEVICE_LOCK >`  |
+| Menu function                 | Receiver path                                                                                                                                                                                           | Candidate probe                                                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Audio Summing                 | `Device Configuration > Audio > Audio Summing`                                                                                                                                                          | `< GET 0 AUDIO_SUMMING >`                                                                                                               |
+| Interference Management Mode  | `Device Configuration > RF > Interference Management`                                                                                                                                                   | `< GET 0 INTERFERENCE_MGMT >`                                                                                                           |
+| Antenna Bias                  | `Device Configuration > RF > Antenna Bias`                                                                                                                                                              | `< GET 0 ANTENNA_BIAS >`                                                                                                                |
+| Feedback Reduction (DFR)      | `Audio Settings > Feedback Reduction`                                                                                                                                                                   | `< GET x FEEDBACK_REDUCTION >`                                                                                                          |
+| Mic Offset (TX)               | TX menu via Tx Remote Control                                                                                                                                                                           | `< GET x MIC_OFFSET >`                                                                                                                  |
+| RF Power (TX)                 | TX menu via Tx Remote Control                                                                                                                                                                           | `< GET x TX_RF_POWER >`                                                                                                                 |
+| High-Pass Filter (TX)         | TX menu via Tx Remote Control                                                                                                                                                                           | `< GET x TX_HIGH_PASS >`                                                                                                                |
+| Tx Factory Reset              | `Transmitter > Tx Factory Reset`                                                                                                                                                                        | `< SET x TX_FACTORY_RESET >`                                                                                                            |
+| Tx Preset                     | `Transmitter > Transmitter Preset`                                                                                                                                                                      | `< GET x TX_PRESET >`                                                                                                                   |
+| Dante Device Lock             | `Device Configuration > Dante > Dante Device Lock`                                                                                                                                                      | `< GET 0 DANTE_DEVICE_LOCK >`                                                                                                           |
+| Per-slot `NA_DEVICE_NAME` (?) | n/a — Variables block in the PDF hints at `x` (channel) + `z` (slot) for `NA_DEVICE_NAME`, but the example commands omit both. Need to confirm whether the firmware actually accepts the extended form. | Compare responses to: `< GET NA_DEVICE_NAME >`, `< GET 1 NA_DEVICE_NAME >`, `< GET 1 NA_DEVICE_NAME 1 >`, `< GET 1 NA_DEVICE_NAME 2 >`. |
 
 ---
 
