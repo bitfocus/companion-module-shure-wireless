@@ -27,9 +27,32 @@ A reference of every TCP command this module uses against SLX-D+ devices is avai
 When an SLX-D+ model is selected, the **Buttons** page in Companion shows a preset palette grouped as:
 
 - **SLX-D+ Channel _N_** — one group per receiver channel, with ready-to-use buttons for status display, Bodypack/Handheld link indicator (colour-coded green/yellow/grey), frequency, battery, audio gain ±3 dB, encryption-error indicator, interference indicator, channel flash, linked-TX reboot, remote-pair listener, and (on SLXD4QDAN+) the Dante channel name.
+- **SLX-D+ Channel _N_ (Encoder)** — a rotary preset (Stream Deck Plus / Loupedeck): turn = audio gain ±1 dB, push = reset to 0 dB. On surfaces without an encoder the button still works as a "reset gain" button.
 - **SLX-D+ Device** — flash device, encryption ON/OFF, app-connection ON/OFF.
 
 Drag any preset onto an empty button and it arrives fully configured — actions, feedbacks and style all wired up. Bodypack/Handheld presets automatically reflect whichever transmitter is currently active on the channel.
+
+### SLX-D+ — recommended triggers
+
+Companion's **Triggers** page can fire actions automatically when the receiver's state changes. The module exposes all the booleans below as **feedbacks**, so a trigger can use _"When feedback X becomes true"_ as its condition.
+
+| Trigger                                               | Condition (feedback to watch)                           | Suggested action                                                                 |
+| ----------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **Battery critical**                                  | `Battery Level` with _Battery Alert Level_ set to **1** | Send Slack/Mail webhook ("CH _N_ battery ≤ 1 bar"), and/or flash a status button |
+| **Encryption error**                                  | `SLX-D+ Encryption Error` on channel _N_                | Log message, flash device, switch a status page to red                           |
+| **RF interference**                                   | `Interference Status` on channel _N_                    | Show a warning on a "stage manager" button, log the timestamp                    |
+| **Transmitter went offline (paired but powered off)** | `SLX-D+ Slot Link Inactive` on slot _N:1_               | Reset Companion variable, switch monitoring view, notify FOH                     |
+| **Remote-pair request pending**                       | `SLX-D+ Remote-Pair Request Pending` on channel _N_     | Highlight the receiver's "Pair" button so an operator notices the BLE request    |
+
+**How to set one up (example: Battery critical)**
+
+1. In Companion → **Triggers** → **+ Add trigger**.
+2. **Type**: _Feedback_.
+3. Pick the connection (this instance) → feedback `Battery Level` → channel = the receiver channel, _Battery Alert Level_ = `1`.
+4. **Actions**: add whatever Companion action you want — internal `instance:custom-variable set`, `surface:page set`, a webhook, etc.
+5. Save. The trigger fires the moment the receiver reports `TX_BATT_BARS ≤ 1`.
+
+These templates aren't shipped as preset JSON because Companion's module API doesn't yet support trigger presets — the user side has to wire them up once. The feedbacks they rely on are all already registered by this module, so no additional setup on the receiver is needed.
 
 ### Available actions
 

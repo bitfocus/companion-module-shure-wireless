@@ -244,7 +244,27 @@ function buildChannelPresets(n, model) {
 		],
 	}
 
-	// 11. Dante channel name (only on Dante-equipped models)
+	// 11. Rotary encoder for audio gain (Stream Deck Plus / Loupedeck).
+	// Falls back to a regular pushbutton on non-encoder surfaces — the button
+	// still works (the push action resets gain to 0 dB) but rotation is ignored.
+	presets[`ch${n}_gain_encoder`] = {
+		type: 'button',
+		category: `SLX-D+ Channel ${n} (Encoder)`,
+		name: `CH${n} Gain Encoder (turn ±1 dB, push = reset to 0)`,
+		style: baseStyle(`CH${n}\\n$(shure-wireless:ch_${n}_audio_gain)\\ndB`),
+		options: { rotaryActions: true },
+		steps: [
+			{
+				down: [{ actionId: 'channel_setaudiogain', options: { channel: channelId, gain: '0' } }],
+				up: [],
+				rotate_left: [{ actionId: 'channel_decreasegain', options: { channel: channelId, gain: '1' } }],
+				rotate_right: [{ actionId: 'channel_increasegain', options: { channel: channelId, gain: '1' } }],
+			},
+		],
+		feedbacks: [],
+	}
+
+	// 12. Dante channel name (only on Dante-equipped models)
 	if (model.dante === true) {
 		presets[`ch${n}_dante_name`] = {
 			type: 'button',
