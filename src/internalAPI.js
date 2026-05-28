@@ -934,21 +934,26 @@ export default class WirelessApi {
 			// (SLX+ Dante only) 31-char padded channel label
 			channel.naChanName = value.replace('{', '').replace('}', '').trim()
 			this.instance.setVariableValues({ [`${prefix}na_chan_name`]: channel.naChanName })
-		} else if (key == 'AUDIO_LEVEL_PEAK') {
-			// (SLX+) metered property — also reachable via GET / REP
+		} else if (key == 'AUDIO_LEVEL_PEAK' && model.family === 'slxplus') {
+			// (SLX+ only) metered property — also reachable via GET / REP.
+			// Gated on family so a hypothetical AD/ULX REP of the same key
+			// wouldn't clobber the family-specific parsing in parseADSample etc.
 			channel.audioLevelPeak = parseInt(value) - 120
 			this.instance.setVariableValues({
 				[`${prefix}audio_level_peak`]:
 					channel.audioLevelPeak + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),
 			})
-		} else if (key == 'AUDIO_LEVEL_RMS') {
+		} else if (key == 'AUDIO_LEVEL_RMS' && model.family === 'slxplus') {
 			channel.audioLevel = parseInt(value) - 120
 			this.instance.setVariableValues({
 				[`${prefix}audio_level`]: channel.audioLevel + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),
 			})
-		} else if (key == 'RSSI') {
-			// (SLX+) per-antenna RSSI from REP. value = "<antennaIdx> <dBmRaw>"
-			// e.g. "1 083" (antenna A) or "2 064" (antenna B)
+		} else if (key == 'RSSI' && model.family === 'slxplus') {
+			// (SLX+ only) per-antenna RSSI from REP. value = "<antennaIdx> <dBmRaw>"
+			// e.g. "1 083" (antenna A) or "2 064" (antenna B).
+			// Gated on family because AD uses rfBitmapA/B as 0-255 colour
+			// segments (set in parseADSample). Our 0-5 bars mapping would
+			// silently corrupt AD's icon rendering if this branch were generic.
 			let parts = value.split(/\s+/)
 			let antIdx = parseInt(parts[0])
 			let raw = parseInt(parts[1])
@@ -1012,6 +1017,15 @@ export default class WirelessApi {
 
 			this.receiver.highDensity = value
 			this.instance.setVariableValues({ high_density_mode: value })
+		} else if (key == 'ENCRYPTION_MODE' && this.instance.model.family === 'slxplus') {
+			// (SLX+ only) — must be matched **before** the generic
+			// `key.match(/ENCRYPTION/)` branch below, because that regex
+			// also matches `ENCRYPTION_MODE` and would otherwise hijack the
+			// SLX-D+ REP into the AD/ULX transformation path (which maps
+			// INACTIVE/MANUAL/AUTO → OFF/ON/ON — incorrect for SLX-D+).
+			// AD's own ENCRYPTION_MODE keeps using the regex branch below.
+			this.receiver.encryptionMode = value
+			this.instance.setVariableValues({ encryption_mode: value })
 		} else if (key.match(/ENCRYPTION/)) {
 			if (value == 'INACTIVE') {
 				value = 'OFF'
@@ -1035,9 +1049,6 @@ export default class WirelessApi {
 		} else if (key == 'LOCK_STATUS') {
 			this.receiver.lockStatus = value
 			this.instance.setVariableValues({ lock_status: value })
-		} else if (key == 'ENCRYPTION_MODE') {
-			this.receiver.encryptionMode = value
-			this.instance.setVariableValues({ encryption_mode: value })
 		} else if (key == 'APP_CONN_ENABLED') {
 			this.receiver.appConnEnabled = value
 			this.instance.setVariableValues({ app_conn_enabled: value })

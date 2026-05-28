@@ -229,8 +229,10 @@ export function updateFeedbacks() {
 		}
 	}
 
-	// Interference detection is exposed on AD / ULX / SLX-D+ channels.
-	if (this.model.family == 'ad' || this.model.family == 'ulx' || this.model.family == 'slxplus') {
+	// Interference detection is exposed on every family except classic SLX-D.
+	// (Original upstream behaviour was `family != 'slx'`, which included QLX —
+	// preserved here so QLX users don't lose the feedback as a regression.)
+	if (this.model.family != 'slx') {
 		feedbacks['interference_status'] = {
 			type: 'boolean',
 			name: 'Interference Status',
