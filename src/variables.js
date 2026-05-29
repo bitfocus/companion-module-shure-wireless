@@ -144,11 +144,19 @@ export function updateVariables() {
 				prefix = `slot_${id}`
 
 				if (this.model.family == 'slxplus') {
-					// SLX-D+ side-channel exposes a small subset (LINK_TX_MODEL + LINK_STATUS).
-					// All TX battery / lock / offset properties live on the channel itself
-					// for the currently-active transmitter.
-					variables.push({ variableId: `${prefix}_link_status`, name: `Slot ${id} Link Status` })
-					variables.push({ variableId: `${prefix}_tx_model`, name: `Slot ${id} Linked TX Model` })
+					// SLX-D+ side-channel — per slot. Empirically confirmed
+					// against firmware 2.0.38.9 the receiver exposes:
+					//   SLOT_TX_MODEL s <padded-model>
+					//   LINK_STATUS   s online|offline
+					//   LINK_TX_BATT_MINS s NNNNN
+					// All other TX properties (battery bars, mute, RF
+					// power, …) are channel-scoped on the active TX.
+					variables.push({ variableId: `${prefix}_link_status`, name: `Slot ${id} Link Status (online/offline)` })
+					variables.push({ variableId: `${prefix}_tx_model`, name: `Slot ${id} TX Model` })
+					variables.push({
+						variableId: `${prefix}_link_tx_batt_mins`,
+						name: `Slot ${id} Linked TX Battery Runtime`,
+					})
 				} else {
 					// AD: full side-channel slot inventory.
 					variables.push({ variableId: `${prefix}_status`, name: `Slot ${id} Status` })
@@ -205,6 +213,10 @@ export function updateVariables() {
 	if (this.model.family == 'slxplus') {
 		variables.push({ variableId: 'encryption_mode', name: 'Audio Encryption Mode' })
 		variables.push({ variableId: 'app_conn_enabled', name: 'App Connection Enabled' })
+		// (SLX+) Empirically discovered on firmware 2.0.38.9 — the receiver
+		// exposes < REP AUDIO_SUMMING_MODE OFF|ON > even though the Strings
+		// PDF v1.0 (2026-A) doesn't list it.
+		variables.push({ variableId: 'audio_summing_mode', name: 'Audio Summing Mode' })
 
 		if (this.model.dante === true) {
 			variables.push({ variableId: 'na_device_name', name: 'Dante Device Name' })

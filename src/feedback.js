@@ -281,11 +281,21 @@ export function updateFeedbacks() {
 			},
 		}
 
+		// Empirically against firmware 2.0.38.9 the receiver reports
+		// `online` / `offline` (lowercase) for LINK_STATUS, NOT the
+		// dotted LINKED.ACTIVE / LINKED.INACTIVE / EMPTY documented in
+		// PDF v1.0 (2026-A). "Empty" is derived from SLOT_TX_MODEL — a
+		// slot whose tx model is the blank padded form has no TX
+		// paired into it, regardless of what LINK_STATUS says.
+		const isSlotEmpty = (s) => {
+			const tx = (s.txType || '').trim()
+			return tx === '' || tx === 'Unknown' || tx === 'UNKNOWN'
+		}
+
 		feedbacks['slot_link_active'] = {
 			type: 'boolean',
 			name: 'SLX-D+ Slot Link Active',
-			description:
-				'True when the selected side-channel slot is LINKED.ACTIVE (its transmitter is powered on and connected).',
+			description: 'True when the selected side-channel slot is online (its transmitter is powered on).',
 			defaultStyle: {
 				color: combineRgb(0, 0, 0),
 				bgcolor: combineRgb(0, 200, 0),
@@ -293,7 +303,8 @@ export function updateFeedbacks() {
 			options: [this.SLOTS_FIELD],
 			callback: ({ options }) => {
 				let parts = options.slot.split(':')
-				return this.api.getSlot(parseInt(parts[0]), parseInt(parts[1])).status == 'LINKED.ACTIVE'
+				let s = this.api.getSlot(parseInt(parts[0]), parseInt(parts[1]))
+				return s.status == 'online' && !isSlotEmpty(s)
 			},
 		}
 
@@ -301,7 +312,7 @@ export function updateFeedbacks() {
 			type: 'boolean',
 			name: 'SLX-D+ Slot Link Inactive',
 			description:
-				'True when the selected side-channel slot is LINKED.INACTIVE (TX is paired but currently powered off).',
+				'True when the selected slot has a TX paired but currently powered off (status = offline + TX known).',
 			defaultStyle: {
 				color: combineRgb(0, 0, 0),
 				bgcolor: combineRgb(200, 200, 0),
@@ -309,7 +320,8 @@ export function updateFeedbacks() {
 			options: [this.SLOTS_FIELD],
 			callback: ({ options }) => {
 				let parts = options.slot.split(':')
-				return this.api.getSlot(parseInt(parts[0]), parseInt(parts[1])).status == 'LINKED.INACTIVE'
+				let s = this.api.getSlot(parseInt(parts[0]), parseInt(parts[1]))
+				return s.status == 'offline' && !isSlotEmpty(s)
 			},
 		}
 
@@ -324,7 +336,7 @@ export function updateFeedbacks() {
 			options: [this.SLOTS_FIELD],
 			callback: ({ options }) => {
 				let parts = options.slot.split(':')
-				return this.api.getSlot(parseInt(parts[0]), parseInt(parts[1])).status == 'EMPTY'
+				return isSlotEmpty(this.api.getSlot(parseInt(parts[0]), parseInt(parts[1])))
 			},
 		}
 	}

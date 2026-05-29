@@ -145,7 +145,21 @@ export function updateActions() {
 			name: 'SLX-D+: Enable / disable app (Bluetooth) connection',
 			options: [Fields.OnOff],
 			callback: async ({ options }) => {
-				this.sendCommand(`SET APP_CONN_ENABLED ${options.value}`)
+				// Firmware 2.0.38.9 replies with the expanded name
+				// `APP_CONNECTION_ENABLED` but accepts both forms on SET.
+				// Using the expanded form here keeps SET and observed
+				// REP symmetric, which is nicer for debugging logs.
+				this.sendCommand(`SET APP_CONNECTION_ENABLED ${options.value}`)
+			},
+		}
+
+		actions['slxplus_set_audio_summing_mode'] = {
+			name: 'SLX-D+: Set device audio summing mode',
+			tooltip:
+				'Discovered in firmware 2.0.38.9 via the per-channel ALL dump; not listed in the Strings PDF v1.0 (2026-A) but the device accepts it.',
+			options: [Fields.OnOff],
+			callback: async ({ options }) => {
+				this.sendCommand(`SET AUDIO_SUMMING_MODE ${options.value}`)
 			},
 		}
 

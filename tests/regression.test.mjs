@@ -163,26 +163,65 @@ test('SLX-D family: audio level switch, TX type, sample parser', () => {
 	assert.equal(Object.keys(captured.presets ?? {}).length, 0, 'SLX gets no presets')
 })
 
-test('SLX-D+ family (Dante): new ENCRYPTION_MODE/REM_PAIR/AUDIO_LEVEL/slot branches + 57 presets', () => {
+test('SLX-D+ family (Dante): firmware 2.0.38.9 wire format — online/offline, SLOT_TX_MODEL, slot-2 reachable, both APP_CONN* names, AUDIO_SUMMING_MODE', () => {
 	const { inst, captured } = makeFakeInstance('slxd4qdanplus')
 
+	// Device-level basics (verbatim from probe round 2, 2026-05-28)
 	inst.api.updateReceiver('ENCRYPTION_MODE', 'ON')
-	inst.api.updateReceiver('NA_DEVICE_NAME', '{SLXD4Q-ffc8ec                  }')
+	inst.api.updateReceiver('NA_DEVICE_NAME', '{SLXD4Q-b05e01                  }')
+	// Firmware reports the *expanded* form. Older PDF / older firmware
+	// uses the short form. Parser must accept both.
+	inst.api.updateReceiver('APP_CONNECTION_ENABLED', 'ON')
+	// Bonus discovery from CH1 ALL dump — not in the Strings PDF.
+	inst.api.updateReceiver('AUDIO_SUMMING_MODE', 'OFF')
+
+	// Channel 1: active bodypack with mic. RSSI now single-value.
 	inst.api.updateChannel(1, 'REM_PAIR', 'REQUEST {MyBodypack}')
 	inst.api.updateChannel(1, 'AUDIO_LEVEL_PEAK', '105')
-	inst.api.updateSlot(1, 1, 'LINK_TX_MODEL', 'SLXD1+')
-	inst.api.updateSlot(1, 1, 'LINK_STATUS', 'LINKED.ACTIVE')
+	inst.api.updateChannel(1, 'RSSI', '068') // raw 068 → -52 dBm
+	inst.api.updateChannel(1, 'ANTENNA_STATUS', 'XB') // antenna B active
+	inst.api.updateChannel(1, 'TX_MODEL', 'SLXD1+') // active TX = bodypack
 
+	// Slot routing: real wire forms.
+	inst.api.updateSlot(1, 1, 'SLOT_TX_MODEL', '{SLXD1+    }') // padded
+	inst.api.updateSlot(1, 1, 'LINK_STATUS', 'online')
+	inst.api.updateSlot(1, 1, 'LINK_TX_BATT_MINS', '00246')
+
+	// Channel 4 — Add Second Tx Link probe: slot 1 empty, slot 2 has handheld.
+	inst.api.updateSlot(4, 1, 'SLOT_TX_MODEL', '{          }')
+	inst.api.updateSlot(4, 1, 'LINK_STATUS', 'offline')
+	inst.api.updateSlot(4, 2, 'SLOT_TX_MODEL', '{SLXD2+    }')
+	inst.api.updateSlot(4, 2, 'LINK_STATUS', 'online')
+
+	// --- Receiver / channel assertions ---
 	assert.equal(inst.api.receiver.encryptionMode, 'ON', 'slxplus ENCRYPTION_MODE handled')
 	assert.equal(inst.api.receiver.encryption, 'OFF', 'slxplus must NOT pollute AD/ULX encryption field')
-	assert.equal(inst.api.receiver.naDeviceName, 'SLXD4Q-ffc8ec', 'NA_DEVICE_NAME trimmed of padding')
+	assert.equal(inst.api.receiver.naDeviceName, 'SLXD4Q-b05e01', 'NA_DEVICE_NAME trimmed of padding')
+	assert.equal(inst.api.receiver.appConnEnabled, 'ON', 'APP_CONNECTION_ENABLED (expanded form) parsed')
+	assert.equal(inst.api.receiver.audioSumming, 'OFF', 'AUDIO_SUMMING_MODE (undocumented in PDF) parsed')
 	assert.equal(inst.api.getChannel(1).remPairState, 'REQUEST')
 	assert.equal(inst.api.getChannel(1).remPairTxName, 'MyBodypack')
 	assert.equal(inst.api.getChannel(1).audioLevelPeak, -15, 'AUDIO_LEVEL_PEAK = raw 105 − 120')
-	assert.equal(inst.api.getSlot(1, 1).txType, 'SLXD1+')
-	assert.equal(inst.api.getSlot(1, 1).status, 'LINKED.ACTIVE')
+	assert.equal(inst.api.getChannel(1).rfLevel, -52, 'slxplus RSSI single-value → raw 068 − 120')
+	assert.equal(inst.api.getChannel(1).antenna, 'XB', 'ANTENNA_STATUS stored on channel')
+	assert.equal(inst.api.getChannel(1).antennaA, 'X', 'antenna A idle')
+	assert.equal(inst.api.getChannel(1).antennaB, 'B', 'antenna B active')
+	assert.equal(inst.api.getChannel(1).txType, 'SLXD1+', 'channel-scoped TX_MODEL = active TX')
 
+	// --- Slot assertions: CH1 slot 1 = active bodypack ---
+	assert.equal(inst.api.getSlot(1, 1).txType, 'SLXD1+', 'SLOT_TX_MODEL braces+padding stripped')
+	assert.equal(inst.api.getSlot(1, 1).status, 'online', 'LINK_STATUS lowercase preserved')
+	assert.equal(inst.api.getSlot(1, 1).linkTxBattMins, 246, 'LINK_TX_BATT_MINS now slot-scoped')
+
+	// --- Slot assertions: CH4 slot 1 empty, slot 2 active (Second Tx Link) ---
+	assert.equal(inst.api.getSlot(4, 1).txType, '', 'CH4 slot 1 SLOT_TX_MODEL empty padded → ""')
+	assert.equal(inst.api.getSlot(4, 1).status, 'offline')
+	assert.equal(inst.api.getSlot(4, 2).txType, 'SLXD2+', 'CH4 slot 2 SLOT_TX_MODEL trimmed')
+	assert.equal(inst.api.getSlot(4, 2).status, 'online')
+
+	// --- Preset count: slots:2 doesn't change channel preset count;
+	// still 4 ch × 13 (status, link, freq, batt, gain±, encErr, intf,
+	// flash, reboot, pair, encoder, dante) + 5 device = 57 ---
 	const presetCount = Object.keys(captured.presets ?? {}).length
-	// 4 channels × 13 presets (11 channel + 1 encoder + 1 Dante) + 5 device presets = 57
 	assert.equal(presetCount, 57, `SLXD4QDAN+ should ship 57 presets, got ${presetCount}`)
 })

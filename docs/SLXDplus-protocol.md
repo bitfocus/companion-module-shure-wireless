@@ -7,6 +7,76 @@ receivers (SLXD4+, SLXD4D+, SLXD4Q+, SLXD4QDAN+).
 
 - Shure _SLXD+ Command Strings_, version 1.0 (2026-A) — <https://www.shure.com/en-US/docs/commandstrings/SLXDplus>
 - Shure _SLXD4Q+ Wireless System Manual_, version 2.2 (2026-C) — operational and hardware reference
+- **Empirical verification against firmware 2.0.38.9 on a real SLXD4QDAN+ (2026-05-28)** — used to lock in every concrete wire format and to correct several PDF inaccuracies (see [Firmware 2.0.38.9 deviations](#firmware-20389-deviations) below).
+
+---
+
+## Firmware 2.0.38.9 deviations
+
+The Strings PDF v1.0 (2026-A) was Shure's first public release of the SLX-D+ protocol document and contains several inaccuracies that show up immediately against a real device on firmware 2.0.38.9. This module is built to match what the device actually emits — the PDF entries below are kept for historical accuracy.
+
+| PDF v1.0 says | Firmware 2.0.38.9 sends / accepts | Module behaviour |
+|---|---|---|
+| `LINK_STATUS` values are `LINKED.ACTIVE` / `LINKED.INACTIVE` / `EMPTY` | Lowercase `online` / `offline` only. No explicit "empty" REP — the slot is empty when `SLOT_TX_MODEL` for that index is the blank padded form. | Parser stores `online` / `offline` verbatim. Slot-empty status is derived from `SLOT_TX_MODEL`. The three `slot_link_*` boolean feedbacks are wired accordingly. |
+| Slot side-channel command name is `LINK_TX_MODEL` | The TX model REP comes through `SLOT_TX_MODEL` (same name AD uses), with a padded value like `{SLXD1+    }` | Parser routes via the `SLOT_*` branch and trims braces / padding for the `slxplus` family. |
+| Device property name is `APP_CONN_ENABLED` | Device emits `APP_CONNECTION_ENABLED`. Accepts both on `SET`. | Parser accepts either spelling. Module's `SET` command sends the long form to stay symmetric with what comes back. |
+| `RSSI` is reported per antenna: `< REP x RSSI 1 dBmA >`, `< REP x RSSI 2 dBmB >` | A **single** diversity-output RSSI: `< REP x RSSI dBm >`. Per-antenna activity is published separately via `ANTENNA_STATUS`. | Parser treats `RSSI` as one value, mirrors it onto both `rfBitmapA` / `rfBitmapB` for the icon renderer. The new `ANTENNA_STATUS` property tracks which antenna is active. |
+| `LINK_TX_BATT_MINS` is channel-scoped (no slot index) | The wire form includes a slot index: `< REP x LINK_TX_BATT_MINS s NNNNN >`. Note: when slot `s` is offline the device echoes the active slot's value into the response — only meaningful when `LINK_STATUS s` is `online`. | Parser routes to the slot, stores `slot.linkTxBattMins`. |
+| `< GET 0 ALL >` triggers full discovery | On 2.0.38.9 this triggers metering only; no property REPs come back. Per-channel `< GET N ALL >` does emit the full dump. | Module connect path sends `< GET 0 ALL >` (kept for metering kick-off) **plus** `< GET 1 ALL >` … `< GET N ALL >` for slxplus models. |
+| `NA_DEVICE_NAME` has both `x` (channel) and `z` (slot) parameters | `< GET 1 NA_DEVICE_NAME 2 >` → `< REP ERR >`. The parameter description in the PDF is a copy-paste artefact. | Parser uses the device-level form only. |
+
+### Newly discovered properties not in PDF v1.0 (2026-A)
+
+Found via the per-channel `< GET 1 ALL >` dump on firmware 2.0.38.9.
+
+| Property | Scope | Example | Notes |
+|---|---|---|---|
+| `ANTENNA_STATUS` | channel | `< REP 1 ANTENNA_STATUS XB >` | Two characters: `A` / `B` = active, `X` = idle. So `XB` means antenna B locked, A idle. |
+| `TX_MODEL` (channel-scoped) | channel | `< REP 1 TX_MODEL SLXD1+ >` | Reflects the currently active TX (whichever slot is `online`). Distinct from `SLOT_TX_MODEL` which lists every paired TX. |
+| `AUDIO_SUMMING_MODE` | device | `< REP AUDIO_SUMMING_MODE OFF >` | Module exposes a `SET` action (`SLX-D+: Set device audio summing mode`). |
+
+### Side-channel slot count
+
+PDF v1.0 says _"`1` is always the slot number"_. Empirically: the device responds to slot indices `1` **and** `2`, and the receiver can pair two transmitters per channel (manual "Add Second Tx Link", S. 21). Verified on CH4 by registering a handheld SLXD2+ as the second TX — both slots reported independently:
+
+```
+< REP 4 LINK_STATUS 1 offline >
+< REP 4 LINK_STATUS 2 online >
+< REP 4 SLOT_TX_MODEL 1 {          } >
+< REP 4 SLOT_TX_MODEL 2 {SLXD2+    } >
+```
+
+Module is configured with `slots: 2` for every slxplus model.
+
+### Empty-channel behaviour
+
+`< GET N ALL >` on a channel with no TX paired returns only a minimal subset:
+
+```
+< REP 3 TX_MODEL UNKNOWN >
+< REP 3 TX_BATT_BARS 255 >
+< REP 3 TX_BATT_MINS 65535 >
+< REP 3 SLOT_TX_MODEL 1 {          } >
+< REP 3 LINK_STATUS 1 offline >
+< REP 3 SLOT_TX_MODEL 2 {          } >
+< REP 3 LINK_STATUS 2 offline >
+```
+
+`CHAN_NAME`, `AUDIO_GAIN`, `FREQUENCY` etc. for empty channels are populated only after the user pairs a TX. The module's default state (`Unknown`, `EMPTY`) is what the UI shows until then.
+
+### Sentinel values for unknown TX state
+
+When no TX is paired, the receiver uses these sentinels:
+
+| Field | Sentinel |
+|---|---|
+| `TX_BATT_BARS` | `255` |
+| `TX_BATT_MINS` | `65535` (also `65534` = calculating, `65533` = comm-warning) |
+| `LINK_TX_BATT_MINS s` | same as above |
+| `TX_MODEL` | `UNKNOWN` |
+| `SLOT_TX_MODEL s` | blank 10-char padded form `{          }` |
+
+Parser maps these to the string `Unknown` / empty-string for variable display.
 
 ---
 

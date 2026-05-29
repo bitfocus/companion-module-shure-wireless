@@ -30,7 +30,7 @@ export const Models = {
 		family: 'slxplus',
 		label: 'SLXD4+ Single Receiver',
 		channels: 1,
-		slots: 1,
+		slots: 2,
 		dante: false,
 	},
 	slxd4dplus: {
@@ -38,7 +38,7 @@ export const Models = {
 		family: 'slxplus',
 		label: 'SLXD4D+ Dual Receiver',
 		channels: 2,
-		slots: 1,
+		slots: 2,
 		dante: false,
 	},
 	slxd4qplus: {
@@ -46,7 +46,7 @@ export const Models = {
 		family: 'slxplus',
 		label: 'SLXD4Q+ Quad Receiver',
 		channels: 4,
-		slots: 1,
+		slots: 2,
 		dante: false,
 	},
 	slxd4qdanplus: {
@@ -54,7 +54,7 @@ export const Models = {
 		family: 'slxplus',
 		label: 'SLXD4QDAN+ Quad Receiver (Dante)',
 		channels: 4,
-		slots: 1,
+		slots: 2,
 		dante: true,
 	},
 }
@@ -94,10 +94,15 @@ export const Choices = {
 		{ id: 'AUTO', label: 'Automatic (DHCP)' },
 		{ id: 'MANUAL', label: 'Manual' },
 	],
+	// Empirical from firmware 2.0.38.9: the receiver reports lowercase
+	// `online` / `offline` on `< REP x LINK_STATUS s >`, NOT the dotted
+	// LINKED.ACTIVE / LINKED.INACTIVE / EMPTY values the strings PDF v1.0
+	// (2026-A) documents. `empty` is synthesized in the parser when
+	// SLOT_TX_MODEL for the slot is the blank padded form.
 	SlxPlusLinkStatus: [
-		{ id: 'EMPTY', label: 'Empty (no TX linked)' },
-		{ id: 'LINKED.ACTIVE', label: 'Linked & Active (TX powered on)' },
-		{ id: 'LINKED.INACTIVE', label: 'Linked but Inactive (TX powered off)' },
+		{ id: 'empty', label: 'Empty (no TX paired)' },
+		{ id: 'online', label: 'Online (TX powered on)' },
+		{ id: 'offline', label: 'Offline (TX paired but powered off)' },
 	],
 	SlxPlusTxModel: [
 		{ id: 'SLXD1+', label: 'SLXD1+ Bodypack' },

@@ -16,43 +16,21 @@ This module will connect to the Shure receivers below to provide feedback status
 
 Without this step the device accepts the TCP connection but silently discards every command — no variables update, no actions take effect. (Source: SLXD4Q+ user guide v2.2, page 27.)
 
-### SLX-D+ — using two transmitters on one channel
+### SLX-D+ — presets & encoder
 
-The SLX-D+ hardware can pair **two** transmitters per channel (e.g. a bodypack and a handheld) via the receiver's `Transmitter > Add Second Tx Link` menu. In operation only one of the two transmitters may be powered on at a time; the receiver automatically follows whichever one is active over RF. Companion sees the active transmitter as the channel's _Side Channel Slot 1_ (model, link status, battery), and the values update automatically when you physically switch between transmitters.
-
-A reference of every TCP command this module uses against SLX-D+ devices is available in [`docs/SLXDplus-protocol.md`](../docs/SLXDplus-protocol.md).
-
-### SLX-D+ — drag-and-drop presets
-
-When an SLX-D+ model is selected, the **Buttons** page in Companion shows a preset palette grouped as:
-
-- **SLX-D+ Channel _N_** — one group per receiver channel, with ready-to-use buttons for status display, Bodypack/Handheld link indicator (colour-coded green/yellow/grey), frequency, battery, audio gain ±3 dB, encryption-error indicator, interference indicator, channel flash, linked-TX reboot, remote-pair listener, and (on SLXD4QDAN+) the Dante channel name.
-- **SLX-D+ Channel _N_ (Encoder)** — a rotary preset (Stream Deck Plus / Loupedeck): turn = audio gain ±1 dB, push = reset to 0 dB. On surfaces without an encoder the button still works as a "reset gain" button.
-- **SLX-D+ Device** — flash device, encryption ON/OFF, app-connection ON/OFF.
-
-Drag any preset onto an empty button and it arrives fully configured — actions, feedbacks and style all wired up. Bodypack/Handheld presets automatically reflect whichever transmitter is currently active on the channel.
+Selecting an SLX-D+ model exposes a preset palette under **SLX-D+ Channel _N_**, **SLX-D+ Channel _N_ (Encoder)** and **SLX-D+ Device**: ready-to-use buttons for status display, link indicator, frequency, battery, gain, encryption, flash, reboot, remote-pair, plus the Dante channel name on SLXD4QDAN+. The encoder preset maps turn = ±1 dB gain, push = reset to 0 dB on Stream Deck Plus / Loupedeck. Full TCP reference: [`docs/SLXDplus-protocol.md`](../docs/SLXDplus-protocol.md).
 
 ### SLX-D+ — recommended triggers
 
-Companion's **Triggers** page can fire actions automatically when the receiver's state changes. The module exposes all the booleans below as **feedbacks**, so a trigger can use _"When feedback X becomes true"_ as its condition.
+The boolean feedbacks below are wired to fire on every state change, so Companion's **Triggers** page can act on them with _"When feedback X becomes true"_:
 
-| Trigger                                               | Condition (feedback to watch)                           | Suggested action                                                                 |
-| ----------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| **Battery critical**                                  | `Battery Level` with _Battery Alert Level_ set to **1** | Send Slack/Mail webhook ("CH _N_ battery ≤ 1 bar"), and/or flash a status button |
-| **Encryption error**                                  | `SLX-D+ Encryption Error` on channel _N_                | Log message, flash device, switch a status page to red                           |
-| **RF interference**                                   | `Interference Status` on channel _N_                    | Show a warning on a "stage manager" button, log the timestamp                    |
-| **Transmitter went offline (paired but powered off)** | `SLX-D+ Slot Link Inactive` on slot _N:1_               | Reset Companion variable, switch monitoring view, notify FOH                     |
-| **Remote-pair request pending**                       | `SLX-D+ Remote-Pair Request Pending` on channel _N_     | Highlight the receiver's "Pair" button so an operator notices the BLE request    |
+| Trigger | Condition (feedback to watch) |
+| --- | --- |
+| **Battery critical** | `Battery Level` with _Battery Alert Level_ = **1** |
+| **RF interference** | `Interference Status` on channel _N_ |
+| **Transmitter went offline** | `SLX-D+ Slot Link Inactive` on slot _N:1_ |
 
-**How to set one up (example: Battery critical)**
-
-1. In Companion → **Triggers** → **+ Add trigger**.
-2. **Type**: _Feedback_.
-3. Pick the connection (this instance) → feedback `Battery Level` → channel = the receiver channel, _Battery Alert Level_ = `1`.
-4. **Actions**: add whatever Companion action you want — internal `instance:custom-variable set`, `surface:page set`, a webhook, etc.
-5. Save. The trigger fires the moment the receiver reports `TX_BATT_BARS ≤ 1`.
-
-These templates aren't shipped as preset JSON because Companion's module API doesn't yet support trigger presets — the user side has to wire them up once. The feedbacks they rely on are all already registered by this module, so no additional setup on the receiver is needed.
+Wire any Companion action (webhook, page switch, log, flash) underneath. Module API doesn't ship trigger presets yet — you set the condition once per trigger.
 
 ### Available actions
 
@@ -96,17 +74,17 @@ These templates aren't shipped as preset JSON because Companion's module API doe
 | Slot Status                | If the selected slot\'s status is set, change the color of the button.                        | AD                          |
 | SLX-D+ Encryption Error    | True when the channel reports `ENCRYPTION_STATUS = ERROR` (mismatched transmitter).           | SLX-D+                      |
 | SLX-D+ Remote-Pair Request | True while a transmitter is advertising itself for BLE remote pairing.                        | SLX-D+                      |
-| SLX-D+ Slot Link Active    | True when the side-channel slot is `LINKED.ACTIVE` (TX powered on).                           | SLX-D+                      |
-| SLX-D+ Slot Link Inactive  | True when the slot is `LINKED.INACTIVE` (TX paired but currently powered off).                | SLX-D+                      |
+| SLX-D+ Slot Link Active    | True when the side-channel slot reports `LINK_STATUS = online` (TX powered on).               | SLX-D+                      |
+| SLX-D+ Slot Link Inactive  | True when the slot reports `LINK_STATUS = offline` with a TX still paired (powered off).      | SLX-D+                      |
 | SLX-D+ Slot Empty          | True when no transmitter is paired into the slot.                                             | SLX-D+                      |
 
 ### Channel Status Display
 
-The "Channel Status Display" is a customizable feedback to provide a graphic status readout for a channel, similar to information available on the front panel or in Wireless Workbench.
+The "Channel Status Display" is a customizable feedback to provide a graphic status readout for a channel, similar to information available on the front panel or in Wireless Workbench. On SLX-D+ the renderer shows two RF bars (one per antenna A/B), the audio meter, the battery indicator, and an encryption key icon when audio encryption is on.
 
-| Axient                               | ULX-D                                  | QLX-D                                  | SLX-D                                  |
-| ------------------------------------ | -------------------------------------- | -------------------------------------- | -------------------------------------- |
-| ![AD example](images/example-ad.png) | ![ULX example](images/example-ulx.png) | ![QLX example](images/example-qlx.png) | ![SLX example](images/example-slx.png) |
+| Axient                               | ULX-D                                  | QLX-D                                  | SLX-D                                  | SLX-D+                                         |
+| ------------------------------------ | -------------------------------------- | -------------------------------------- | -------------------------------------- | ---------------------------------------------- |
+| ![AD example](images/example-ad.png) | ![ULX example](images/example-ulx.png) | ![QLX example](images/example-qlx.png) | ![SLX example](images/example-slx.png) | ![SLX-D+ example](images/example-slxplus.png) |
 
 #### Setup
 

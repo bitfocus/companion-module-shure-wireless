@@ -146,7 +146,8 @@ export default class WirelessApi {
 				batteryType: 'Unknown', // (ULX|QLX|AD:TX_BATT_TYPE) ALKA - LION - LITH - NIMH - UNKN
 
 				// SLX-D+ specific (rfLevelA/rfLevelB/rfBitmapA/rfBitmapB are already declared above for AD; reused here)
-				linkTxBattMins: 65535, // (SLX+) LINK_TX_BATT_MINS for the linked TX (channel-scoped in API, not per-slot)
+				// Note: LINK_TX_BATT_MINS is slot-scoped on the wire — stored on
+				// slot.linkTxBattMins via updateSlot. No channel-level field.
 				remPairState: 'OFF', // (SLX+) OFF - ON - REQUEST - ACCEPT - REJECT
 				remPairTxName: '', // (SLX+) name from REM_PAIR REQUEST/ACCEPT messages
 				naChanName: '', // (SLX+ Dante only) 31
@@ -292,6 +293,7 @@ export default class WirelessApi {
 				batteryHealth: 255, // SLOT_BATT_HEALTH_PERCENT 0-100, 255=UNKN
 				batteryRuntime: 65535, // SLOT_BATT_MINS 0+, 65535=UNKN 65534=calcuating 65533=comm warning
 				batteryType: 'Unknown', // SLOT_BATT_TYPE ALKA - LION - LITH - NIMH - UNKN
+				linkTxBattMins: 65535, // (SLX+) LINK_TX_BATT_MINS — 0+ minutes, 65535=UNKN
 			}
 		}
 
@@ -897,23 +899,6 @@ export default class WirelessApi {
 		} else if (key.match(/BATT_TYPE/)) {
 			channel.batteryType = value
 			this.instance.setVariableValues({ [`${prefix}battery_type`]: value })
-		} else if (key == 'LINK_TX_BATT_MINS') {
-			// (SLX+) channel-scoped battery runtime of the linked transmitter
-			channel.linkTxBattMins = parseInt(value)
-			if (channel.linkTxBattMins == 65535) {
-				variable = 'Unknown'
-			} else if (channel.linkTxBattMins == 65534) {
-				variable = 'Calculating'
-			} else if (channel.linkTxBattMins == 65533) {
-				variable = 'Error'
-			} else {
-				let mins = channel.linkTxBattMins
-				let h = Math.floor(mins / 60)
-				let m = mins % 60
-				m = m < 10 ? '0' + m : m
-				variable = `${h}:${m}`
-			}
-			this.instance.setVariableValues({ [`${prefix}link_tx_batt_mins`]: variable })
 		} else if (key == 'REM_PAIR') {
 			// (SLX+) asynchronous remote-pairing state. value forms:
 			//   "ON" | "OFF" | "REQUEST {TxName}" | "ACCEPT {TxName}" | "REJECT {TxName}"
@@ -949,35 +934,53 @@ export default class WirelessApi {
 				[`${prefix}audio_level`]: channel.audioLevel + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),
 			})
 		} else if (key == 'RSSI' && model.family === 'slxplus') {
-			// (SLX+ only) per-antenna RSSI from REP. value = "<antennaIdx> <dBmRaw>"
-			// e.g. "1 083" (antenna A) or "2 064" (antenna B).
+			// (SLX+ only) RSSI reported by firmware 2.0.38.9 as a **single**
+			// diversity-output value (e.g. `< REP 1 RSSI 068 >`), not the
+			// per-antenna pair shown in PDF v1.0 (2026-A). The per-antenna
+			// breakdown is published separately via ANTENNA_STATUS (which
+			// antenna is active) — see the next branch.
 			// Gated on family because AD uses rfBitmapA/B as 0-255 colour
 			// segments (set in parseADSample). Our 0-5 bars mapping would
 			// silently corrupt AD's icon rendering if this branch were generic.
-			let parts = value.split(/\s+/)
-			let antIdx = parseInt(parts[0])
-			let raw = parseInt(parts[1])
+			let raw = parseInt(value.trim().split(/\s+/)[0])
 			let real = raw - 120
 			let label = real + (this.instance.config.variableFormat == 'units' ? ' dBm' : '')
-
-			let mapToBars = (lvl) => {
-				if (lvl >= -25) return 5
-				if (lvl >= -70) return 4
-				if (lvl >= -77) return 3
-				if (lvl >= -83) return 2
-				if (lvl >= -90) return 1
-				return 0
-			}
-
-			if (antIdx == 1) {
-				channel.rfLevelA = real
-				channel.rfBitmapA = mapToBars(real)
-				this.instance.setVariableValues({ [`${prefix}rf_level_a`]: label })
-			} else if (antIdx == 2) {
-				channel.rfLevelB = real
-				channel.rfBitmapB = mapToBars(real)
-				this.instance.setVariableValues({ [`${prefix}rf_level_b`]: label })
-			}
+			let bars
+			if (real >= -25) bars = 5
+			else if (real >= -70) bars = 4
+			else if (real >= -77) bars = 3
+			else if (real >= -83) bars = 2
+			else if (real >= -90) bars = 1
+			else bars = 0
+			channel.rfLevel = real
+			// Mirror to both antenna bitmaps for the icon renderer; whichever
+			// antenna is currently active gets overwritten by ANTENNA_STATUS
+			// when its REP arrives.
+			channel.rfBitmapA = bars
+			channel.rfBitmapB = bars
+			this.instance.setVariableValues({
+				[`${prefix}rf_level`]: label,
+				[`${prefix}rf_level_a`]: label,
+				[`${prefix}rf_level_b`]: label,
+			})
+		} else if (key == 'ANTENNA_STATUS' && model.family === 'slxplus') {
+			// (SLX+ only) — empirically documented from firmware 2.0.38.9.
+			// Two-character code like "XB" / "AX" / "AB" describing which
+			// antenna(s) are currently locked: `X` = idle, `A`/`B` = active.
+			// Not in PDF v1.0 (2026-A); discovered via `< GET 1 ALL >` dump.
+			let v = value.trim()
+			channel.antenna = v
+			channel.antennaA = v.substr(0, 1) || 'X'
+			channel.antennaB = v.substr(1, 1) || 'X'
+			this.instance.setVariableValues({ [`${prefix}antenna`]: v })
+		} else if (key == 'TX_MODEL' && model.family === 'slxplus') {
+			// (SLX+ only) channel-scoped TX model = the currently active
+			// transmitter. When CH1 has slot 1 active with SLXD1+, this
+			// reports `SLXD1+`. When the user power-cycles to the bodypack
+			// linked into slot 2, this re-reports `SLXD2+`. The per-slot
+			// model lives in slot.txType via SLOT_TX_MODEL.
+			channel.txType = value.trim()
+			this.instance.setVariableValues({ [`${prefix}tx_model`]: channel.txType })
 		}
 	}
 
@@ -1041,15 +1044,25 @@ export default class WirelessApi {
 			this.receiver.quadversityMode = value
 			this.instance.setVariableValues({ quadversity_mode: value })
 		} else if (key == 'MODEL') {
-			this.receiver.model = value
-			this.instance.setVariableValues({ model: value })
+			// MODEL is a 32-char padded string wrapped in braces:
+			// `{SLXD4QDAN+                      }`. Trim like the other
+			// padded fields (NA_DEVICE_NAME, FW_VER, DEVICE_ID) for a
+			// clean variable value.
+			this.receiver.model = value.replace('{', '').replace('}', '').trim()
+			this.instance.setVariableValues({ model: this.receiver.model })
 		} else if (key == 'RF_BAND') {
-			this.receiver.rfBand = value
-			this.instance.setVariableValues({ rf_band: value })
+			// RF_BAND is an 8-char padded string: `{G65     }`.
+			this.receiver.rfBand = value.replace('{', '').replace('}', '').trim()
+			this.instance.setVariableValues({ rf_band: this.receiver.rfBand })
 		} else if (key == 'LOCK_STATUS') {
 			this.receiver.lockStatus = value
 			this.instance.setVariableValues({ lock_status: value })
-		} else if (key == 'APP_CONN_ENABLED') {
+		} else if (key == 'APP_CONN_ENABLED' || key == 'APP_CONNECTION_ENABLED') {
+			// Strings PDF v1.0 (2026-A) says `APP_CONN_ENABLED`, but firmware
+			// 2.0.38.9 actually replies with `APP_CONNECTION_ENABLED`. Accept
+			// both names so the parser works regardless of which form a given
+			// firmware sends. The SET command in actions.js sends the
+			// expanded form (the device tolerates both on write too).
 			this.receiver.appConnEnabled = value
 			this.instance.setVariableValues({ app_conn_enabled: value })
 		} else if (key == 'NA_DEVICE_NAME') {
@@ -1116,8 +1129,22 @@ export default class WirelessApi {
 				this.instance.setVariableValues({ [`${prefix}link_status`]: variable })
 				break
 			case 'SLOT_TX_MODEL':
-				slot.txType = value
-				this.instance.setVariableValues({ [`${prefix}tx_model`]: value })
+				// AD reports raw model strings (e.g. `ADX1`); SLX-D+ reports
+				// a padded form inside braces, e.g. `{SLXD1+    }`. Trim for
+				// slxplus so downstream code sees a clean `SLXD1+` / `SLXD2+`
+				// / `SLXD3+` / `` (empty when no TX paired).
+				if (this.instance.model.family === 'slxplus') {
+					slot.txType = value.replace('{', '').replace('}', '').trim()
+				} else {
+					slot.txType = value
+				}
+				this.instance.setVariableValues({ [`${prefix}tx_model`]: slot.txType })
+				// Empty TX model means the slot is empty — re-evaluate the
+				// slxplus link-state booleans (slot_link_empty key depends
+				// on it).
+				if (this.instance.model.family === 'slxplus') {
+					this.instance.checkFeedbacks('slot_link_active', 'slot_link_inactive', 'slot_link_empty')
+				}
 				break
 			case 'SLOT_TX_DEVICE_ID':
 				slot.txDeviceId = value.replace('{', '').replace('}', '').trim()
@@ -1231,19 +1258,41 @@ export default class WirelessApi {
 				slot.batteryType = value
 				this.instance.setVariableValues({ [`${prefix}battery_type`]: value })
 				break
-			// SLX-D+ side-channel commands. PDF v1.0 (2026-A) notes
-			// "1 is always the slot number" — so today the SLX+ API only
-			// addresses slot 1 in practice, but the routing code is fully
-			// parametric in case future firmware exposes additional slots.
-			case 'LINK_TX_MODEL':
-				slot.txType = value
-				this.instance.setVariableValues({ [`${prefix}tx_model`]: value })
+			// SLX-D+ side-channel commands. Empirically confirmed against
+			// firmware 2.0.38.9 (probe rounds 2+3, 2026-05-28):
+			// - LINK_TX_MODEL is NOT a real command for slxplus — the device
+			//   uses SLOT_TX_MODEL (handled above) for both AD and slxplus.
+			// - LINK_STATUS is reported as lowercase `online` / `offline`,
+			//   NOT the dotted PDF forms LINKED.ACTIVE / LINKED.INACTIVE.
+			//   "empty" is a synthesised state — we don't get a separate REP
+			//   for it; the slot is empty when SLOT_TX_MODEL is the blank
+			//   padded form.
+			// - LINK_TX_BATT_MINS carries a slot index (`< REP x
+			//   LINK_TX_BATT_MINS s NNNNN >`) and is routed here. Note: the
+			//   receiver echoes the active slot's battery value into offline
+			//   slots' replies, so the value is only meaningful when the
+			//   slot's link_status is `online`.
+			case 'LINK_STATUS':
+				slot.status = value.trim().toLowerCase()
+				this.instance.setVariableValues({ [`${prefix}link_status`]: slot.status })
 				this.instance.checkFeedbacks('slot_link_active', 'slot_link_inactive', 'slot_link_empty')
 				break
-			case 'LINK_STATUS':
-				slot.status = value
-				this.instance.setVariableValues({ [`${prefix}link_status`]: value })
-				this.instance.checkFeedbacks('slot_link_active', 'slot_link_inactive', 'slot_link_empty')
+			case 'LINK_TX_BATT_MINS':
+				slot.linkTxBattMins = parseInt(value)
+				if (slot.linkTxBattMins == 65535) {
+					variable = 'Unknown'
+				} else if (slot.linkTxBattMins == 65534) {
+					variable = 'Calculating'
+				} else if (slot.linkTxBattMins == 65533) {
+					variable = 'Error'
+				} else {
+					let mins = slot.linkTxBattMins
+					let h = Math.floor(mins / 60)
+					let m = mins % 60
+					m = m < 10 ? '0' + m : m
+					variable = `${h}:${m}`
+				}
+				this.instance.setVariableValues({ [`${prefix}link_tx_batt_mins`]: variable })
 				break
 		}
 	}

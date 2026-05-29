@@ -294,6 +294,18 @@ class ShureWirelessInstance extends InstanceBase {
 				let cmd = '< GET 0 ALL >'
 				this.socket.send(cmd)
 
+				if (this.model.family === 'slxplus') {
+					// Firmware 2.0.38.9 returns only SAMPLE messages for
+					// `< GET 0 ALL >` — the property dump used to populate
+					// receiver / channel state never arrives. Per-channel
+					// `< GET N ALL >` *does* dump everything (verified probe
+					// round 2, 2026-05-28), so we fan out one of those per
+					// configured channel.
+					for (let ch = 1; ch <= this.model.channels; ch++) {
+						this.socket.send(`< GET ${ch} ALL >`)
+					}
+				}
+
 				if (this.config.meteringOn === true) {
 					cmd = `< SET 0 METER_RATE ${this.config.meteringInterval} >`
 					this.socket.send(cmd)
@@ -368,11 +380,14 @@ class ShureWirelessInstance extends InstanceBase {
 					this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], joinData(commandArr, 3))
 				} else if (
 					this.model.family === 'slxplus' &&
-					(commandArr[1] === 'LINK_TX_MODEL' || commandArr[1] === 'LINK_STATUS')
+					(commandArr[1] === 'LINK_STATUS' || commandArr[1] === 'LINK_TX_BATT_MINS')
 				) {
-					// SLX-D+ side-channel commands carry a slot number as commandArr[2].
-					// Per PDF v1.0 (2026-A) the slot is "always 1" today, but the
-					// parameter is parsed parametrically in case future firmware adds slots.
+					// SLX-D+ side-channel REPs that carry a slot index as
+					// commandArr[2]. Empirically confirmed slot indices 1 and 2
+					// against firmware 2.0.38.9 (probe round 3, 2026-05-28).
+					// SLOT_TX_MODEL is also slot-scoped but routes via the
+					// `startsWith('SLOT')` branch above (shared with the AD
+					// family code path) — both work.
 					this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], joinData(commandArr, 3))
 				} else {
 					//this command is about a specific channel
