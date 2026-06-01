@@ -8,6 +8,7 @@ import {
 } from '@companion-module/base'
 import { updateActions } from './actions.js'
 import { updateFeedbacks } from './feedback.js'
+import { updatePresets } from './presets.js'
 import { updateVariables } from './variables.js'
 import WirelessApi from './internalAPI.js'
 import { BooleanFeedbackUpgradeMap } from './upgrades.js'
@@ -33,6 +34,7 @@ class ShureWirelessInstance extends InstanceBase {
 
 		this.updateActions = updateActions.bind(this)
 		this.updateFeedbacks = updateFeedbacks.bind(this)
+		this.updatePresets = updatePresets.bind(this)
 		this.updateVariables = updateVariables.bind(this)
 	}
 
@@ -72,6 +74,7 @@ class ShureWirelessInstance extends InstanceBase {
 		this.updateActions()
 		this.updateFeedbacks()
 		this.updateVariables()
+		this.updatePresets()
 
 		if (resetConnection === true || this.socket === undefined) {
 			this.initTCP()
@@ -244,6 +247,7 @@ class ShureWirelessInstance extends InstanceBase {
 		this.updateActions()
 		this.updateVariables()
 		this.updateFeedbacks()
+		this.updatePresets()
 
 		this.initTCP()
 	}
@@ -289,6 +293,17 @@ class ShureWirelessInstance extends InstanceBase {
 				this.log('debug', 'Connected')
 				let cmd = '< GET 0 ALL >'
 				this.socket.send(cmd)
+
+				if (this.model.family === 'slxdplus') {
+					// On SLX-D+ (firmware 2.0.38.9) `< GET 0 ALL >` replies `< REP ERR >`
+					// and only starts metering — it does NOT dump device/channel
+					// properties. A per-channel `< GET N ALL >` DOES dump everything
+					// (device + channel props). Verified on hardware 2026-05-28, so we
+					// fan out one GET per configured channel to populate state.
+					for (let ch = 1; ch <= this.model.channels; ch++) {
+						this.socket.send(`< GET ${ch} ALL >`)
+					}
+				}
 
 				if (this.config.meteringOn === true) {
 					cmd = `< SET 0 METER_RATE ${this.config.meteringInterval} >`
@@ -360,8 +375,19 @@ class ShureWirelessInstance extends InstanceBase {
 					//this command isn't about a specific channel
 					this.api.updateReceiver(commandArr[0], joinData(commandArr, 1))
 				} else if (commandArr[1].startsWith('SLOT')) {
-					//this command is about a specific SLOT in AD
+					//this command is about a specific SLOT (AD, and SLOT_TX_MODEL on SLX-D+)
 					this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], joinData(commandArr, 3))
+				} else if (this.model.family === 'slxdplus' && commandArr[1] === 'LINK_STATUS') {
+					// SLX-D+ LINK_STATUS carries a slot index (commandArr[2]); each
+					// channel has two addressable slots with independent online/offline
+					// state. Verified on firmware 2.0.38.9 (2026-05-28).
+					this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], joinData(commandArr, 3))
+				} else if (this.model.family === 'slxdplus' && commandArr[1] === 'LINK_TX_BATT_MINS') {
+					// SLX-D+ LINK_TX_BATT_MINS also carries a slot index, but the
+					// receiver echoes the active TX's runtime into every slot — it is
+					// just the channel battery runtime (equivalent to TX_BATT_MINS).
+					// Strip the slot token and route channel-level.
+					this.api.updateChannel(commandNum, commandArr[1], joinData(commandArr, 3))
 				} else {
 					//this command is about a specific channel
 					this.api.updateChannel(commandNum, commandArr[1], joinData(commandArr, 2))
@@ -379,6 +405,9 @@ class ShureWirelessInstance extends InstanceBase {
 						break
 					case 'slx':
 						this.api.parseSLXSample(commandNum, command)
+						break
+					case 'slxdplus':
+						this.api.parseSlxdPlusSample(commandNum, command)
 						break
 				}
 
@@ -442,6 +471,15 @@ class ShureWirelessInstance extends InstanceBase {
 
 					if (this.api.getSlot(i, j).txDeviceId != '') {
 						data += ` (${this.api.getSlot(i, j).txDeviceId})`
+					} else if (
+						this.model.family === 'slxdplus' &&
+						this.api.getSlot(i, j).txType &&
+						this.api.getSlot(i, j).txType !== 'Unknown'
+					) {
+						// SLX-D+ side-channel slots don't have a separate Device ID;
+						// the SLOT_TX_MODEL value (SLXD1+/SLXD2+/SLXD3+) is the most
+						// useful disambiguator in the dropdown.
+						data += ` (${this.api.getSlot(i, j).txType})`
 					}
 
 					this.CHOICES_SLOTS.push({ id: id, label: data })

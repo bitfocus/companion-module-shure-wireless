@@ -679,11 +679,12 @@ export default class Icons {
 	 * @param {number} rf - the RF status
 	 * @param {number} battery - the battery status
 	 * @param {number} batteryAlertLevel - the level to change the battery to red
+	 * @param {String} [encryption] - encryption status ('ON' | 'OFF' | 'ERROR'); SLX-D+ only — classic SLX-D has no encryption and omits it
 	 * @returns {String} base64 encoded PNG
 	 * @access public
 	 * @since 1.1.0
 	 */
-	getSLXStatus(image, audio, rf, battery, batteryAlertLevel) {
+	getSLXStatus(image, audio, rf, battery, batteryAlertLevel, encryption) {
 		let out
 
 		if (image && image.width && image.height) {
@@ -693,7 +694,8 @@ export default class Icons {
 				image.height +
 				(audio ? 'b' + audio : '') +
 				(rf ? 'c' + rf : '') +
-				(battery ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '')
+				(battery ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '') +
+				(encryption ? 'g' + encryption : '')
 
 			if (this.savedIcons[id] === undefined) {
 				let img = new Image(image.width, image.height)
@@ -710,6 +712,12 @@ export default class Icons {
 					this.drawFromPNGdata(img, this.BATTERY_RED[battery], 3, 46 + yOffset, 25, 9)
 				} else {
 					this.drawFromPNGdata(img, this.BATTERY[battery], 3, 46 + yOffset, 25, 9)
+				}
+
+				// SLX-D+ exposes audio encryption (ENCRYPTION_MODE / ENCRYPTION_STATUS);
+				// classic SLX-D does not, so the badge is only drawn when a status is passed.
+				if (encryption) {
+					this.drawFromPNGdata(img, this.ENCRYPTION[encryption], 52, 2 + yOffset, 16, 6)
 				}
 
 				out = img.toBase64()

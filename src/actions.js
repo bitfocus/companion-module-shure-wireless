@@ -94,7 +94,7 @@ export function updateActions() {
 		}
 	}
 
-	if (this.model.family == 'ad' || this.model.family == 'slx') {
+	if (this.model.family == 'ad' || this.model.family == 'slx' || this.model.family == 'slxdplus') {
 		actions['flash_channel'] = {
 			name: 'Flash lights on receiver channel',
 			tooltip: 'It will automatically turn off after 60 seconds',
@@ -102,6 +102,149 @@ export function updateActions() {
 			callback: async ({ options }) => {
 				this.sendCommand(`SET ${options.channel} FLASH ON`)
 			},
+		}
+	}
+
+	if (this.model.family == 'slxdplus') {
+		// SLX-D+ specific actions. Strings sourced from
+		// "Shure SLXD+ Command Strings" v1.0 (2026-A).
+
+		actions['slxdplus_set_group_channel'] = {
+			name: 'SLX-D+: Set Group/Channel',
+			tooltip: 'Setting Group/Channel also updates the channel frequency. Wildcard "--,--" cannot be set.',
+			options: [this.CHANNELS_FIELD, Fields.GroupChannel],
+			callback: async (event, context) => {
+				const options = event.options
+				let value = await this.parseActionOption(event, 'value', context)
+				if (value) {
+					this.sendCommand(`SET ${options.channel} GROUP_CHANNEL {${value}}`)
+				}
+			},
+		}
+
+		actions['slxdplus_set_meter_rate'] = {
+			name: 'SLX-D+: Set channel meter rate',
+			tooltip: '0 disables metering. Range 100-65535 ms.',
+			options: [this.CHANNELS_A_FIELD, Fields.MeterRate],
+			callback: async ({ options }) => {
+				const rate = String(options.rate).padStart(5, '0')
+				this.sendCommand(`SET ${options.channel} METER_RATE ${rate}`)
+			},
+		}
+
+		actions['slxdplus_set_encryption_mode'] = {
+			name: 'SLX-D+: Set audio encryption (device)',
+			tooltip: 'Linked transmitters must be re-synced via IR after toggling encryption.',
+			options: [Fields.OnOff],
+			callback: async ({ options }) => {
+				this.sendCommand(`SET ENCRYPTION_MODE ${options.value}`)
+			},
+		}
+
+		actions['slxdplus_set_app_conn_enabled'] = {
+			name: 'SLX-D+: Enable / disable app (Bluetooth) connection',
+			options: [Fields.OnOff],
+			callback: async ({ options }) => {
+				// Firmware 2.0.38.9 replies with the expanded name
+				// `APP_CONNECTION_ENABLED` but accepts both forms on SET.
+				// Using the expanded form here keeps SET and observed
+				// REP symmetric, which is nicer for debugging logs.
+				this.sendCommand(`SET APP_CONNECTION_ENABLED ${options.value}`)
+			},
+		}
+
+		actions['slxdplus_set_audio_summing_mode'] = {
+			name: 'SLX-D+: Set device audio summing mode',
+			tooltip:
+				'Discovered in firmware 2.0.38.9 via the per-channel ALL dump; not listed in the Strings PDF v1.0 (2026-A) but the device accepts it.',
+			options: [Fields.OnOff],
+			callback: async ({ options }) => {
+				this.sendCommand(`SET AUDIO_SUMMING_MODE ${options.value}`)
+			},
+		}
+
+		actions['slxdplus_rem_pair_enable'] = {
+			name: 'SLX-D+: Remote pairing — enable on channel',
+			tooltip:
+				'Puts the channel into BLE remote-pairing mode. The receiver will emit REM_PAIR REQUEST when it sees a transmitter advertising.',
+			options: [this.CHANNELS_FIELD],
+			callback: async ({ options }) => {
+				this.sendCommand(`SET ${options.channel} REM_PAIR ON`)
+			},
+		}
+
+		actions['slxdplus_rem_pair_disable'] = {
+			name: 'SLX-D+: Remote pairing — disable on channel',
+			options: [this.CHANNELS_FIELD],
+			callback: async ({ options }) => {
+				this.sendCommand(`SET ${options.channel} REM_PAIR OFF`)
+			},
+		}
+
+		actions['slxdplus_rem_pair_accept'] = {
+			name: 'SLX-D+: Remote pairing — accept a transmitter',
+			tooltip:
+				'Use the TxName from the most recent REM_PAIR REQUEST message (also exposed as variable ch_N_rem_pair_tx_name).',
+			options: [this.CHANNELS_FIELD, Fields.TxName],
+			callback: async (event, context) => {
+				const options = event.options
+				let txname = await this.parseActionOption(event, 'txname', context)
+				if (txname) {
+					this.sendCommand(`SET ${options.channel} REM_PAIR ACCEPT {${txname}}`)
+				}
+			},
+		}
+
+		actions['slxdplus_rem_pair_reject'] = {
+			name: 'SLX-D+: Remote pairing — reject a transmitter',
+			options: [this.CHANNELS_FIELD, Fields.TxName],
+			callback: async (event, context) => {
+				const options = event.options
+				let txname = await this.parseActionOption(event, 'txname', context)
+				if (txname) {
+					this.sendCommand(`SET ${options.channel} REM_PAIR REJECT {${txname}}`)
+				}
+			},
+		}
+
+		actions['slxdplus_link_tx_reboot'] = {
+			name: 'SLX-D+: Reboot the linked transmitter',
+			tooltip: 'Reboots whichever transmitter is currently active on the channel.',
+			options: [this.CHANNELS_FIELD],
+			callback: async ({ options }) => {
+				this.sendCommand(`SET ${options.channel} LINK_TX_REBOOT`)
+			},
+		}
+
+		if (this.model.dante === true) {
+			actions['slxdplus_set_dante_chan_name'] = {
+				name: 'SLX-D+ (Dante): Set Dante channel name',
+				tooltip: 'Allowed chars: A-Z a-z 0-9 - (no leading/trailing hyphen). 1-31 chars.',
+				options: [this.CHANNELS_FIELD, Fields.DanteChanName],
+				callback: async (event, context) => {
+					const options = event.options
+					let name = await this.parseActionOption(event, 'name', context)
+					if (name) {
+						this.sendCommand(`SET ${options.channel} NA_CHAN_NAME {${name}}`)
+					}
+				},
+			}
+
+			actions['slxdplus_set_net_settings'] = {
+				name: 'SLX-D+ (Dante): Set network settings',
+				tooltip:
+					'Changing Shure Control (SC) settings requires reconnecting at the new IP. Changing Dante (D1/D2) settings causes the device to REBOOT.',
+				options: [Fields.NetInterface, Fields.NetIpMode, Fields.IpAddress, Fields.SubnetMask, Fields.Gateway],
+				callback: async (event, context) => {
+					const options = event.options
+					let ip = await this.parseActionOption(event, 'ipaddr', context)
+					let mask = await this.parseActionOption(event, 'mask', context)
+					let gw = await this.parseActionOption(event, 'gw', context)
+					if (ip != null && mask != null && gw != null) {
+						this.sendCommand(`SET NET_SETTINGS ${options.iface} ${options.ipmode} ${ip} ${mask} ${gw}`)
+					}
+				},
+			}
 		}
 	}
 

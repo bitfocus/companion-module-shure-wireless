@@ -54,6 +54,24 @@ export function updateFeedbacks() {
 			]
 			iconDefault = ['battery', 'rf', 'audio']
 			break
+		case 'slxdplus':
+			labelChoices = [
+				{ id: 'name', label: 'Channel Name' },
+				{ id: 'frequency', label: 'Frequency' },
+				{ id: 'groupChan', label: 'Group/Channel' },
+				{ id: 'audioGain', label: 'Audio Gain' },
+				{ id: 'txType', label: 'TX Model (linked)' },
+				{ id: 'batteryRuntime', label: 'Battery Runtime' },
+			]
+			labelDefault = ['name', 'frequency', 'audioGain', 'txType']
+			iconChoices = [
+				{ id: 'battery', label: 'Battery' },
+				{ id: 'rf', label: 'RF' },
+				{ id: 'audio', label: 'Audio Level' },
+				{ id: 'encryption', label: 'Encryption' },
+			]
+			iconDefault = ['battery', 'rf', 'audio']
+			break
 		case 'ad':
 			labelChoices = [
 				{ id: 'name', label: 'Channel Name' },
@@ -171,7 +189,7 @@ export function updateFeedbacks() {
 		},
 	}
 
-	if (this.model.family != 'slx') {
+	if (this.model.family != 'slx' && this.model.family != 'slxdplus') {
 		if (this.model.family != 'qlx') {
 			feedbacks['channel_muted'] = {
 				type: 'boolean',
@@ -209,7 +227,12 @@ export function updateFeedbacks() {
 				}
 			},
 		}
+	}
 
+	// Interference detection is exposed on every family except classic SLX-D.
+	// (Original upstream behaviour was `family != 'slx'`, which included QLX —
+	// preserved here so QLX users don't lose the feedback as a regression.)
+	if (this.model.family != 'slx') {
 		feedbacks['interference_status'] = {
 			type: 'boolean',
 			name: 'Interference Status',
@@ -225,6 +248,95 @@ export function updateFeedbacks() {
 				} else {
 					return false
 				}
+			},
+		}
+	}
+
+	if (this.model.family == 'slxdplus') {
+		feedbacks['encryption_error'] = {
+			type: 'boolean',
+			name: 'SLX-D+ Encryption Error',
+			description: 'True when the channel reports ENCRYPTION_STATUS = ERROR (mismatched transmitter).',
+			defaultStyle: {
+				color: combineRgb(255, 255, 255),
+				bgcolor: combineRgb(180, 0, 0),
+			},
+			options: [this.CHANNELS_FIELD],
+			callback: ({ options }) => {
+				return this.api.getChannel(parseInt(options.channel)).encryptionStatus == 'ERROR'
+			},
+		}
+
+		feedbacks['rem_pair_request'] = {
+			type: 'boolean',
+			name: 'SLX-D+ Remote-Pair Request Pending',
+			description: 'True while a transmitter is advertising itself for BLE remote pairing (REM_PAIR REQUEST).',
+			defaultStyle: {
+				color: combineRgb(0, 0, 0),
+				bgcolor: combineRgb(255, 200, 0),
+			},
+			options: [this.CHANNELS_FIELD],
+			callback: ({ options }) => {
+				return this.api.getChannel(parseInt(options.channel)).remPairState == 'REQUEST'
+			},
+		}
+
+		// Empirically against firmware 2.0.38.9 the receiver reports
+		// `online` / `offline` (lowercase) for LINK_STATUS, NOT the
+		// dotted LINKED.ACTIVE / LINKED.INACTIVE / EMPTY documented in
+		// PDF v1.0 (2026-A). "Empty" is derived from SLOT_TX_MODEL — a
+		// slot whose tx model is the blank padded form has no TX
+		// paired into it, regardless of what LINK_STATUS says.
+		const isSlotEmpty = (s) => {
+			const tx = (s.txType || '').trim()
+			return tx === '' || tx === 'Unknown' || tx === 'UNKNOWN'
+		}
+
+		feedbacks['slot_link_active'] = {
+			type: 'boolean',
+			name: 'SLX-D+ Slot Link Active',
+			description: 'True when the selected side-channel slot is online (its transmitter is powered on).',
+			defaultStyle: {
+				color: combineRgb(0, 0, 0),
+				bgcolor: combineRgb(0, 200, 0),
+			},
+			options: [this.SLOTS_FIELD],
+			callback: ({ options }) => {
+				let parts = options.slot.split(':')
+				let s = this.api.getSlot(parseInt(parts[0]), parseInt(parts[1]))
+				return s.status == 'online' && !isSlotEmpty(s)
+			},
+		}
+
+		feedbacks['slot_link_inactive'] = {
+			type: 'boolean',
+			name: 'SLX-D+ Slot Link Inactive',
+			description:
+				'True when the selected slot has a TX paired but currently powered off (status = offline + TX known).',
+			defaultStyle: {
+				color: combineRgb(0, 0, 0),
+				bgcolor: combineRgb(200, 200, 0),
+			},
+			options: [this.SLOTS_FIELD],
+			callback: ({ options }) => {
+				let parts = options.slot.split(':')
+				let s = this.api.getSlot(parseInt(parts[0]), parseInt(parts[1]))
+				return s.status == 'offline' && !isSlotEmpty(s)
+			},
+		}
+
+		feedbacks['slot_link_empty'] = {
+			type: 'boolean',
+			name: 'SLX-D+ Slot Empty',
+			description: 'True when no transmitter is paired into the selected side-channel slot.',
+			defaultStyle: {
+				color: combineRgb(255, 255, 255),
+				bgcolor: combineRgb(80, 80, 80),
+			},
+			options: [this.SLOTS_FIELD],
+			callback: ({ options }) => {
+				let parts = options.slot.split(':')
+				return isSlotEmpty(this.api.getSlot(parseInt(parts[0]), parseInt(parts[1])))
 			},
 		}
 	}
