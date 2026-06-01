@@ -27,7 +27,7 @@ export const Models = {
 	slxd4d: { id: 'slxd4d', family: 'slx', label: 'SLXD4D Dual Receiver', channels: 2, slots: 0 },
 	slxd4plus: {
 		id: 'slxd4plus',
-		family: 'slxplus',
+		family: 'slxdplus',
 		label: 'SLXD4+ Single Receiver',
 		channels: 1,
 		slots: 2,
@@ -35,7 +35,7 @@ export const Models = {
 	},
 	slxd4dplus: {
 		id: 'slxd4dplus',
-		family: 'slxplus',
+		family: 'slxdplus',
 		label: 'SLXD4D+ Dual Receiver',
 		channels: 2,
 		slots: 2,
@@ -43,7 +43,7 @@ export const Models = {
 	},
 	slxd4qplus: {
 		id: 'slxd4qplus',
-		family: 'slxplus',
+		family: 'slxdplus',
 		label: 'SLXD4Q+ Quad Receiver',
 		channels: 4,
 		slots: 2,
@@ -51,7 +51,7 @@ export const Models = {
 	},
 	slxd4qdanplus: {
 		id: 'slxd4qdanplus',
-		family: 'slxplus',
+		family: 'slxdplus',
 		label: 'SLXD4QDAN+ Quad Receiver (Dante)',
 		channels: 4,
 		slots: 2,
@@ -93,22 +93,6 @@ export const Choices = {
 	NetIpMode: [
 		{ id: 'AUTO', label: 'Automatic (DHCP)' },
 		{ id: 'MANUAL', label: 'Manual' },
-	],
-	// Empirical from firmware 2.0.38.9: the receiver reports lowercase
-	// `online` / `offline` on `< REP x LINK_STATUS s >`, NOT the dotted
-	// LINKED.ACTIVE / LINKED.INACTIVE / EMPTY values the strings PDF v1.0
-	// (2026-A) documents. `empty` is synthesized in the parser when
-	// SLOT_TX_MODEL for the slot is the blank padded form.
-	SlxPlusLinkStatus: [
-		{ id: 'empty', label: 'Empty (no TX paired)' },
-		{ id: 'online', label: 'Online (TX powered on)' },
-		{ id: 'offline', label: 'Offline (TX paired but powered off)' },
-	],
-	SlxPlusTxModel: [
-		{ id: 'SLXD1+', label: 'SLXD1+ Bodypack' },
-		{ id: 'SLXD2+', label: 'SLXD2+ Handheld' },
-		{ id: 'SLXD3+', label: 'SLXD3+ Plug-On' },
-		{ id: 'UNKNOWN', label: 'Unknown' },
 	],
 }
 

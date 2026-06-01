@@ -54,7 +54,7 @@ export function updateFeedbacks() {
 			]
 			iconDefault = ['battery', 'rf', 'audio']
 			break
-		case 'slxplus':
+		case 'slxdplus':
 			labelChoices = [
 				{ id: 'name', label: 'Channel Name' },
 				{ id: 'frequency', label: 'Frequency' },
@@ -66,7 +66,7 @@ export function updateFeedbacks() {
 			labelDefault = ['name', 'frequency', 'audioGain', 'txType']
 			iconChoices = [
 				{ id: 'battery', label: 'Battery' },
-				{ id: 'rf', label: 'RF (both antennas)' },
+				{ id: 'rf', label: 'RF' },
 				{ id: 'audio', label: 'Audio Level' },
 				{ id: 'encryption', label: 'Encryption' },
 			]
@@ -189,7 +189,7 @@ export function updateFeedbacks() {
 		},
 	}
 
-	if (this.model.family != 'slx' && this.model.family != 'slxplus') {
+	if (this.model.family != 'slx' && this.model.family != 'slxdplus') {
 		if (this.model.family != 'qlx') {
 			feedbacks['channel_muted'] = {
 				type: 'boolean',
@@ -252,7 +252,7 @@ export function updateFeedbacks() {
 		}
 	}
 
-	if (this.model.family == 'slxplus') {
+	if (this.model.family == 'slxdplus') {
 		feedbacks['encryption_error'] = {
 			type: 'boolean',
 			name: 'SLX-D+ Encryption Error',

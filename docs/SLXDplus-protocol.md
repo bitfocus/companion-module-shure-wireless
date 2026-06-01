@@ -13,40 +13,40 @@ receivers (SLXD4+, SLXD4D+, SLXD4Q+, SLXD4QDAN+).
 
 ## Firmware 2.0.38.9 deviations
 
-The Strings PDF v1.0 (2026-A) was Shure's first public release of the SLX-D+ protocol document and contains several inaccuracies that show up immediately against a real device on firmware 2.0.38.9. This module is built to match what the device actually emits — the PDF entries below are kept for historical accuracy.
+The Strings PDF v1.0 (2026-A) was Shure's first public release of the SLX-D+ protocol document and contains several inaccuracies that show up immediately against a real device on firmware 2.0.38.9. Every row below was **verified directly on hardware (SLXD4QDAN+, firmware 2.0.38.9, 2026-05-28)** — raw probe transcripts are reproduced further down. This module is built to match what the device actually emits; the PDF entries are kept for historical accuracy.
 
-| PDF v1.0 says | Firmware 2.0.38.9 sends / accepts | Module behaviour |
-|---|---|---|
-| `LINK_STATUS` values are `LINKED.ACTIVE` / `LINKED.INACTIVE` / `EMPTY` | Lowercase `online` / `offline` only. No explicit "empty" REP — the slot is empty when `SLOT_TX_MODEL` for that index is the blank padded form. | Parser stores `online` / `offline` verbatim. Slot-empty status is derived from `SLOT_TX_MODEL`. The three `slot_link_*` boolean feedbacks are wired accordingly. |
-| Slot side-channel command name is `LINK_TX_MODEL` | The TX model REP comes through `SLOT_TX_MODEL` (same name AD uses), with a padded value like `{SLXD1+    }` | Parser routes via the `SLOT_*` branch and trims braces / padding for the `slxplus` family. |
-| Device property name is `APP_CONN_ENABLED` | Device emits `APP_CONNECTION_ENABLED`. Accepts both on `SET`. | Parser accepts either spelling. Module's `SET` command sends the long form to stay symmetric with what comes back. |
-| `RSSI` is reported per antenna: `< REP x RSSI 1 dBmA >`, `< REP x RSSI 2 dBmB >` | A **single** diversity-output RSSI: `< REP x RSSI dBm >`. Per-antenna activity is published separately via `ANTENNA_STATUS`. | Parser treats `RSSI` as one value, mirrors it onto both `rfBitmapA` / `rfBitmapB` for the icon renderer. The new `ANTENNA_STATUS` property tracks which antenna is active. |
-| `LINK_TX_BATT_MINS` is channel-scoped (no slot index) | The wire form includes a slot index: `< REP x LINK_TX_BATT_MINS s NNNNN >`. Note: when slot `s` is offline the device echoes the active slot's value into the response — only meaningful when `LINK_STATUS s` is `online`. | Parser routes to the slot, stores `slot.linkTxBattMins`. |
-| `< GET 0 ALL >` triggers full discovery | On 2.0.38.9 this triggers metering only; no property REPs come back. Per-channel `< GET N ALL >` does emit the full dump. | Module connect path sends `< GET 0 ALL >` (kept for metering kick-off) **plus** `< GET 1 ALL >` … `< GET N ALL >` for slxplus models. |
-| `NA_DEVICE_NAME` has both `x` (channel) and `z` (slot) parameters | `< GET 1 NA_DEVICE_NAME 2 >` → `< REP ERR >`. The parameter description in the PDF is a copy-paste artefact. | Parser uses the device-level form only. |
+| PDF v1.0 says                                                              | Firmware 2.0.38.9 sends / accepts (verified)                                                                                                                                                                                                                                        | Module behaviour                                                                                                                                                   |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `LINK_STATUS` values are `LINKED.ACTIVE` / `LINKED.INACTIVE` / `EMPTY`     | Lowercase `online` / `offline` only, and the GET **requires** the slot token (`< GET x LINK_STATUS s >`; the no-token form returns `< REP ERR >`). No explicit "empty" REP — a slot is empty when its `SLOT_TX_MODEL` is the blank padded form.                                     | Parser stores `online` / `offline` verbatim per slot. Slot-empty is derived from `SLOT_TX_MODEL`. The three `slot_link_*` boolean feedbacks are wired accordingly. |
+| Slot TX-model command is `LINK_TX_MODEL`                                   | `LINK_TX_MODEL` **does not exist** — `< GET x LINK_TX_MODEL 1 >` → `< REP ERR >`. The per-slot model comes through `SLOT_TX_MODEL` (same name AD uses) with a padded value like `{SLXD1+    }`; the active-TX model is the channel-scoped `TX_MODEL` (`< REP x TX_MODEL SLXD1+ >`). | Per-slot model routes via the `SLOT_*` branch (trimmed for `slxdplus`); active model uses the existing channel `TX_MODEL`/`TX_TYPE` handler.                       |
+| Device property name is `APP_CONN_ENABLED`                                 | Only `APP_CONNECTION_ENABLED` works — the short form returns `< REP ERR >`.                                                                                                                                                                                                         | Parser/SET use `APP_CONNECTION_ENABLED` (and still accept the short form defensively).                                                                             |
+| `RSSI` is reported per antenna: `< REP x RSSI 1 … >`, `< REP x RSSI 2 … >` | A **single** diversity-output RSSI: `< REP x RSSI 096 >`. There is no per-antenna RSSI.                                                                                                                                                                                             | Parser treats `RSSI` as one value → single `rfBitmapA` bar and one `ch_x_rf_level` (modelled like SLX-D).                                                          |
+| `LINK_TX_BATT_MINS` is channel-scoped (no slot index)                      | The wire form includes a slot index (`< REP x LINK_TX_BATT_MINS s NNNNN >`) **but the receiver echoes the active TX's value into every slot** — e.g. both slots report `00494` on CH1. It is therefore just the channel battery runtime, equivalent to `TX_BATT_MINS`.              | Dispatcher strips the slot token and routes channel-level; folded into the same handler as `TX_BATT_MINS` (→ `ch_x_battery_runtime`).                              |
+| `< GET 0 ALL >` triggers full discovery                                    | On 2.0.38.9 it returns `< REP ERR >` and only starts metering — **no** property REPs. Per-channel `< GET N ALL >` **does** emit the full device + channel dump.                                                                                                                     | Connect path sends `< GET 0 ALL >` (metering kick-off) **plus** `< GET 1 ALL >` … `< GET N ALL >` for slxdplus models.                                             |
+| `NA_DEVICE_NAME` has both `x` (channel) and `z` (slot) parameters          | `< GET 1 NA_DEVICE_NAME 2 >` → `< REP ERR >`; only the device-level `< GET NA_DEVICE_NAME >` works. The PDF parameter list is a copy-paste artefact.                                                                                                                                | Parser uses the device-level form only.                                                                                                                            |
 
 ### Newly discovered properties not in PDF v1.0 (2026-A)
 
-Found via the per-channel `< GET 1 ALL >` dump on firmware 2.0.38.9.
+Confirmed in the per-channel `< GET 1 ALL >` dump on firmware 2.0.38.9.
 
-| Property | Scope | Example | Notes |
-|---|---|---|---|
-| `ANTENNA_STATUS` | channel | `< REP 1 ANTENNA_STATUS XB >` | Two characters: `A` / `B` = active, `X` = idle. So `XB` means antenna B locked, A idle. |
-| `TX_MODEL` (channel-scoped) | channel | `< REP 1 TX_MODEL SLXD1+ >` | Reflects the currently active TX (whichever slot is `online`). Distinct from `SLOT_TX_MODEL` which lists every paired TX. |
-| `AUDIO_SUMMING_MODE` | device | `< REP AUDIO_SUMMING_MODE OFF >` | Module exposes a `SET` action (`SLX-D+: Set device audio summing mode`). |
+| Property                    | Scope   | Example                          | Notes                                                                                                                                                          |
+| --------------------------- | ------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ANTENNA_STATUS`            | channel | `< REP 1 ANTENNA_STATUS XB >`    | Two characters: `A` / `B` = active, `X` = idle. `XB` means antenna B locked, A idle. Exposed as the `ch_x_antenna` variable; it does **not** feed the RF icon. |
+| `TX_MODEL` (channel-scoped) | channel | `< REP 1 TX_MODEL SLXD1+ >`      | The currently active TX. Distinct from `SLOT_TX_MODEL`, which lists the model paired into each slot.                                                           |
+| `AUDIO_SUMMING_MODE`        | device  | `< REP AUDIO_SUMMING_MODE OFF >` | Module exposes a `SET` action (`SLX-D+: Set device audio summing mode`).                                                                                       |
 
-### Side-channel slot count
+### Side-channel slots — two addressable, distinct slots
 
-PDF v1.0 says _"`1` is always the slot number"_. Empirically: the device responds to slot indices `1` **and** `2`, and the receiver can pair two transmitters per channel (manual "Add Second Tx Link", S. 21). Verified on CH4 by registering a handheld SLXD2+ as the second TX — both slots reported independently:
+PDF v1.0 says _"`1` is always the slot number"_. **This is wrong for firmware 2.0.38.9.** The receiver exposes **two** addressable slots per channel with fully independent `LINK_STATUS` and `SLOT_TX_MODEL`, matching the hardware "Add Second Tx Link" feature (manual p. 21). Verified by pairing a bodypack on CH1 slot 1 and a handheld on CH4 slot 2, both powered on:
 
 ```
-< REP 4 LINK_STATUS 1 offline >
-< REP 4 LINK_STATUS 2 online >
-< REP 4 SLOT_TX_MODEL 1 {          } >
-< REP 4 SLOT_TX_MODEL 2 {SLXD2+    } >
+< REP 1 LINK_STATUS 1 online  >   < REP 1 SLOT_TX_MODEL 1 {SLXD1+    } >
+< REP 1 LINK_STATUS 2 offline >   < REP 1 SLOT_TX_MODEL 2 {          } >
+< REP 4 LINK_STATUS 1 offline >   < REP 4 SLOT_TX_MODEL 1 {          } >
+< REP 4 LINK_STATUS 2 online  >   < REP 4 SLOT_TX_MODEL 2 {SLXD2+    } >
 ```
 
-Module is configured with `slots: 2` for every slxplus model.
+Channel-scoped `TX_MODEL` only reports the _active_ TX (`SLXD2+` on CH4) and cannot express which slot it occupies or that a second TX is paired-but-offline. The module therefore keeps a **minimal** 2-slot model for `slxdplus`: only `LINK_STATUS` (`slot_x-yy_link_status`) and `SLOT_TX_MODEL` (`slot_x-yy_tx_model`) per slot. Everything else (battery, RF, audio) stays channel-scoped on the active TX. This is deliberately narrower than the AD family's full per-slot inventory.
 
 ### Empty-channel behaviour
 
@@ -68,13 +68,13 @@ Module is configured with `slots: 2` for every slxplus model.
 
 When no TX is paired, the receiver uses these sentinels:
 
-| Field | Sentinel |
-|---|---|
-| `TX_BATT_BARS` | `255` |
-| `TX_BATT_MINS` | `65535` (also `65534` = calculating, `65533` = comm-warning) |
-| `LINK_TX_BATT_MINS s` | same as above |
-| `TX_MODEL` | `UNKNOWN` |
-| `SLOT_TX_MODEL s` | blank 10-char padded form `{          }` |
+| Field                 | Sentinel                                                     |
+| --------------------- | ------------------------------------------------------------ |
+| `TX_BATT_BARS`        | `255`                                                        |
+| `TX_BATT_MINS`        | `65535` (also `65534` = calculating, `65533` = comm-warning) |
+| `LINK_TX_BATT_MINS s` | same as above                                                |
+| `TX_MODEL`            | `UNKNOWN`                                                    |
+| `SLOT_TX_MODEL s`     | blank 10-char padded form `{          }`                     |
 
 Parser maps these to the string `Unknown` / empty-string for variable display.
 
@@ -108,36 +108,31 @@ SLXD4Q+ user guide, page 27.
 
 | Model      | Channels | Side-channel slots (API) | Dante |
 | ---------- | -------: | -----------------------: | :---: |
-| SLXD4+     |        1 |                        1 |   —   |
-| SLXD4D+    |        2 |                        1 |   —   |
-| SLXD4Q+    |        4 |                        1 |   —   |
-| SLXD4QDAN+ |        4 |                        1 |   ✓   |
+| SLXD4+     |        1 |                        2 |   —   |
+| SLXD4D+    |        2 |                        2 |   —   |
+| SLXD4Q+    |        4 |                        2 |   —   |
+| SLXD4QDAN+ |        4 |                        2 |   ✓   |
 
-Hardware-wise, the receiver can pair **two** transmitters per channel via the
-_Add Second Tx Link_ menu (manual p. 21), but only one transmitter may be
-powered on at a time. The TCP API exposes only the currently-active
-transmitter at slot index **1** — when the user physically swaps between e.g.
-a bodypack and a handheld (TX A off → TX B on), the `LINK_TX_MODEL 1` /
-`LINK_STATUS 1` REPs reflect the new active transmitter.
+The receiver can pair **two** transmitters per channel via the _Add Second Tx
+Link_ menu (manual p. 21), and the TCP API exposes **both** slots independently
+(verified on firmware 2.0.38.9 — see the slot transcript above). Only one TX is
+powered on at a time; the channel-scoped `TX_MODEL` reflects whichever slot is
+`online`, while each slot's `LINK_STATUS` / `SLOT_TX_MODEL` track that slot's own
+state.
 
 ```
-[TX-A (bodypack) on]
-< REP 1 LINK_TX_MODEL 1 SLXD1+ >
-< REP 1 LINK_STATUS 1 LINKED.ACTIVE >
-
-[user powers TX-A off and TX-B (handheld) on]
-< REP 1 LINK_TX_MODEL 1 SLXD2+ >       ← slot 1 now reflects the handheld
-< REP 1 LINK_STATUS 1 LINKED.ACTIVE >
+[bodypack on CH1 slot 1, handheld on CH4 slot 2]
+< REP 1 TX_MODEL SLXD1+ >              ← active TX on CH1
+< REP 1 LINK_STATUS 1 online  >        ← slot 1 = the bodypack
+< REP 4 TX_MODEL SLXD2+ >              ← active TX on CH4
+< REP 4 LINK_STATUS 2 online  >        ← slot 2 = the handheld
 ```
 
 > **Documentation footnotes**
 >
-> - The command-strings PDF writes _“Where x is the channel number and 1 is always the slot number”_ for `LINK_TX_MODEL` and `LINK_STATUS`. The wording _“always”_ is read as a deliberate API restriction to slot 1 — contrast the AD family, whose documentation says _“z is the slot number”_ with slots 1–8 addressable.
-> - The `NA_DEVICE_NAME` variable description in the PDF mentions _“x is the channel number and z is the slot number”_, but the example commands show neither parameter (`< GET NA_DEVICE_NAME >`). Two plausible readings:
->   1. **Documentation artefact**: the Variables block was copied from a multi-slot template (the AD family uses an identical wording) and `NA_DEVICE_NAME` is in reality device-scoped only.
->   2. **Undocumented extended form**: the firmware accepts `< GET x NA_DEVICE_NAME z >` and returns something different (e.g. a per-channel/per-slot Dante label) but the examples in the PDF only show the default form.
->      The menu text in the SLXD4Q+ user guide (p. 6) reads _“Dante Device Name: view and edit names for networked Dante devices”_ — plural — which keeps option 2 in play. To be resolved at first hardware verification by probing `< GET 1 NA_DEVICE_NAME >` and `< GET 1 NA_DEVICE_NAME 2 >` against the device.
-> - The module's slot iteration is fully parametric (`for slot in 1..model.slots`) so that a future firmware revision exposing slot 2 can be enabled by changing a single integer in `src/setup.js`.
+> - The PDF writes _“Where x is the channel number and 1 is always the slot number”_ for `LINK_TX_MODEL` and `LINK_STATUS`. This is inaccurate: `LINK_TX_MODEL` is not implemented at all on firmware 2.0.38.9, and `LINK_STATUS` accepts slot indices **1 and 2** with independent values.
+> - The `NA_DEVICE_NAME` variable description mentions a `z` (slot) parameter, but the firmware rejects it (`< GET 1 NA_DEVICE_NAME 2 >` → `< REP ERR >`). `NA_DEVICE_NAME` is device-scoped only — the PDF wording is a copy-paste artefact from the AD multi-slot template.
+> - Slot iteration is parametric (`for slot in 1..model.slots`, `model.slots = 2`).
 
 ---
 
@@ -414,7 +409,7 @@ Range: `00000` (off — default) or `00100`–`65535` ms.
 | `audRms`  | AUDIO_LEVEL_RMS         |      1 |               3 |
 | `rfRssi`  | RSSI (diversity output) |      1 |               3 |
 
-For per-antenna RSSI use the `< GET x RSSI >` REP pair (see below) instead.
+`rfRssi` is the same single diversity value returned by `< GET x RSSI >`.
 
 ### AUDIO_LEVEL_PEAK / AUDIO_LEVEL_RMS
 
@@ -426,53 +421,54 @@ For per-antenna RSSI use the `< GET x RSSI >` REP pair (see below) instead.
 3 chars, dBFS. **Real value = reported − 120.** Reported range 000-120 →
 −120…0 dBFS (typical −100…0).
 
-### RSSI (per antenna)
+### RSSI (single diversity value)
 
-|               |                        |
-| ------------- | ---------------------- |
-| GET           | `< GET x RSSI >`       |
-| REP antenna A | `< REP x RSSI 1 083 >` |
-| REP antenna B | `< REP x RSSI 2 064 >` |
+|     |                      |
+| --- | -------------------- |
+| GET | `< GET x RSSI >`     |
+| REP | `< REP x RSSI 096 >` |
 
-3 chars, dBm. **Real value = reported − 120.** Range −120…0 dBm.
+3 chars, dBm. **Real value = reported − 120.** Range −120…0 dBm. SLX-D+ reports a
+single diversity RSSI — there is no per-antenna RSSI (the PDF's `RSSI 1` / `RSSI 2`
+forms are not implemented). Which antenna is locked is reported separately by
+`ANTENNA_STATUS`.
 
 ---
 
-## Side-channel command strings (slot 1 per channel)
+## Side-channel command strings (slots 1 and 2 per channel)
 
-### LINK_TX_MODEL
+### SLOT_TX_MODEL — per-slot TX model (firmware uses this, not `LINK_TX_MODEL`)
 
-|     |                                                                   |
-| --- | ----------------------------------------------------------------- |
-| GET | `< GET x LINK_TX_MODEL 1 >`                                       |
-| REP | `< REP x LINK_TX_MODEL 1 SLXD1+ \| SLXD2+ \| SLXD3+ \| UNKNOWN >` |
+|     |                                                                  |
+| --- | ---------------------------------------------------------------- |
+| GET | `< GET x SLOT_TX_MODEL s >`                                      |
+| REP | `< REP x SLOT_TX_MODEL s {SLXD1+    } >` (padded; blank = empty) |
 
-### LINK_STATUS
+`LINK_TX_MODEL` from the PDF **is not implemented** on firmware 2.0.38.9
+(`< GET x LINK_TX_MODEL 1 >` → `< REP ERR >`). Use `SLOT_TX_MODEL` (per slot) and
+the channel-scoped `TX_MODEL` (active TX) instead.
 
-|     |                                                                     |
-| --- | ------------------------------------------------------------------- |
-| GET | `< GET x LINK_STATUS 1 >`                                           |
-| REP | `< REP x LINK_STATUS 1 EMPTY \| LINKED.ACTIVE \| LINKED.INACTIVE >` |
+### LINK_STATUS — per-slot link state
 
-| Value           | Meaning                                             |
-| --------------- | --------------------------------------------------- |
-| EMPTY           | No transmitter linked                               |
-| LINKED.INACTIVE | Linked but not currently connected (TX powered off) |
-| LINKED.ACTIVE   | Linked and connected                                |
+|     |                                                 |
+| --- | ----------------------------------------------- |
+| GET | `< GET x LINK_STATUS s >` (slot token required) |
+| REP | `< REP x LINK_STATUS s online \| offline >`     |
 
-### LINK_TX_BATT_MINS (5 chars)
+| Value   | Meaning                                                         |
+| ------- | --------------------------------------------------------------- |
+| online  | Linked and powered on                                           |
+| offline | Linked but powered off                                          |
+| (empty) | No TX paired — derived when `SLOT_TX_MODEL s` is the blank form |
 
-|     |                                     |
-| --- | ----------------------------------- |
-| GET | `< GET x LINK_TX_BATT_MINS >`       |
-| REP | `< REP x LINK_TX_BATT_MINS 00360 >` |
+`s` is `1` or `2`. The no-token GET (`< GET x LINK_STATUS >`) returns `< REP ERR >`.
 
-| Value       | Meaning                                        |
-| ----------- | ---------------------------------------------- |
-| 00000–65532 | Minutes of runtime remaining                   |
-| 65533       | Battery communication warning (check contacts) |
-| 65534       | Calculating                                    |
-| 65535       | Unknown / not applicable                       |
+### LINK_TX_BATT_MINS — alias of TX_BATT_MINS
+
+`< REP x LINK_TX_BATT_MINS s NNNNN >` carries a slot token, but the receiver echoes
+the active TX's runtime into every slot, so it is identical to the channel-scoped
+`TX_BATT_MINS` below. The module strips the token and treats it as the channel
+battery runtime. (Same 5-digit encoding and sentinels as `TX_BATT_MINS`.)
 
 ### TX_BATT_MINS / TX_BATT_BARS
 
@@ -502,19 +498,18 @@ in the command-strings PDF. They may still be reachable over TCP — to be
 verified by probing the live device. Confirmed commands will be added to a
 future revision of this document and to the module.
 
-| Menu function                 | Receiver path                                                                                                                                                                                           | Candidate probe                                                                                                                         |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Audio Summing                 | `Device Configuration > Audio > Audio Summing`                                                                                                                                                          | `< GET 0 AUDIO_SUMMING >`                                                                                                               |
-| Interference Management Mode  | `Device Configuration > RF > Interference Management`                                                                                                                                                   | `< GET 0 INTERFERENCE_MGMT >`                                                                                                           |
-| Antenna Bias                  | `Device Configuration > RF > Antenna Bias`                                                                                                                                                              | `< GET 0 ANTENNA_BIAS >`                                                                                                                |
-| Feedback Reduction (DFR)      | `Audio Settings > Feedback Reduction`                                                                                                                                                                   | `< GET x FEEDBACK_REDUCTION >`                                                                                                          |
-| Mic Offset (TX)               | TX menu via Tx Remote Control                                                                                                                                                                           | `< GET x MIC_OFFSET >`                                                                                                                  |
-| RF Power (TX)                 | TX menu via Tx Remote Control                                                                                                                                                                           | `< GET x TX_RF_POWER >`                                                                                                                 |
-| High-Pass Filter (TX)         | TX menu via Tx Remote Control                                                                                                                                                                           | `< GET x TX_HIGH_PASS >`                                                                                                                |
-| Tx Factory Reset              | `Transmitter > Tx Factory Reset`                                                                                                                                                                        | `< SET x TX_FACTORY_RESET >`                                                                                                            |
-| Tx Preset                     | `Transmitter > Transmitter Preset`                                                                                                                                                                      | `< GET x TX_PRESET >`                                                                                                                   |
-| Dante Device Lock             | `Device Configuration > Dante > Dante Device Lock`                                                                                                                                                      | `< GET 0 DANTE_DEVICE_LOCK >`                                                                                                           |
-| Per-slot `NA_DEVICE_NAME` (?) | n/a — Variables block in the PDF hints at `x` (channel) + `z` (slot) for `NA_DEVICE_NAME`, but the example commands omit both. Need to confirm whether the firmware actually accepts the extended form. | Compare responses to: `< GET NA_DEVICE_NAME >`, `< GET 1 NA_DEVICE_NAME >`, `< GET 1 NA_DEVICE_NAME 1 >`, `< GET 1 NA_DEVICE_NAME 2 >`. |
+| Menu function                | Receiver path                                         | Candidate probe                |
+| ---------------------------- | ----------------------------------------------------- | ------------------------------ |
+| Audio Summing                | `Device Configuration > Audio > Audio Summing`        | `< GET 0 AUDIO_SUMMING >`      |
+| Interference Management Mode | `Device Configuration > RF > Interference Management` | `< GET 0 INTERFERENCE_MGMT >`  |
+| Antenna Bias                 | `Device Configuration > RF > Antenna Bias`            | `< GET 0 ANTENNA_BIAS >`       |
+| Feedback Reduction (DFR)     | `Audio Settings > Feedback Reduction`                 | `< GET x FEEDBACK_REDUCTION >` |
+| Mic Offset (TX)              | TX menu via Tx Remote Control                         | `< GET x MIC_OFFSET >`         |
+| RF Power (TX)                | TX menu via Tx Remote Control                         | `< GET x TX_RF_POWER >`        |
+| High-Pass Filter (TX)        | TX menu via Tx Remote Control                         | `< GET x TX_HIGH_PASS >`       |
+| Tx Factory Reset             | `Transmitter > Tx Factory Reset`                      | `< SET x TX_FACTORY_RESET >`   |
+| Tx Preset                    | `Transmitter > Transmitter Preset`                    | `< GET x TX_PRESET >`          |
+| Dante Device Lock            | `Device Configuration > Dante > Dante Device Lock`    | `< GET 0 DANTE_DEVICE_LOCK >`  |
 
 ---
 
@@ -527,4 +522,5 @@ future revision of this document and to the module.
 - `FREQUENCY` and `GROUP_CHANNEL` are coupled — when one changes the receiver emits both REPs; both are parsed.
 - `REM_PAIR` is asynchronous. Incoming `REQUEST` messages are exposed as a `Boolean` feedback (_Remote-Pair Request Pending_) and as a `rem_pair_state` variable, so users can light up a button when a transmitter is asking to be paired.
 - `NET_SETTINGS` writes against `D1` or `D2` cause the device to reboot. The action surfaces this in its tooltip, and the module's automatic reconnect (via `configUpdated`) re-establishes the TCP session.
-- `LINK_TX_MODEL` returns `SLXD1+`, `SLXD2+`, `SLXD3+`, `UNKNOWN` — not to be confused with `SLXD1` / `SLXD2` / `SLXD3` (non-plus) used by the classic SLX-D module.
+- `SLOT_TX_MODEL` / `TX_MODEL` return `SLXD1+`, `SLXD2+`, `SLXD3+`, `UNKNOWN` — not to be confused with `SLXD1` / `SLXD2` / `SLXD3` (non-plus) used by the classic SLX-D module.
+- SLX-D+ is modelled like SLX-D, not like Axient: a single diversity RF level (no per-antenna colour bitmaps), no per-slot battery/RF inventory. The only per-slot data kept is `LINK_STATUS` and `SLOT_TX_MODEL` (two slots). Device audio encryption (`ENCRYPTION_MODE`, ON/OFF) is surfaced through the shared `encryption` variable.

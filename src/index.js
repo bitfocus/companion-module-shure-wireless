@@ -294,13 +294,12 @@ class ShureWirelessInstance extends InstanceBase {
 				let cmd = '< GET 0 ALL >'
 				this.socket.send(cmd)
 
-				if (this.model.family === 'slxplus') {
-					// Firmware 2.0.38.9 returns only SAMPLE messages for
-					// `< GET 0 ALL >` — the property dump used to populate
-					// receiver / channel state never arrives. Per-channel
-					// `< GET N ALL >` *does* dump everything (verified probe
-					// round 2, 2026-05-28), so we fan out one of those per
-					// configured channel.
+				if (this.model.family === 'slxdplus') {
+					// On SLX-D+ (firmware 2.0.38.9) `< GET 0 ALL >` replies `< REP ERR >`
+					// and only starts metering — it does NOT dump device/channel
+					// properties. A per-channel `< GET N ALL >` DOES dump everything
+					// (device + channel props). Verified on hardware 2026-05-28, so we
+					// fan out one GET per configured channel to populate state.
 					for (let ch = 1; ch <= this.model.channels; ch++) {
 						this.socket.send(`< GET ${ch} ALL >`)
 					}
@@ -376,19 +375,19 @@ class ShureWirelessInstance extends InstanceBase {
 					//this command isn't about a specific channel
 					this.api.updateReceiver(commandArr[0], joinData(commandArr, 1))
 				} else if (commandArr[1].startsWith('SLOT')) {
-					//this command is about a specific SLOT in AD
+					//this command is about a specific SLOT (AD, and SLOT_TX_MODEL on SLX-D+)
 					this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], joinData(commandArr, 3))
-				} else if (
-					this.model.family === 'slxplus' &&
-					(commandArr[1] === 'LINK_STATUS' || commandArr[1] === 'LINK_TX_BATT_MINS')
-				) {
-					// SLX-D+ side-channel REPs that carry a slot index as
-					// commandArr[2]. Empirically confirmed slot indices 1 and 2
-					// against firmware 2.0.38.9 (probe round 3, 2026-05-28).
-					// SLOT_TX_MODEL is also slot-scoped but routes via the
-					// `startsWith('SLOT')` branch above (shared with the AD
-					// family code path) — both work.
+				} else if (this.model.family === 'slxdplus' && commandArr[1] === 'LINK_STATUS') {
+					// SLX-D+ LINK_STATUS carries a slot index (commandArr[2]); each
+					// channel has two addressable slots with independent online/offline
+					// state. Verified on firmware 2.0.38.9 (2026-05-28).
 					this.api.updateSlot(commandNum, parseInt(commandArr[2]), commandArr[1], joinData(commandArr, 3))
+				} else if (this.model.family === 'slxdplus' && commandArr[1] === 'LINK_TX_BATT_MINS') {
+					// SLX-D+ LINK_TX_BATT_MINS also carries a slot index, but the
+					// receiver echoes the active TX's runtime into every slot — it is
+					// just the channel battery runtime (equivalent to TX_BATT_MINS).
+					// Strip the slot token and route channel-level.
+					this.api.updateChannel(commandNum, commandArr[1], joinData(commandArr, 3))
 				} else {
 					//this command is about a specific channel
 					this.api.updateChannel(commandNum, commandArr[1], joinData(commandArr, 2))
@@ -407,8 +406,8 @@ class ShureWirelessInstance extends InstanceBase {
 					case 'slx':
 						this.api.parseSLXSample(commandNum, command)
 						break
-					case 'slxplus':
-						this.api.parseSlxPlusSample(commandNum, command)
+					case 'slxdplus':
+						this.api.parseSlxdPlusSample(commandNum, command)
 						break
 				}
 
@@ -473,12 +472,12 @@ class ShureWirelessInstance extends InstanceBase {
 					if (this.api.getSlot(i, j).txDeviceId != '') {
 						data += ` (${this.api.getSlot(i, j).txDeviceId})`
 					} else if (
-						this.model.family === 'slxplus' &&
+						this.model.family === 'slxdplus' &&
 						this.api.getSlot(i, j).txType &&
 						this.api.getSlot(i, j).txType !== 'Unknown'
 					) {
 						// SLX-D+ side-channel slots don't have a separate Device ID;
-						// the LINK_TX_MODEL value (SLXD1+/SLXD2+/SLXD3+) is the most
+						// the SLOT_TX_MODEL value (SLXD1+/SLXD2+/SLXD3+) is the most
 						// useful disambiguator in the dropdown.
 						data += ` (${this.api.getSlot(i, j).txType})`
 					}

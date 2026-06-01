@@ -25,13 +25,12 @@ export default class WirelessApi {
 		//ulx-d   [FW_VER,DEVICE_ID,ENCRYPTION,AUDIO_SUMMING_MODE,FREQUENCY_DIVERSITY_MODE,HIGH_DENSITY,FLASH]
 		//ad      [FW_VER,DEVICE_ID,ENCRYPTION_MODE,MODEL,QUADVERSITY_MODE,RF_BAND,TRANSMISSION_MODE,FLASH]
 		//slx-d   [FW_VER,DEVICE_ID,RF_BAND,MODEL,LOCK_STATUS,FLASH]
-		//slx-d+  [FW_VER,DEVICE_ID,RF_BAND,MODEL,LOCK_STATUS,FLASH,ENCRYPTION_MODE,APP_CONN_ENABLED,NA_DEVICE_NAME,NET_SETTINGS]
+		//slx-d+  [FW_VER,DEVICE_ID,RF_BAND,MODEL,LOCK_STATUS,FLASH,ENCRYPTION_MODE,APP_CONNECTION_ENABLED,AUDIO_SUMMING_MODE,NA_DEVICE_NAME,NET_SETTINGS]
 		this.receiver = {
 			firmwareVersion: '', // (ULX|QLX) 18 | (AD|SLX|SLX+) 24
 			deviceId: '', // (ULX|QLX|SLX|SLX+) 8 | (AD) 31
-			encryption: 'OFF', // (QLX|AD:ENCRYPTION_MODE) OFF - ON | (ULX) OFF - MANUAL - AUTO
-			encryptionMode: 'OFF', // (SLX+) OFF - ON
-			audioSumming: 'OFF', // (ULXD4D|ULXD4Q only) OFF - 1+2 - 3+4 - 1+2/3+4 - 1+2+3+4
+			encryption: 'OFF', // (QLX|AD:ENCRYPTION_MODE|SLX+:ENCRYPTION_MODE) OFF - ON | (ULX) OFF - MANUAL - AUTO
+			audioSumming: 'OFF', // (ULXD4D|ULXD4Q only) OFF - 1+2 - 3+4 - 1+2/3+4 - 1+2+3+4 | (SLX+) OFF - ON
 			frequencyDiversity: 'OFF', // (ULXD4D|ULXD4Q only) OFF - 1+2 - 3+4 - 1+2/3+4
 			highDensity: 'OFF', // (ULX) OFF - ON | (AD:TRANSMISSION_MODE) STANDARD = OFF - HIGH_DENSITY = ON
 			flash: 'OFF', // (ULX|AD|SLX|SLX+) OFF - ON
@@ -66,7 +65,7 @@ export default class WirelessApi {
 			//ad     rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,AUDIO_MUTE,GROUP_CHANNEL,FREQUENCY,FLASH,ENCRYPTION_STATUS,INTERFERENCE_STATUS,UNREGISTERED_TX_STATUS]
 			//          [FD_MODE,GROUP_CHANNEL2,FREQUENCY2,INTERFERENCE_STATUS2]
 			//slx-d  rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,GROUP_CHAN,FREQUENCY,AUDIO_OUT_LVL_SWITCH]
-			//slx-d+ rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,AUDIO_OUT_LVL_SWITCH,GROUP_CHANNEL,FREQUENCY,FLASH,ENCRYPTION_STATUS,INTERFERENCE_STATUS,REM_PAIR,LINK_TX_BATT_MINS]
+			//slx-d+ rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,AUDIO_OUT_LVL_SWITCH,GROUP_CHANNEL,FREQUENCY,INTERFERENCE_STATUS,RSSI,ANTENNA_STATUS,ENCRYPTION_STATUS,REM_PAIR]
 			//          [NA_CHAN_NAME (Dante only)]
 			//qlx-d  tx [TX_TYPE,TX_DEVICE_ID,TX_OFFSET,TX_RF_PWR,TX_MUTE_STATUS,TX_PWR_LOCK,TX_MENU_LOCK,TX_MUTE_BUTTON_STATUS,TX_POWER_SOURCE]
 			//          [BATT_BARS,BATT_CHARGE,BATT_CYCLE,BATT_RUN_TIME,BATT_TEMP_F,BATT_TEMP_C,BATT_TYPE]
@@ -75,7 +74,7 @@ export default class WirelessApi {
 			//ad     tx [TX_MODEL,TX_DEVICE_ID,TX_OFFSET,TX_INPUT_PAD,TX_POWER_LEVEL,TX_MUTE_MODE_STATUS,TX_POLARITY,TX_LOCK,TX_TALK_SWITCH]
 			//          [TX_BATT_BARS,TX_BATT_CHARGE_PERCENT,TX_BATT_CYCLE_COUNT,TX_BATT_HEALTH_PERCENT,TX_BATT_MINS,TX_BATT_TEMP_F,TX_BATT_TEMP_C,TX_BATT_TYPE]
 			//slx-d  tx [TX_TYPE,TX_BATT_BARS,TX_BATT_MINS]
-			//slx-d+ tx [TX_BATT_BARS,TX_BATT_MINS] (TX model lives in slot.txType from LINK_TX_MODEL)
+			//slx-d+ tx [TX_MODEL,TX_BATT_BARS,TX_BATT_MINS] (active TX; per-slot model via SLOT_TX_MODEL, link via LINK_STATUS)
 			this.channels[id] = {
 				slots: [], // AD TX Slots
 				//rx
@@ -110,8 +109,8 @@ export default class WirelessApi {
 				rfLevelB: -120, // (AD) 0-120, -120dBm
 				rfLevelC: -120, // (AD) 0-120, -120dBm
 				rfLevelD: -120, // (AD) 0-120, -120dBm
-				rfBitmapA: 0, // (AD|SLX+) 0-255, 8 bit color segment | (ULX|QLX|SLX) 0-5 | (SLX+ via per-antenna RSSI) 0-5
-				rfBitmapB: 0, // (AD|SLX+) 0-255, 8 bit color segment | (SLX+) 0-5
+				rfBitmapA: 0, // (AD) 0-255, 8 bit color segment | (ULX|QLX|SLX|SLX+) 0-5
+				rfBitmapB: 0, // (AD) 0-255, 8 bit color segment
 				rfBitmapC: 0, // (AD) 0-255, 8 bit color segment
 				rfBitmapD: 0, // (AD) 0-255, 8 bit color segment
 				audioLevel: -50, // (ULX|QLX) 0-50,-50dB | (AD|SLX) 0-120,-120dB
@@ -145,9 +144,11 @@ export default class WirelessApi {
 				batteryTempC: 255, // (ULX|QLX|AD:TX_BATT_TEMP_C)  +40 255=UNKN
 				batteryType: 'Unknown', // (ULX|QLX|AD:TX_BATT_TYPE) ALKA - LION - LITH - NIMH - UNKN
 
-				// SLX-D+ specific (rfLevelA/rfLevelB/rfBitmapA/rfBitmapB are already declared above for AD; reused here)
-				// Note: LINK_TX_BATT_MINS is slot-scoped on the wire — stored on
-				// slot.linkTxBattMins via updateSlot. No channel-level field.
+				// SLX-D+ specific. RF is a single diversity RSSI (rfLevel/rfBitmapA,
+				// like SLX-D); ANTENNA_STATUS reports which antenna is locked.
+				// Battery/runtime are channel-scoped (TX_BATT_BARS/TX_BATT_MINS);
+				// per-slot link/model live on the slot objects (LINK_STATUS,
+				// SLOT_TX_MODEL). Verified on firmware 2.0.38.9 (2026-05-28).
 				remPairState: 'OFF', // (SLX+) OFF - ON - REQUEST - ACCEPT - REJECT
 				remPairTxName: '', // (SLX+) name from REM_PAIR REQUEST/ACCEPT messages
 				naChanName: '', // (SLX+ Dante only) 31
@@ -230,10 +231,13 @@ export default class WirelessApi {
 				)
 				break
 			case 'slx':
+				// Classic SLX-D: single RF bar, no encryption.
 				icon = this.icons.getSLXStatus(image, audioLED, rfBitmapA, batteryBars, opt.barlevel)
 				break
-			case 'slxplus':
-				icon = this.icons.getSlxPlusStatus(image, audioLED, rfBitmapA, rfBitmapB, batteryBars, opt.barlevel, encryption)
+			case 'slxdplus':
+				// SLX-D+ is a single-diversity-RSSI receiver like SLX-D (one RF bar),
+				// but unlike SLX-D it supports audio encryption — show the badge.
+				icon = this.icons.getSLXStatus(image, audioLED, rfBitmapA, batteryBars, opt.barlevel, encryption)
 				break
 			case 'ad':
 				icon = this.icons.getADStatus(
@@ -277,9 +281,9 @@ export default class WirelessApi {
 	getSlot(channel, id) {
 		if (this.getChannel(channel).slots[id] === undefined) {
 			this.getChannel(channel).slots[id] = {
-				status: 'EMPTY', // SLOT_STATUS EMPTY - STANDARD - LINKED.INACTIVE - LINKED.ACTIVE
+				status: 'EMPTY', // (AD:SLOT_STATUS) EMPTY - STANDARD - LINKED.INACTIVE - LINKED.ACTIVE | (SLX+:LINK_STATUS) online - offline
 				showLinkStatus: 255, // SLOT_SHOWLINK_STATUS 1-5,255=UNKN
-				txType: 'Unknown', // SLOT_TX_MODEL AD1 - AD2 - ADX1 - ADX1M - ADX2 - ADX2FD - UNKNOWN
+				txType: 'Unknown', // SLOT_TX_MODEL (AD) AD1 - AD2 - ADX1 - ADX1M - ADX2 - ADX2FD | (SLX+) SLXD1+ - SLXD2+ - SLXD3+ - UNKNOWN
 				txDeviceId: '', // SLOT_TX_DEVICE_ID 31
 				txOffset: 255, // SLOT_OFFSET 0-32,-12 255=UNKN
 				txInputPad: 255, // SLOT_INPUT_PAD 0=ON(-12), 12=OFF(0), 255=UNKN
@@ -293,7 +297,6 @@ export default class WirelessApi {
 				batteryHealth: 255, // SLOT_BATT_HEALTH_PERCENT 0-100, 255=UNKN
 				batteryRuntime: 65535, // SLOT_BATT_MINS 0+, 65535=UNKN 65534=calcuating 65533=comm warning
 				batteryType: 'Unknown', // SLOT_BATT_TYPE ALKA - LION - LITH - NIMH - UNKN
-				linkTxBattMins: 65535, // (SLX+) LINK_TX_BATT_MINS — 0+ minutes, 65535=UNKN
 			}
 		}
 
@@ -423,16 +426,15 @@ export default class WirelessApi {
 	 *     < SAMPLE 1 ALL 102 102 086 >
 	 *
 	 * All three meter fields are 3-character, ASCII-decimal numbers offset by 120
-	 * (audio in dBFS, RF in dBm). Only one rfRssi value is reported by SAMPLE
-	 * (the diversity output); per-antenna values are obtained via the
-	 * < GET x RSSI > REP pair instead.
+	 * (audio in dBFS, RF in dBm). SLX-D+ reports a single diversity RSSI — the
+	 * same value is also available on demand via < GET x RSSI >.
 	 *
 	 * @param {number} id - the channel id
 	 * @param {String} data - the raw sample data string
 	 * @access public
 	 * @since 2.4.0
 	 */
-	parseSlxPlusSample(id, data) {
+	parseSlxdPlusSample(id, data) {
 		let channel = this.getChannel(id)
 		let prefix = 'ch_' + id + '_'
 		let sample = data.split(' ')
@@ -475,12 +477,7 @@ export default class WirelessApi {
 		} else {
 			bars = 0
 		}
-		// SAMPLE only delivers a single (diversity) RF level. Mirror it to both
-		// antenna bitmaps so the icon shows a sensible default. When the user
-		// polls < GET x RSSI > explicitly, the per-antenna REPs in updateChannel
-		// will overwrite rfBitmapA / rfBitmapB with the real per-antenna values.
 		channel.rfBitmapA = bars
-		channel.rfBitmapB = bars
 
 		this.instance.setVariableValues({
 			[`${prefix}rf_level`]: channel.rfLevel + (this.instance.config.variableFormat == 'units' ? ' dBm' : ''),
@@ -863,7 +860,11 @@ export default class WirelessApi {
 				variable = value + (this.instance.config.variableFormat == 'units' ? '%' : '')
 			}
 			this.instance.setVariableValues({ [`${prefix}battery_health`]: variable })
-		} else if (key == 'TX_BATT_MINS' || key == 'BATT_RUN_TIME') {
+		} else if (key == 'TX_BATT_MINS' || key == 'BATT_RUN_TIME' || key == 'LINK_TX_BATT_MINS') {
+			// SLX-D+ LINK_TX_BATT_MINS is equivalent to TX_BATT_MINS: it carries a
+			// slot index on the wire but the receiver echoes the active TX's value
+			// into every slot, so it is just the channel battery runtime. The
+			// dispatcher in index.js strips the slot token before routing here.
 			channel.batteryRuntime = parseInt(value)
 			if (channel.batteryRuntime == 65535) {
 				variable = 'Unknown'
@@ -919,7 +920,7 @@ export default class WirelessApi {
 			// (SLX+ Dante only) 31-char padded channel label
 			channel.naChanName = value.replace('{', '').replace('}', '').trim()
 			this.instance.setVariableValues({ [`${prefix}na_chan_name`]: channel.naChanName })
-		} else if (key == 'AUDIO_LEVEL_PEAK' && model.family === 'slxplus') {
+		} else if (key == 'AUDIO_LEVEL_PEAK' && model.family === 'slxdplus') {
 			// (SLX+ only) metered property — also reachable via GET / REP.
 			// Gated on family so a hypothetical AD/ULX REP of the same key
 			// wouldn't clobber the family-specific parsing in parseADSample etc.
@@ -928,23 +929,18 @@ export default class WirelessApi {
 				[`${prefix}audio_level_peak`]:
 					channel.audioLevelPeak + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),
 			})
-		} else if (key == 'AUDIO_LEVEL_RMS' && model.family === 'slxplus') {
+		} else if (key == 'AUDIO_LEVEL_RMS' && model.family === 'slxdplus') {
 			channel.audioLevel = parseInt(value) - 120
 			this.instance.setVariableValues({
 				[`${prefix}audio_level`]: channel.audioLevel + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),
 			})
-		} else if (key == 'RSSI' && model.family === 'slxplus') {
-			// (SLX+ only) RSSI reported by firmware 2.0.38.9 as a **single**
-			// diversity-output value (e.g. `< REP 1 RSSI 068 >`), not the
-			// per-antenna pair shown in PDF v1.0 (2026-A). The per-antenna
-			// breakdown is published separately via ANTENNA_STATUS (which
-			// antenna is active) — see the next branch.
-			// Gated on family because AD uses rfBitmapA/B as 0-255 colour
-			// segments (set in parseADSample). Our 0-5 bars mapping would
-			// silently corrupt AD's icon rendering if this branch were generic.
-			let raw = parseInt(value.trim().split(/\s+/)[0])
-			let real = raw - 120
-			let label = real + (this.instance.config.variableFormat == 'units' ? ' dBm' : '')
+		} else if (key == 'RSSI' && model.family === 'slxdplus') {
+			// (SLX+ only) Single diversity RSSI (e.g. `< REP 1 RSSI 096 >`),
+			// confirmed on firmware 2.0.38.9 (2026-05-28). SLX-D+ is a single-bar
+			// receiver like SLX-D — there is no per-antenna RF level. Gated on
+			// family because AD uses rfBitmapA as a 0-255 colour byte (set in
+			// parseADSample); our 0-5 bars mapping would corrupt AD's icon.
+			let real = parseInt(value.trim().split(/\s+/)[0]) - 120
 			let bars
 			if (real >= -25) bars = 5
 			else if (real >= -70) bars = 4
@@ -953,34 +949,17 @@ export default class WirelessApi {
 			else if (real >= -90) bars = 1
 			else bars = 0
 			channel.rfLevel = real
-			// Mirror to both antenna bitmaps for the icon renderer; whichever
-			// antenna is currently active gets overwritten by ANTENNA_STATUS
-			// when its REP arrives.
 			channel.rfBitmapA = bars
-			channel.rfBitmapB = bars
 			this.instance.setVariableValues({
-				[`${prefix}rf_level`]: label,
-				[`${prefix}rf_level_a`]: label,
-				[`${prefix}rf_level_b`]: label,
+				[`${prefix}rf_level`]: real + (this.instance.config.variableFormat == 'units' ? ' dBm' : ''),
 			})
-		} else if (key == 'ANTENNA_STATUS' && model.family === 'slxplus') {
-			// (SLX+ only) — empirically documented from firmware 2.0.38.9.
-			// Two-character code like "XB" / "AX" / "AB" describing which
-			// antenna(s) are currently locked: `X` = idle, `A`/`B` = active.
-			// Not in PDF v1.0 (2026-A); discovered via `< GET 1 ALL >` dump.
-			let v = value.trim()
-			channel.antenna = v
-			channel.antennaA = v.substr(0, 1) || 'X'
-			channel.antennaB = v.substr(1, 1) || 'X'
-			this.instance.setVariableValues({ [`${prefix}antenna`]: v })
-		} else if (key == 'TX_MODEL' && model.family === 'slxplus') {
-			// (SLX+ only) channel-scoped TX model = the currently active
-			// transmitter. When CH1 has slot 1 active with SLXD1+, this
-			// reports `SLXD1+`. When the user power-cycles to the bodypack
-			// linked into slot 2, this re-reports `SLXD2+`. The per-slot
-			// model lives in slot.txType via SLOT_TX_MODEL.
-			channel.txType = value.trim()
-			this.instance.setVariableValues({ [`${prefix}tx_model`]: channel.txType })
+		} else if (key == 'ANTENNA_STATUS' && model.family === 'slxdplus') {
+			// (SLX+ only) Two-character code like "XB" / "AX" describing which
+			// antenna is locked: `X` = idle, `A`/`B` = active. Exposed as a plain
+			// diagnostic variable; it does not feed the RF icon. Confirmed on
+			// firmware 2.0.38.9 (not in Strings PDF v1.0 2026-A).
+			channel.antenna = value.trim()
+			this.instance.setVariableValues({ [`${prefix}antenna`]: channel.antenna })
 		}
 	}
 
@@ -1020,16 +999,10 @@ export default class WirelessApi {
 
 			this.receiver.highDensity = value
 			this.instance.setVariableValues({ high_density_mode: value })
-		} else if (key == 'ENCRYPTION_MODE' && this.instance.model.family === 'slxplus') {
-			// (SLX+ only) — must be matched **before** the generic
-			// `key.match(/ENCRYPTION/)` branch below, because that regex
-			// also matches `ENCRYPTION_MODE` and would otherwise hijack the
-			// SLX-D+ REP into the AD/ULX transformation path (which maps
-			// INACTIVE/MANUAL/AUTO → OFF/ON/ON — incorrect for SLX-D+).
-			// AD's own ENCRYPTION_MODE keeps using the regex branch below.
-			this.receiver.encryptionMode = value
-			this.instance.setVariableValues({ encryption_mode: value })
 		} else if (key.match(/ENCRYPTION/)) {
+			// Handles ULX ENCRYPTION (OFF/MANUAL/AUTO) and the ON/OFF
+			// ENCRYPTION_MODE reported by AD and SLX-D+ alike — ON/OFF pass
+			// straight through, so SLX-D+ needs no special case.
 			if (value == 'INACTIVE') {
 				value = 'OFF'
 			} else if (value == 'MANUAL' || value == 'AUTO') {
@@ -1131,18 +1104,18 @@ export default class WirelessApi {
 			case 'SLOT_TX_MODEL':
 				// AD reports raw model strings (e.g. `ADX1`); SLX-D+ reports
 				// a padded form inside braces, e.g. `{SLXD1+    }`. Trim for
-				// slxplus so downstream code sees a clean `SLXD1+` / `SLXD2+`
+				// slxdplus so downstream code sees a clean `SLXD1+` / `SLXD2+`
 				// / `SLXD3+` / `` (empty when no TX paired).
-				if (this.instance.model.family === 'slxplus') {
+				if (this.instance.model.family === 'slxdplus') {
 					slot.txType = value.replace('{', '').replace('}', '').trim()
 				} else {
 					slot.txType = value
 				}
 				this.instance.setVariableValues({ [`${prefix}tx_model`]: slot.txType })
 				// Empty TX model means the slot is empty — re-evaluate the
-				// slxplus link-state booleans (slot_link_empty key depends
+				// slxdplus link-state booleans (slot_link_empty key depends
 				// on it).
-				if (this.instance.model.family === 'slxplus') {
+				if (this.instance.model.family === 'slxdplus') {
 					this.instance.checkFeedbacks('slot_link_active', 'slot_link_inactive', 'slot_link_empty')
 				}
 				break
@@ -1258,41 +1231,18 @@ export default class WirelessApi {
 				slot.batteryType = value
 				this.instance.setVariableValues({ [`${prefix}battery_type`]: value })
 				break
-			// SLX-D+ side-channel commands. Empirically confirmed against
-			// firmware 2.0.38.9 (probe rounds 2+3, 2026-05-28):
-			// - LINK_TX_MODEL is NOT a real command for slxplus — the device
-			//   uses SLOT_TX_MODEL (handled above) for both AD and slxplus.
-			// - LINK_STATUS is reported as lowercase `online` / `offline`,
-			//   NOT the dotted PDF forms LINKED.ACTIVE / LINKED.INACTIVE.
-			//   "empty" is a synthesised state — we don't get a separate REP
-			//   for it; the slot is empty when SLOT_TX_MODEL is the blank
-			//   padded form.
-			// - LINK_TX_BATT_MINS carries a slot index (`< REP x
-			//   LINK_TX_BATT_MINS s NNNNN >`) and is routed here. Note: the
-			//   receiver echoes the active slot's battery value into offline
-			//   slots' replies, so the value is only meaningful when the
-			//   slot's link_status is `online`.
+			// SLX-D+ minimal side-channel slot data. Confirmed against firmware
+			// 2.0.38.9 (2026-05-28): each channel exposes two addressable slots
+			// with independent LINK_STATUS and SLOT_TX_MODEL (verified by pairing
+			// a 2nd TX — slot 1 empty / slot 2 `{SLXD2+}` online). LINK_STATUS is
+			// lowercase `online` / `offline`; the slot is "empty" when its
+			// SLOT_TX_MODEL is the blank padded form. (LINK_TX_MODEL is not a real
+			// command; LINK_TX_BATT_MINS just echoes the channel TX_BATT_MINS and
+			// is handled channel-level in updateChannel.)
 			case 'LINK_STATUS':
 				slot.status = value.trim().toLowerCase()
 				this.instance.setVariableValues({ [`${prefix}link_status`]: slot.status })
 				this.instance.checkFeedbacks('slot_link_active', 'slot_link_inactive', 'slot_link_empty')
-				break
-			case 'LINK_TX_BATT_MINS':
-				slot.linkTxBattMins = parseInt(value)
-				if (slot.linkTxBattMins == 65535) {
-					variable = 'Unknown'
-				} else if (slot.linkTxBattMins == 65534) {
-					variable = 'Calculating'
-				} else if (slot.linkTxBattMins == 65533) {
-					variable = 'Error'
-				} else {
-					let mins = slot.linkTxBattMins
-					let h = Math.floor(mins / 60)
-					let m = mins % 60
-					m = m < 10 ? '0' + m : m
-					variable = `${h}:${m}`
-				}
-				this.instance.setVariableValues({ [`${prefix}link_tx_batt_mins`]: variable })
 				break
 		}
 	}

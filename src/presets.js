@@ -1,7 +1,7 @@
 import { combineRgb } from '@companion-module/base'
 
 /**
- * Drag-and-drop presets for the Shure SLX-D+ family (`family === 'slxplus'`).
+ * Drag-and-drop presets for the Shure SLX-D+ family (`family === 'slxdplus'`).
  *
  * Each preset is a self-contained button configuration (style + actions +
  * feedbacks) that the user can drop onto an empty Companion button. The
@@ -9,7 +9,7 @@ import { combineRgb } from '@companion-module/base'
  * registered elsewhere in this module — they don't introduce any new
  * back-end mechanism.
  *
- * For non-slxplus models (ULX / QLX / AD / SLX) the function clears the
+ * For non-slxdplus models (ULX / QLX / AD / SLX) the function clears the
  * preset list, so the upstream behaviour for those families is preserved.
  *
  * @since 2.4.0
@@ -216,7 +216,7 @@ function buildChannelPresets(n, model) {
 		style: { ...baseStyle(`↻\\nReboot\\nCH${n} TX`), bgcolor: COLOR_BG_ACCENT },
 		steps: [
 			{
-				down: [{ actionId: 'slxplus_link_tx_reboot', options: { channel: channelId } }],
+				down: [{ actionId: 'slxdplus_link_tx_reboot', options: { channel: channelId } }],
 				up: [],
 			},
 		],
@@ -231,7 +231,7 @@ function buildChannelPresets(n, model) {
 		style: { ...baseStyle(`📡\\nPair\\nCH${n}`), bgcolor: COLOR_BG_ACCENT },
 		steps: [
 			{
-				down: [{ actionId: 'slxplus_rem_pair_enable', options: { channel: channelId } }],
+				down: [{ actionId: 'slxdplus_rem_pair_enable', options: { channel: channelId } }],
 				up: [],
 			},
 		],
@@ -275,7 +275,7 @@ function buildChannelPresets(n, model) {
 				{
 					down: [
 						{
-							actionId: 'slxplus_set_dante_chan_name',
+							actionId: 'slxdplus_set_dante_chan_name',
 							options: { channel: channelId, name: `CH${n}` },
 						},
 					],
@@ -309,7 +309,7 @@ function buildDevicePresets(model) {
 		style: { ...baseStyle('🔒\\nEncrypt\\nON'), bgcolor: COLOR_BG_ACCENT },
 		steps: [
 			{
-				down: [{ actionId: 'slxplus_set_encryption_mode', options: { value: 'ON' } }],
+				down: [{ actionId: 'slxdplus_set_encryption_mode', options: { value: 'ON' } }],
 				up: [],
 			},
 		],
@@ -323,7 +323,7 @@ function buildDevicePresets(model) {
 		style: { ...baseStyle('🔓\\nEncrypt\\nOFF'), bgcolor: COLOR_BG_ACCENT },
 		steps: [
 			{
-				down: [{ actionId: 'slxplus_set_encryption_mode', options: { value: 'OFF' } }],
+				down: [{ actionId: 'slxdplus_set_encryption_mode', options: { value: 'OFF' } }],
 				up: [],
 			},
 		],
@@ -337,7 +337,7 @@ function buildDevicePresets(model) {
 		style: { ...baseStyle('📱\\nApp\\nON'), bgcolor: COLOR_BG_ACCENT },
 		steps: [
 			{
-				down: [{ actionId: 'slxplus_set_app_conn_enabled', options: { value: 'ON' } }],
+				down: [{ actionId: 'slxdplus_set_app_conn_enabled', options: { value: 'ON' } }],
 				up: [],
 			},
 		],
@@ -351,7 +351,7 @@ function buildDevicePresets(model) {
 		style: { ...baseStyle('📱\\nApp\\nOFF'), bgcolor: COLOR_BG_ACCENT },
 		steps: [
 			{
-				down: [{ actionId: 'slxplus_set_app_conn_enabled', options: { value: 'OFF' } }],
+				down: [{ actionId: 'slxdplus_set_app_conn_enabled', options: { value: 'OFF' } }],
 				up: [],
 			},
 		],
@@ -371,8 +371,8 @@ function buildDevicePresets(model) {
  * @since 2.4.0
  */
 export function updatePresets() {
-	if (!this.model || this.model.family !== 'slxplus') {
-		// Non-slxplus models keep the existing (empty) preset behaviour.
+	if (!this.model || this.model.family !== 'slxdplus') {
+		// Non-slxdplus models keep the existing (empty) preset behaviour.
 		this.setPresetDefinitions({})
 		return
 	}

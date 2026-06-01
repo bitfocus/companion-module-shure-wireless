@@ -94,7 +94,7 @@ export function updateActions() {
 		}
 	}
 
-	if (this.model.family == 'ad' || this.model.family == 'slx' || this.model.family == 'slxplus') {
+	if (this.model.family == 'ad' || this.model.family == 'slx' || this.model.family == 'slxdplus') {
 		actions['flash_channel'] = {
 			name: 'Flash lights on receiver channel',
 			tooltip: 'It will automatically turn off after 60 seconds',
@@ -105,11 +105,11 @@ export function updateActions() {
 		}
 	}
 
-	if (this.model.family == 'slxplus') {
+	if (this.model.family == 'slxdplus') {
 		// SLX-D+ specific actions. Strings sourced from
 		// "Shure SLXD+ Command Strings" v1.0 (2026-A).
 
-		actions['slxplus_set_group_channel'] = {
+		actions['slxdplus_set_group_channel'] = {
 			name: 'SLX-D+: Set Group/Channel',
 			tooltip: 'Setting Group/Channel also updates the channel frequency. Wildcard "--,--" cannot be set.',
 			options: [this.CHANNELS_FIELD, Fields.GroupChannel],
@@ -122,7 +122,7 @@ export function updateActions() {
 			},
 		}
 
-		actions['slxplus_set_meter_rate'] = {
+		actions['slxdplus_set_meter_rate'] = {
 			name: 'SLX-D+: Set channel meter rate',
 			tooltip: '0 disables metering. Range 100-65535 ms.',
 			options: [this.CHANNELS_A_FIELD, Fields.MeterRate],
@@ -132,7 +132,7 @@ export function updateActions() {
 			},
 		}
 
-		actions['slxplus_set_encryption_mode'] = {
+		actions['slxdplus_set_encryption_mode'] = {
 			name: 'SLX-D+: Set audio encryption (device)',
 			tooltip: 'Linked transmitters must be re-synced via IR after toggling encryption.',
 			options: [Fields.OnOff],
@@ -141,7 +141,7 @@ export function updateActions() {
 			},
 		}
 
-		actions['slxplus_set_app_conn_enabled'] = {
+		actions['slxdplus_set_app_conn_enabled'] = {
 			name: 'SLX-D+: Enable / disable app (Bluetooth) connection',
 			options: [Fields.OnOff],
 			callback: async ({ options }) => {
@@ -153,7 +153,7 @@ export function updateActions() {
 			},
 		}
 
-		actions['slxplus_set_audio_summing_mode'] = {
+		actions['slxdplus_set_audio_summing_mode'] = {
 			name: 'SLX-D+: Set device audio summing mode',
 			tooltip:
 				'Discovered in firmware 2.0.38.9 via the per-channel ALL dump; not listed in the Strings PDF v1.0 (2026-A) but the device accepts it.',
@@ -163,7 +163,7 @@ export function updateActions() {
 			},
 		}
 
-		actions['slxplus_rem_pair_enable'] = {
+		actions['slxdplus_rem_pair_enable'] = {
 			name: 'SLX-D+: Remote pairing — enable on channel',
 			tooltip:
 				'Puts the channel into BLE remote-pairing mode. The receiver will emit REM_PAIR REQUEST when it sees a transmitter advertising.',
@@ -173,7 +173,7 @@ export function updateActions() {
 			},
 		}
 
-		actions['slxplus_rem_pair_disable'] = {
+		actions['slxdplus_rem_pair_disable'] = {
 			name: 'SLX-D+: Remote pairing — disable on channel',
 			options: [this.CHANNELS_FIELD],
 			callback: async ({ options }) => {
@@ -181,7 +181,7 @@ export function updateActions() {
 			},
 		}
 
-		actions['slxplus_rem_pair_accept'] = {
+		actions['slxdplus_rem_pair_accept'] = {
 			name: 'SLX-D+: Remote pairing — accept a transmitter',
 			tooltip:
 				'Use the TxName from the most recent REM_PAIR REQUEST message (also exposed as variable ch_N_rem_pair_tx_name).',
@@ -195,7 +195,7 @@ export function updateActions() {
 			},
 		}
 
-		actions['slxplus_rem_pair_reject'] = {
+		actions['slxdplus_rem_pair_reject'] = {
 			name: 'SLX-D+: Remote pairing — reject a transmitter',
 			options: [this.CHANNELS_FIELD, Fields.TxName],
 			callback: async (event, context) => {
@@ -207,7 +207,7 @@ export function updateActions() {
 			},
 		}
 
-		actions['slxplus_link_tx_reboot'] = {
+		actions['slxdplus_link_tx_reboot'] = {
 			name: 'SLX-D+: Reboot the linked transmitter',
 			tooltip: 'Reboots whichever transmitter is currently active on the channel.',
 			options: [this.CHANNELS_FIELD],
@@ -217,7 +217,7 @@ export function updateActions() {
 		}
 
 		if (this.model.dante === true) {
-			actions['slxplus_set_dante_chan_name'] = {
+			actions['slxdplus_set_dante_chan_name'] = {
 				name: 'SLX-D+ (Dante): Set Dante channel name',
 				tooltip: 'Allowed chars: A-Z a-z 0-9 - (no leading/trailing hyphen). 1-31 chars.',
 				options: [this.CHANNELS_FIELD, Fields.DanteChanName],
@@ -230,7 +230,7 @@ export function updateActions() {
 				},
 			}
 
-			actions['slxplus_set_net_settings'] = {
+			actions['slxdplus_set_net_settings'] = {
 				name: 'SLX-D+ (Dante): Set network settings',
 				tooltip:
 					'Changing Shure Control (SC) settings requires reconnecting at the new IP. Changing Dante (D1/D2) settings causes the device to REBOOT.',
