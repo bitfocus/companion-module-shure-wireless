@@ -128,8 +128,8 @@ export default class WirelessApi {
 				batteryRuntime: 65535, // (ULX|QLX) 0+, 65535=UNKN
 				// ((AD|SLX):TX_BATT_MINS) 0+, 65535=UNKN 65534=calcuating 65533=comm warning
 				batteryRuntime2: 'Unknown', // Text representation of batteryRuntime
-				batteryTempF: 255, // (ULX|QLX|AD:TX_BATT_TEMP_F) +40 255=UNKN
-				batteryTempC: 255, // (ULX|QLX|AD:TX_BATT_TEMP_C)  +40 255=UNKN
+				batteryTempF: 255, // (ULX|QLX|AD:TX_BATT_TEMP_F) -40 255=UNKN
+				batteryTempC: 255, // (ULX|QLX|AD:TX_BATT_TEMP_C)  -40 255=UNKN
 				batteryType: 'Unknown', // (ULX|QLX|AD:TX_BATT_TYPE) ALKA - LION - LITH - NIMH - UNKN
 			}
 		}
@@ -784,7 +784,7 @@ export default class WirelessApi {
 			if (channel.batteryTempC == 255) {
 				variable = 'Unknown'
 			} else {
-				variable = channel.batteryTempC + 40 + (this.instance.config.variableFormat == 'units' ? '°' : '')
+				variable = channel.batteryTempC - 40 + (this.instance.config.variableFormat == 'units' ? '°' : '')
 			}
 			this.instance.setVariableValues({ [`${prefix}battery_temp_c`]: variable })
 		} else if (key.match(/BATT_TEMP_F/)) {
@@ -792,7 +792,7 @@ export default class WirelessApi {
 			if (channel.batteryTempF == 255) {
 				variable = 'Unknown'
 			} else {
-				variable = channel.batteryTempF + 40 + (this.instance.config.variableFormat == 'units' ? '°' : '')
+				variable = channel.batteryTempF - 40 + (this.instance.config.variableFormat == 'units' ? '°' : '')
 			}
 			this.instance.setVariableValues({ [`${prefix}battery_temp_f`]: variable })
 		} else if (key.match(/BATT_TYPE/)) {
