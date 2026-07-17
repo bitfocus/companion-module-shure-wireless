@@ -743,7 +743,7 @@ export default class WirelessApi {
 			if (channel.batteryCharge == 255) {
 				variable = 'Unknown'
 			} else {
-				variable = value + (this.instance.config.variableFormat == 'units' ? '%' : '')
+				variable = channel.batteryCharge + (this.instance.config.variableFormat == 'units' ? '%' : '')
 			}
 			this.instance.setVariableValues({ [`${prefix}battery_charge`]: variable })
 		} else if (key.match(/BATT_CYCLE/)) {
@@ -751,7 +751,7 @@ export default class WirelessApi {
 			if (channel.batteryCycle == 65535) {
 				variable = 'Unknown'
 			} else {
-				variable = value
+				variable = channel.batteryCycle
 			}
 			this.instance.setVariableValues({ [`${prefix}battery_cycle`]: variable })
 		} else if (key.match(/BATT_HEALTH/)) {
@@ -759,7 +759,7 @@ export default class WirelessApi {
 			if (channel.batteryHealth == 255) {
 				variable = 'Unknown'
 			} else {
-				variable = value + (this.instance.config.variableFormat == 'units' ? '%' : '')
+				variable = channel.batteryHealth + (this.instance.config.variableFormat == 'units' ? '%' : '')
 			}
 			this.instance.setVariableValues({ [`${prefix}battery_health`]: variable })
 		} else if (key == 'TX_BATT_MINS' || key == 'BATT_RUN_TIME') {
@@ -894,7 +894,7 @@ export default class WirelessApi {
 				if (value == 255) {
 					variable = 'Unknown'
 				} else {
-					variable = value
+					variable = slot.showLinkStatus
 				}
 				this.instance.setVariableValues({ [`${prefix}link_status`]: variable })
 				break
@@ -932,7 +932,7 @@ export default class WirelessApi {
 				if (slot.txPowerLevel == 255) {
 					variable = 'Unknown'
 				} else {
-					variable = value + ' mW'
+					variable = slot.txPowerLevel + ' mW'
 				}
 				this.instance.setVariableValues({ [`${prefix}tx_power_level`]: variable })
 				this.instance.checkFeedbacks('slot_rf_power', 'slot_is_active')
@@ -962,7 +962,7 @@ export default class WirelessApi {
 				if (slot.batteryBars == 255) {
 					variable = 'Unknown'
 				} else {
-					variable = value
+					variable = slot.batteryBars
 				}
 				this.instance.setVariableValues({ [`${prefix}battery_bars`]: variable })
 				break
@@ -971,7 +971,7 @@ export default class WirelessApi {
 				if (slot.batteryCharge == 255) {
 					variable = 'Unknown'
 				} else {
-					variable = value + (this.instance.config.variableFormat == 'units' ? '%' : '')
+					variable = slot.batteryCharge + (this.instance.config.variableFormat == 'units' ? '%' : '')
 				}
 				this.instance.setVariableValues({ [`${prefix}battery_charge`]: variable })
 				break
@@ -980,7 +980,7 @@ export default class WirelessApi {
 				if (slot.batteryCycle == 65535) {
 					variable = 'Unknown'
 				} else {
-					variable = value
+					variable = slot.batteryCycle
 				}
 				this.instance.setVariableValues({ [`${prefix}battery_cycle`]: variable })
 				break
@@ -989,7 +989,7 @@ export default class WirelessApi {
 				if (slot.batteryHealth == 255) {
 					variable = 'Unknown'
 				} else {
-					variable = value + (this.instance.config.variableFormat == 'units' ? '%' : '')
+					variable = slot.batteryHealth + (this.instance.config.variableFormat == 'units' ? '%' : '')
 				}
 				this.instance.setVariableValues({ [`${prefix}battery_health`]: variable })
 				break
