@@ -54,7 +54,7 @@ export default class WirelessApi {
 			//qlx-d rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,GROUP_CHAN,FREQUENCY,ENCRYPTION_WARNING]
 			//ulx-d rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,AUDIO_MUTE,GROUP_CHAN,FREQUENCY,ENCRYPTION_WARNING,RF_INT_DET]
 			//ad    rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,AUDIO_MUTE,GROUP_CHANNEL,FREQUENCY,FLASH,ENCRYPTION_STATUS,INTERFERENCE_STATUS,UNREGISTERED_TX_STATUS]
-			//         [FD_MODE,GROUP_CHANNEL2,FREQUENCY2,INTERFERENCE_STATUS2]
+			//         [ANTENNA_CONFIGURATION,FD_MODE,GROUP_CHANNEL2,FREQUENCY2,INTERFERENCE_STATUS2]
 			//slx-d rx [CHAN_NAME,METER_RATE,AUDIO_GAIN,GROUP_CHAN,FREQUENCY,AUDIO_OUT_LVL_SWITCH]
 			//qlx-d tx [TX_TYPE,TX_DEVICE_ID,TX_OFFSET,TX_RF_PWR,TX_MUTE_STATUS,TX_PWR_LOCK,TX_MENU_LOCK,TX_MUTE_BUTTON_STATUS,TX_POWER_SOURCE]
 			//         [BATT_BARS,BATT_CHARGE,BATT_CYCLE,BATT_RUN_TIME,BATT_TEMP_F,BATT_TEMP_C,BATT_TYPE]
@@ -78,6 +78,7 @@ export default class WirelessApi {
 				encryptionStatus: 'OK', // (AD) OK - ERROR | (ULX+QLD:ENCRYPTION_WARNING) OFF=OK - ON=ERROR
 				interferenceStatus: 'NONE', // (AD) NONE - DETECTED | (ULX:RF_INT_DET) NONE - CRITICAL=DETECTED
 				unregisteredTxStatus: 'OK', // (AD) OK - ERROR
+				antennaConfiguration: 'AUTOMATIC', // (AD) AB - CD - AUTOMATIC - QUADVERSITY
 				fdMode: 'OFF', // (AD) OFF - FD-C - FD-S
 				groupChan2: '--,--', // xx,yy
 				group2: 0, // (AD) xx,yy (xx)
@@ -315,11 +316,12 @@ export default class WirelessApi {
 					channel.audioLevelPeak + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),
 			})
 
-			if (this.receiver.quadversityMode == 'ON') {
+			// AD4D/AD4Q report quadversity for the receiver, ANX4 reports it per channel
+			if (this.receiver.quadversityMode == 'ON' || channel.antennaConfiguration == 'QUADVERSITY') {
 				channel.rfLevelC = parseInt(sample[13]) - 120
 				channel.rfBitmapC = parseInt(sample[12])
-				channel.rfLevelC = parseInt(sample[15]) - 120
-				channel.rfBitmapC = parseInt(sample[14])
+				channel.rfLevelD = parseInt(sample[15]) - 120
+				channel.rfBitmapD = parseInt(sample[14])
 				channel.antennaC = sample[7].substr(2, 1)
 				channel.antennaD = sample[7].substr(3, 1)
 				this.instance.setVariableValues({
@@ -567,6 +569,9 @@ export default class WirelessApi {
 		} else if (key == 'UNREGISTERED_TX_STATUS') {
 			channel.unregisteredTxStatus = value
 			this.instance.setVariableValues({ [`${prefix}unregistered_tx_status`]: value })
+		} else if (key == 'ANTENNA_CONFIGURATION') {
+			channel.antennaConfiguration = value
+			this.instance.setVariableValues({ [`${prefix}antenna_configuration`]: value })
 		} else if (key == 'FD_MODE') {
 			channel.fdMode = value
 			this.instance.setVariableValues({ [`${prefix}fd_mode`]: value })

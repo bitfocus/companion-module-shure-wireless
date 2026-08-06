@@ -46,6 +46,7 @@ export function updateVariables() {
 		}
 
 		if (this.model.family == 'ad') {
+			variables.push({ variableId: `${prefix}_antenna_configuration`, name: `Channel ${i} Antenna Configuration` })
 			variables.push({ variableId: `${prefix}_signal_quality`, name: `Channel ${i} Signal Quality` })
 			variables.push({ variableId: `${prefix}_rf_level_a`, name: `Channel ${i} RF Level A` })
 			variables.push({ variableId: `${prefix}_rf_level_b`, name: `Channel ${i} RF Level B` })

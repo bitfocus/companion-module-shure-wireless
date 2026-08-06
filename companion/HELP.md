@@ -5,7 +5,9 @@ This module will connect to the Shure receivers below to provide feedback status
 - Shure ULX-D (ULXD4, ULXD4D, ULXD4Q)
 - Shure QLX-D (QLXD4)
 - Shure SLX-D (SLXD4, SLXD4D)
-- Shure Axient Digital (AD4D, AD4Q)
+- Shure Axient Digital (AD4D, AD4Q, ANX4)
+
+Because the ANX4's channel count depends on the licenses installed on the receiver, selecting it exposes a "Licensed Channels" option in the instance configuration. Set this to the number of channels the receiver is licensed for (1-24, or up to 16 in ULX-D transmission mode) and the channels, slots, and variables will be created to match.
 
 ### Available actions
 
