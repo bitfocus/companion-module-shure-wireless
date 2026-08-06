@@ -16,6 +16,15 @@ function CreateModelChoices() {
 	return choices
 }
 
+// Receivers that support more than one wireless system, such as the ANX4, change their
+// feature set with the selected transmission mode.  Transmitter slots and the channel
+// maximum are per the ANX4 user guide; standard vs high density is reported by the
+// receiver itself via TRANSMISSION_MODE.
+export const TransmissionModes = {
+	ad: { id: 'ad', label: 'Axient Digital', maxChannels: 16, slots: 8 },
+	ulxd: { id: 'ulxd', label: 'ULX-D', maxChannels: 24, slots: 0, ulxdChannels: true },
+}
+
 export const Models = {
 	ulxd4: { id: 'ulxd4', family: 'ulx', label: 'ULXD4 Single Receiver', channels: 1, slots: 0 },
 	ulxd4d: { id: 'ulxd4d', family: 'ulx', label: 'ULXD4D Dual Receiver', channels: 2, slots: 0 },
@@ -23,13 +32,14 @@ export const Models = {
 	qlxd4: { id: 'qlxd4', family: 'qlx', label: 'QLXD4 Single Receiver', channels: 1, slots: 0 },
 	ad4d: { id: 'ad4d', family: 'ad', label: 'AD4D Dual Receiver', channels: 2, slots: 8 },
 	ad4q: { id: 'ad4q', family: 'ad', label: 'AD4Q Quad Receiver', channels: 4, slots: 8 },
-	anx4: { id: 'anx4', family: 'ad', label: 'ANX4 Scalable Receiver', channels: 4, maxChannels: 24, slots: 8 },
+	anx4: { id: 'anx4', family: 'ad', label: 'ANX4 Scalable Receiver', channels: 4, slots: 8, modes: TransmissionModes },
 	slxd4: { id: 'slxd4', family: 'slx', label: 'SLXD4 Single Receiver', channels: 1, slots: 0 },
 	slxd4d: { id: 'slxd4d', family: 'slx', label: 'SLXD4D Dual Receiver', channels: 2, slots: 0 },
 }
 
 export const Choices = {
 	Models: CreateModelChoices(),
+	TransmissionModes: Object.values(TransmissionModes).map(({ id, label }) => ({ id, label })),
 	OnOffToggle: [
 		{ id: 'ON', label: 'Mute' },
 		{ id: 'OFF', label: 'Unmute' },

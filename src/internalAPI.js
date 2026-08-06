@@ -306,9 +306,13 @@ export default class WirelessApi {
 			channel.antennaA = sample[7].substr(0, 1)
 			channel.antennaB = sample[7].substr(1, 1)
 
+			// channel quality is only reported for Axient Digital channels
+			if (!this.instance.model.ulxdChannels) {
+				this.instance.setVariableValues({ [`${prefix}signal_quality`]: channel.signalQuality })
+			}
+
 			this.instance.setVariableValues({
 				[`${prefix}antenna`]: channel.antenna,
-				[`${prefix}signal_quality`]: channel.signalQuality,
 				[`${prefix}rf_level_a`]: channel.rfLevelA + (this.instance.config.variableFormat == 'units' ? ' dBm' : ''),
 				[`${prefix}rf_level_b`]: channel.rfLevelB + (this.instance.config.variableFormat == 'units' ? ' dBm' : ''),
 				[`${prefix}audio_level`]: channel.audioLevel + (this.instance.config.variableFormat == 'units' ? ' dBFS' : ''),

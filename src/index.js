@@ -51,7 +51,7 @@ class ShureWirelessInstance extends InstanceBase {
 			resetConnection = true
 		}
 
-		if (this.config.channelCount != config.channelCount) {
+		if (this.config.channelCount != config.channelCount || this.config.transmissionMode != config.transmissionMode) {
 			resetConnection = true
 		}
 
@@ -169,11 +169,21 @@ class ShureWirelessInstance extends InstanceBase {
 				default: 'ulxd4',
 			},
 			{
+				type: 'dropdown',
+				id: 'transmissionMode',
+				label: 'Transmission Mode',
+				tooltip: 'The wireless system the receiver is operating in.',
+				choices: Choices.TransmissionModes,
+				width: 3,
+				default: 'ad',
+				isVisible: (config) => config.modelID === 'anx4',
+			},
+			{
 				type: 'number',
 				id: 'channelCount',
 				label: 'Licensed Channels',
-				tooltip: 'The number of channels licensed on the receiver.',
-				width: 2,
+				tooltip: 'The number of channels licensed on the receiver.\nUp to 16 for Axient Digital, or 24 for ULX-D.',
+				width: 3,
 				min: 1,
 				max: 24,
 				default: 4,
@@ -482,17 +492,24 @@ class ShureWirelessInstance extends InstanceBase {
 			return
 		}
 
-		if (model.maxChannels === undefined) {
+		if (model.modes === undefined) {
 			this.model = model
-		} else {
-			let channels = parseInt(this.config.channelCount)
+			return
+		}
 
-			if (isNaN(channels)) {
-				channels = model.channels
-			}
+		let mode = model.modes[this.config.transmissionMode] ?? Object.values(model.modes)[0]
+		let channels = parseInt(this.config.channelCount)
 
-			// copy so the shared model definition isn't modified
-			this.model = { ...model, channels: Math.min(Math.max(channels, 1), model.maxChannels) }
+		if (isNaN(channels)) {
+			channels = model.channels
+		}
+
+		// copy so the shared model definition isn't modified
+		this.model = {
+			...model,
+			channels: Math.min(Math.max(channels, 1), mode.maxChannels),
+			slots: mode.slots,
+			ulxdChannels: mode.ulxdChannels === true,
 		}
 	}
 

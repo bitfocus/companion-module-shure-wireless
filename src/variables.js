@@ -34,7 +34,11 @@ export function updateVariables() {
 		}
 
 		if (this.model.family == 'ad') {
-			variables.push({ variableId: `${prefix}_unregistered_tx_status`, name: `Channel ${i} Unregistered TX Status` })
+			// unregistered transmitters only apply to Axient Digital channels
+			if (!this.model.ulxdChannels) {
+				variables.push({ variableId: `${prefix}_unregistered_tx_status`, name: `Channel ${i} Unregistered TX Status` })
+			}
+
 			variables.push({ variableId: `${prefix}_fd_mode`, name: `Channel ${i} FD Mode` })
 			variables.push({ variableId: `${prefix}_group_chan2`, name: `Channel ${i} Group & Channel 2` })
 			variables.push({ variableId: `${prefix}_frequency2`, name: `Channel ${i} Frequency 2` })
@@ -47,7 +51,12 @@ export function updateVariables() {
 
 		if (this.model.family == 'ad') {
 			variables.push({ variableId: `${prefix}_antenna_configuration`, name: `Channel ${i} Antenna Configuration` })
-			variables.push({ variableId: `${prefix}_signal_quality`, name: `Channel ${i} Signal Quality` })
+
+			// channel quality is only reported for Axient Digital channels
+			if (!this.model.ulxdChannels) {
+				variables.push({ variableId: `${prefix}_signal_quality`, name: `Channel ${i} Signal Quality` })
+			}
+
 			variables.push({ variableId: `${prefix}_rf_level_a`, name: `Channel ${i} RF Level A` })
 			variables.push({ variableId: `${prefix}_rf_level_b`, name: `Channel ${i} RF Level B` })
 			variables.push({ variableId: `${prefix}_rf_level_c`, name: `Channel ${i} RF Level C` })
