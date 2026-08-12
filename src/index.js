@@ -51,6 +51,10 @@ class ShureWirelessInstance extends InstanceBase {
 			resetConnection = true
 		}
 
+		if (this.config.channelCount != config.channelCount || this.config.transmissionMode != config.transmissionMode) {
+			resetConnection = true
+		}
+
 		if (this.config.meteringOn !== config.meteringOn) {
 			if (config.meteringOn === true) {
 				cmd = `< SET 0 METER_RATE ${this.config.meteringInterval} >`
@@ -63,11 +67,7 @@ class ShureWirelessInstance extends InstanceBase {
 
 		this.config = config
 
-		if (Models[this.config.modelID] !== undefined) {
-			this.model = Models[this.config.modelID]
-		} else {
-			this.log('debug', `Shure Model: ${this.config.modelID} NOT FOUND`)
-		}
+		this.setupModel()
 
 		this.updateActions()
 		this.updateFeedbacks()
@@ -169,6 +169,28 @@ class ShureWirelessInstance extends InstanceBase {
 				default: 'ulxd4',
 			},
 			{
+				type: 'dropdown',
+				id: 'transmissionMode',
+				label: 'Transmission Mode',
+				tooltip: 'The wireless system the receiver is operating in.',
+				choices: Choices.TransmissionModes,
+				width: 3,
+				default: 'ad',
+				isVisible: (config) => config.modelID === 'anx4',
+			},
+			{
+				type: 'number',
+				id: 'channelCount',
+				label: 'Licensed Channels',
+				tooltip: 'The number of channels licensed on the receiver.\nUp to 16 for Axient Digital, or 24 for ULX-D.',
+				width: 3,
+				min: 1,
+				max: 24,
+				default: 4,
+				required: true,
+				isVisible: (config) => config.modelID === 'anx4',
+			},
+			{
 				type: 'checkbox',
 				id: 'meteringOn',
 				label: 'Enable Metering?',
@@ -224,12 +246,11 @@ class ShureWirelessInstance extends InstanceBase {
 		this.CHOICES_SLOTS = []
 		this.CHOICES_SLOTS_A = []
 
-		if (this.config.modelID !== undefined) {
-			this.model = Models[this.config.modelID]
-		} else {
+		if (this.config.modelID === undefined) {
 			this.config.modelID = 'ulxd4'
-			this.model = Models['ulxd4']
 		}
+
+		this.setupModel()
 
 		if (this.config.variableFormat === undefined) {
 			this.config.variableFormat = 'units'
@@ -454,6 +475,42 @@ class ShureWirelessInstance extends InstanceBase {
 		this.CHANNELS_A_FIELD.choices = this.CHOICES_CHANNELS_A
 		this.SLOTS_FIELD.choices = this.CHOICES_SLOTS
 		this.SLOTS_A_FIELD.choices = this.CHOICES_SLOTS_A
+	}
+
+	/**
+	 * INTERNAL: use the configuration to select the active model.  Models that declare
+	 * a maxChannels have a licensable channel count, which is taken from the config.
+	 *
+	 * @access protected
+	 * @since 2.4.0
+	 */
+	setupModel() {
+		let model = Models[this.config.modelID]
+
+		if (model === undefined) {
+			this.log('debug', `Shure Model: ${this.config.modelID} NOT FOUND`)
+			return
+		}
+
+		if (model.modes === undefined) {
+			this.model = model
+			return
+		}
+
+		let mode = model.modes[this.config.transmissionMode] ?? Object.values(model.modes)[0]
+		let channels = parseInt(this.config.channelCount)
+
+		if (isNaN(channels)) {
+			channels = model.channels
+		}
+
+		// copy so the shared model definition isn't modified
+		this.model = {
+			...model,
+			channels: Math.min(Math.max(channels, 1), mode.maxChannels),
+			slots: mode.slots,
+			ulxdChannels: mode.ulxdChannels === true,
+		}
 	}
 
 	/**
