@@ -104,9 +104,13 @@ export function updateFeedbacks() {
 		callback: (event) => {
 			let opt = event.options
 			let channel = this.api.getChannel(parseInt(opt.channel))
+			let icon = this.api.getIcon(opt, event.image)
 			let out = {
 				alignment: 'left:top',
-				imageBuffers: [{ buffer: this.api.getIcon(opt, event.image) }],
+				imageBuffer: icon,
+				imageBufferEncoding: { pixelFormat: 'ARGB' },
+				// Kept for Companion v4 installations that still consume the legacy field.
+				imageBuffers: [{ buffer: icon }],
 				size: '7',
 				text: '',
 			}
