@@ -778,7 +778,10 @@ export default class WirelessApi {
 				variable = `${h}:${m}`
 			}
 			channel.batteryRuntime2 = variable
-			this.instance.setVariableValues({ [`${prefix}battery_runtime`]: variable })
+			this.instance.setVariableValues({
+				[`${prefix}battery_runtime`]: variable,
+				[`${prefix}battery_runtime_mins`]: channel.batteryRuntime,
+			})
 		} else if (key.match(/BATT_TEMP_C/)) {
 			channel.batteryTempC = parseInt(value)
 			if (channel.batteryTempC == 255) {
@@ -1008,7 +1011,10 @@ export default class WirelessApi {
 					m = m < 10 ? '0' + m : m
 					variable = `${h}:${m}`
 				}
-				this.instance.setVariableValues({ [`${prefix}battery_runtime`]: variable })
+				this.instance.setVariableValues({
+					[`${prefix}battery_runtime`]: variable,
+					[`${prefix}battery_runtime_mins`]: slot.batteryRuntime,
+				})
 				break
 			case 'SLOT_BATT_TYPE':
 				slot.batteryType = value
