@@ -109,6 +109,7 @@ export function updateVariables() {
 		}
 
 		variables.push({ variableId: `${prefix}_battery_runtime`, name: `Channel ${i} Battery Run Time` })
+		variables.push({ variableId: `${prefix}_battery_runtime_mins`, name: `Channel ${i} Battery Run Time (Minutes)` })
 
 		if (this.model.family != 'slx') {
 			variables.push({ variableId: `${prefix}_battery_temp_f`, name: `Channel ${i} Battery Temperature (F)` })
@@ -136,6 +137,7 @@ export function updateVariables() {
 				variables.push({ variableId: `${prefix}_battery_cycle`, name: `Slot ${id} Battery Cycle` })
 				variables.push({ variableId: `${prefix}_battery_health`, name: `Slot ${id} Battery Health` })
 				variables.push({ variableId: `${prefix}_battery_runtime`, name: `Slot ${id} Battery Run Time` })
+				variables.push({ variableId: `${prefix}_battery_runtime_mins`, name: `Slot ${id} Battery Run Time (Minutes)` })
 				variables.push({ variableId: `${prefix}_battery_type`, name: `Slot ${id} Battery Type` })
 			}
 		}
