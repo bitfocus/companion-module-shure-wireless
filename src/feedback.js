@@ -210,6 +210,20 @@ export function updateFeedbacks() {
 			},
 		}
 
+		feedbacks['transmitter_talk_switch'] = {
+			type: 'boolean',
+			name: 'Transmitter Talk Switch',
+			description: "If the selected channel's transmitter talk/mute button is pressed, change the color of the button.",
+			defaultStyle: {
+				color: combineRgb(255, 255, 255),
+				bgcolor: combineRgb(0, 128, 0),
+			},
+			options: [this.CHANNELS_FIELD],
+			callback: ({ options }) => {
+				return this.api.getChannel(parseInt(options.channel)).txTalkSwitch == 'PRESSED'
+			},
+		}
+
 		feedbacks['interference_status'] = {
 			type: 'boolean',
 			name: 'Interference Status',
