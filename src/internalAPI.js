@@ -674,6 +674,7 @@ export default class WirelessApi {
 			}
 			channel.txTalkSwitch = variable
 			this.instance.setVariableValues({ [`${prefix}tx_talk_switch`]: variable })
+			this.instance.checkFeedbacks('transmitter_talk_switch')
 		} else if (key == 'TX_OFFSET') {
 			channel.txOffset = parseInt(value)
 			if (channel.txOffset == 255) {
