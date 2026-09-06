@@ -6,6 +6,25 @@ This module will connect to the Shure receivers below to provide feedback status
 - Shure QLX-D (QLXD4)
 - Shure SLX-D (SLXD4, SLXD4D)
 - Shure Axient Digital (AD4D, AD4Q)
+- Shure Scalable Wireless (ANX4)
+
+#### ANX4
+
+The ANX4 is a scalable receiver that operates with either Axient Digital or ULX-D transmitters, rather than belonging to either system, so selecting it exposes two extra options in the instance configuration:
+
+| Option                | Description                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Transmission Mode** | The wireless system the receiver is operating in. Set this to match the mode selected on the receiver (Device RF > Transmission Mode).                  |
+| **Licensed Channels** | The number of channels the receiver is licensed for. The ANX4 does not ship with active channels, and licenses are activated per channel in ShureCloud. |
+
+The feature set follows the transmission mode, per the ANX4 user guide:
+
+| Transmission Mode  | Maximum Channels | Transmitter Slots |
+| ------------------ | ---------------- | ----------------- |
+| **Axient Digital** | 16               | 8 per channel     |
+| **ULX-D**          | 24               | Not supported     |
+
+Channels, slots, and variables are created to match. Standard and high density are reported by the receiver itself and do not need to be configured here.
 
 ### Available actions
 
