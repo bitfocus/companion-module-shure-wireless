@@ -25,20 +25,21 @@ This module will connect to the Shure receivers below to provide feedback status
 
 ### Available feedbacks
 
-| Title                  | Description                                                                                   | Model Support       |
-| ---------------------- | --------------------------------------------------------------------------------------------- | ------------------- |
-| Battery Level          | If the battery bar drops to or below a certain value, change the color of the button.         | All                 |
-| Channel Frequency      | If the selected channel\'s frequency is set, change the color of the button.                  | ULX, QLX, SLX, & AD |
-| Channel Gain           | If the selected channel\'s gain is set, change the color of the button.                       | All                 |
-| Channel Muted          | If the selected channel is muted, change the color of the button.                             | ULX, AD             |
-| Channel Status Display | **See below**                                                                                 | ULX, QLX, SLX, & AD |
-| Interference Status    | If the selected channel gets interference, change the color of the button.                    | ULX, QLX, AD        |
-| Transmitter Muted      | If the selected channel\'s transmitter is muted, change the color of the button.              | ULX, QLX, & AD      |
-| Transmitter Turned Off | If the selected channel\'s transmitter is powered off, change the color of the button.        | All                 |
-| Slot is Active         | If the selected slot\'s transmitter is active to the channel, change the color of the button. | AD                  |
-| Slot RF Output         | If the selected slot\'s transmitter RF is set, change the color of the button.                | ADX only            |
-| Slot RF Power          | If the selected slot\'s transmitter power level is set, change the color of the button.       | ADX only            |
-| Slot Status            | If the selected slot\'s status is set, change the color of the button.                        | AD                  |
+| Title                   | Description                                                                                         | Model Support       |
+| ----------------------- | --------------------------------------------------------------------------------------------------- | ------------------- |
+| Battery Level           | If the battery bar drops to or below a certain value, change the color of the button.               | All                 |
+| Channel Frequency       | If the selected channel\'s frequency is set, change the color of the button.                        | ULX, QLX, SLX, & AD |
+| Channel Gain            | If the selected channel\'s gain is set, change the color of the button.                             | All                 |
+| Channel Muted           | If the selected channel is muted, change the color of the button.                                   | ULX, AD             |
+| Channel Status Display  | **See below**                                                                                       | ULX, QLX, SLX, & AD |
+| Interference Status     | If the selected channel gets interference, change the color of the button.                          | ULX, QLX, AD        |
+| Transmitter Muted       | If the selected channel\'s transmitter is muted, change the color of the button.                    | ULX, QLX, & AD      |
+| Transmitter Talk Switch | If the selected channel\'s transmitter talk/mute button is pressed, change the color of the button. | ULX, QLX, & AD      |
+| Transmitter Turned Off  | If the selected channel\'s transmitter is powered off, change the color of the button.              | All                 |
+| Slot is Active          | If the selected slot\'s transmitter is active to the channel, change the color of the button.       | AD                  |
+| Slot RF Output          | If the selected slot\'s transmitter RF is set, change the color of the button.                      | ADX only            |
+| Slot RF Power           | If the selected slot\'s transmitter power level is set, change the color of the button.             | ADX only            |
+| Slot Status             | If the selected slot\'s status is set, change the color of the button.                              | AD                  |
 
 ### Channel Status Display
 

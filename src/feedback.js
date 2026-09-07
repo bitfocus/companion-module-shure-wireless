@@ -210,7 +210,7 @@ export function updateFeedbacks() {
 			},
 		}
 
-		if (this.model.family == 'ad') {
+		if (['ad', 'qlx', 'ulx'].includes(this.model.family)) {
 			feedbacks['transmitter_talk_switch'] = {
 				type: 'boolean',
 				name: 'Transmitter Talk Switch',
