@@ -106,7 +106,7 @@ export function updateFeedbacks() {
 			let channel = this.api.getChannel(parseInt(opt.channel))
 			let out = {
 				alignment: 'left:top',
-				imageBuffers: [{ buffer: this.api.getIcon(opt, event.image) }],
+				imageBuffer: this.api.getIcon(opt, event.image),
 				size: '7',
 				text: '',
 			}
