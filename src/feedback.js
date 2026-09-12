@@ -286,7 +286,7 @@ export function updateFeedbacks() {
 		},
 	}
 
-	if (this.model.family == 'ad') {
+	if (this.model.slots > 0) {
 		feedbacks['slot_is_active'] = {
 			type: 'boolean',
 			name: 'Slot is Active',

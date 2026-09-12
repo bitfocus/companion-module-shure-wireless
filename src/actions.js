@@ -105,7 +105,7 @@ export function updateActions() {
 		}
 	}
 
-	if (this.model.family == 'ad') {
+	if (this.model.slots > 0) {
 		actions['slot_rf_output'] = {
 			name: 'Set slot RF output (ADX)',
 			options: [this.SLOTS_A_FIELD, Fields.RfOutput],
