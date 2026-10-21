@@ -44,6 +44,8 @@ This module will connect to the Shure receivers below to provide feedback status
 
 The "Channel Status Display" is a customizable feedback to provide a graphic status readout for a channel, similar to information available on the front panel or in Wireless Workbench.
 
+Ready-to-use status buttons are available under **Presets > Channel status displays**. Drag a channel preset onto a surface to create a button with the recommended labels, icons, and battery warning level, then customize its feedback if needed.
+
 | Axient                               | ULX-D                                  | QLX-D                                  | SLX-D                                  |
 | ------------------------------------ | -------------------------------------- | -------------------------------------- | -------------------------------------- |
 | ![AD example](images/example-ad.png) | ![ULX example](images/example-ulx.png) | ![QLX example](images/example-qlx.png) | ![SLX example](images/example-slx.png) |

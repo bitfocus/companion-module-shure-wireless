@@ -618,13 +618,13 @@ export default class Icons {
 				'x' +
 				image.height +
 				(ant ? 'a' + ant : '') +
-				(audio ? 'b' + audio : '') +
-				(rfA ? 'c' + rfA : '') +
-				(rfB ? 'd' + rfB : '') +
-				(battery ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '') +
+				(audio !== undefined ? 'b' + audio : '') +
+				(rfA !== undefined ? 'c' + rfA : '') +
+				(rfB !== undefined ? 'd' + rfB : '') +
+				(battery !== undefined ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '') +
 				(lock ? 'f' + lock : '') +
 				(encryption ? 'g' + encryption : '') +
-				(quality ? 'h' + quality : '')
+				(quality !== undefined ? 'h' + quality : '')
 
 			if (this.savedIcons[id] === undefined) {
 				let img = new Image(image.width, image.height)
@@ -691,9 +691,9 @@ export default class Icons {
 				image.width +
 				'x' +
 				image.height +
-				(audio ? 'b' + audio : '') +
-				(rf ? 'c' + rf : '') +
-				(battery ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '')
+				(audio !== undefined ? 'b' + audio : '') +
+				(rf !== undefined ? 'c' + rf : '') +
+				(battery !== undefined ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '')
 
 			if (this.savedIcons[id] === undefined) {
 				let img = new Image(image.width, image.height)
@@ -746,9 +746,9 @@ export default class Icons {
 				'x' +
 				image.height +
 				(ant ? 'a' + ant : '') +
-				(audio ? 'b' + audio : '') +
-				(rf ? 'c' + rf : '') +
-				(battery ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '') +
+				(audio !== undefined ? 'b' + audio : '') +
+				(rf !== undefined ? 'c' + rf : '') +
+				(battery !== undefined ? 'e' + (battery <= batteryAlertLevel ? battery + 'R' : battery) : '') +
 				(lock ? 'f' + lock : '') +
 				(encryption ? 'g' + encryption : '')
 
