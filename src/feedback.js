@@ -1,6 +1,23 @@
 import { combineRgb } from '@companion-module/base'
 import { Fields } from './setup.js'
 
+export function getStatusDisplayDefaults(family) {
+	if (family === 'slx') {
+		return {
+			labels: ['name', 'frequency', 'audioGain', 'txType'],
+			icons: ['battery', 'rf', 'audio'],
+		}
+	}
+
+	return {
+		labels: ['name', 'frequency', 'txType', 'txPowerLevel'],
+		icons:
+			family === 'ad'
+				? ['battery', 'locks', 'rf', 'audio', 'encryption', 'quality']
+				: ['battery', 'locks', 'rf', 'audio', 'encryption'],
+	}
+}
+
 /**
  * INTERNAL: initialize feedbacks.
  *
@@ -11,7 +28,8 @@ export function updateFeedbacks() {
 	// feedbacks
 	let feedbacks = {}
 
-	let labelChoices, labelDefault, iconChoices, iconDefault
+	let labelChoices, iconChoices
+	const statusDefaults = getStatusDisplayDefaults(this.model.family)
 
 	switch (this.model.family) {
 		case 'qlx':
@@ -27,7 +45,6 @@ export function updateFeedbacks() {
 				{ id: 'batteryType', label: 'Battery Type' },
 				{ id: 'batteryRuntime', label: 'Battery Runtime' },
 			]
-			labelDefault = ['name', 'frequency', 'txType', 'txPowerLevel']
 			iconChoices = [
 				{ id: 'battery', label: 'Battery' },
 				{ id: 'locks', label: 'Locks' },
@@ -35,7 +52,6 @@ export function updateFeedbacks() {
 				{ id: 'audio', label: 'Audio Level' },
 				{ id: 'encryption', label: 'Encryption' },
 			]
-			iconDefault = ['battery', 'locks', 'rf', 'audio', 'encryption']
 			break
 		case 'slx':
 			labelChoices = [
@@ -46,13 +62,11 @@ export function updateFeedbacks() {
 				{ id: 'txType', label: 'TX Model' },
 				{ id: 'batteryRuntime', label: 'Battery Runtime' },
 			]
-			labelDefault = ['name', 'frequency', 'audioGain', 'txType']
 			iconChoices = [
 				{ id: 'battery', label: 'Battery' },
 				{ id: 'rf', label: 'RF' },
 				{ id: 'audio', label: 'Audio Level' },
 			]
-			iconDefault = ['battery', 'rf', 'audio']
 			break
 		case 'ad':
 			labelChoices = [
@@ -66,7 +80,6 @@ export function updateFeedbacks() {
 				{ id: 'batteryType', label: 'Battery Type' },
 				{ id: 'batteryRuntime', label: 'Battery Runtime' },
 			]
-			labelDefault = ['name', 'frequency', 'txType', 'txPowerLevel']
 			iconChoices = [
 				{ id: 'battery', label: 'Battery' },
 				{ id: 'locks', label: 'Locks' },
@@ -75,7 +88,6 @@ export function updateFeedbacks() {
 				{ id: 'encryption', label: 'Encryption' },
 				{ id: 'quality', label: 'Quality' },
 			]
-			iconDefault = ['battery', 'locks', 'rf', 'audio', 'encryption', 'quality']
 			break
 	}
 
@@ -89,14 +101,14 @@ export function updateFeedbacks() {
 				type: 'multidropdown',
 				label: 'Label Data',
 				id: 'labels',
-				default: labelDefault,
+				default: statusDefaults.labels,
 				choices: labelChoices,
 			},
 			{
 				type: 'multidropdown',
 				label: 'Icons',
 				id: 'icons',
-				default: iconDefault,
+				default: statusDefaults.icons,
 				choices: iconChoices,
 			},
 			Fields.BatteryLevel,
@@ -104,9 +116,15 @@ export function updateFeedbacks() {
 		callback: (event) => {
 			let opt = event.options
 			let channel = this.api.getChannel(parseInt(opt.channel))
+			const image = event.image?.width && event.image?.height ? event.image : { width: 72, height: 58 }
+			const icon = this.api.getIcon(opt, image)
 			let out = {
 				alignment: 'left:top',
-				imageBuffers: [{ buffer: this.api.getIcon(opt, event.image) }],
+				imageBuffer: icon,
+				imageBufferEncoding: { pixelFormat: 'ARGB' },
+				imageBufferPosition: { x: 0, y: 0, width: image.width, height: image.height },
+				// Companion 4 and earlier consume the legacy plural property.
+				imageBuffers: [{ buffer: icon }],
 				size: '7',
 				text: '',
 			}
