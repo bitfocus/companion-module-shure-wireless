@@ -4,7 +4,7 @@
 	"main": "src/index.js",
 	"type": "module",
 	"scripts": {
-		"test": "node --experimental-test-module-mocks --test",
+		"test": "echo \"Error: no test specified\" && exit 1",
 		"format": "prettier --write .",
 		"build": "companion-module-build"
 	},
